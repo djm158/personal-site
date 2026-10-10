@@ -50,8 +50,9 @@ Planned; check `BACKLOG.md` for what exists.
 
 ## Design reference
 
-The design is the `Portfolio.dc.html` project in claude.ai/design. It is a prototype: use it
-as the visual spec, and don't port its runtime, inline styles or state-based page switching.
+The design is the `Portfolio.dc.html` project in claude.ai/design. `design/` holds a local
+copy for reading, which may be behind the project. It is a prototype: use it as the visual
+spec, and don't port its runtime, inline styles or state-based page switching.
 
 ## Documentation
 
