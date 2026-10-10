@@ -1,1 +1,52 @@
 @import "tailwindcss";
+
+/* design/ is a reference copy of the prototype; keep Tailwind from scanning it for class names */
+@source not "../../design";
+
+@theme {
+  /* colours (day) */
+  --color-bg: oklch(0.965 0.012 80);
+  --color-surface: oklch(0.92 0.024 75);
+  --color-ink: oklch(0.25 0.025 50);
+  --color-muted: oklch(0.46 0.025 55);
+  --color-line: oklch(0.25 0.025 50 / 0.14);
+  --color-accent: oklch(0.52 0.12 42);
+  --color-moss: oklch(0.55 0.08 130);
+  --color-onink: oklch(0.965 0.012 80);
+
+  /* avatar */
+  --color-hair: oklch(0.6 0.145 42);
+  --color-hair2: oklch(0.48 0.12 38);
+  --color-skin: oklch(0.88 0.045 65);
+  --color-skin2: oklch(0.8 0.06 55);
+
+  /* fonts */
+  --font-sans: "Geist", system-ui, sans-serif;
+  --font-serif: "Instrument Serif", serif;
+  --font-mono: "Geist Mono", monospace;
+
+  /* layout */
+  --breakpoint-nav: 760px;
+  --spacing-gutter: clamp(20px, 4vw, 48px);
+  --container-page: 1240px;
+  --container-blog: 960px;
+  --container-post: 720px;
+
+  /* motion */
+  --ease-soft: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --ease-spring: cubic-bezier(0.3, 1.6, 0.5, 1);
+}
+
+@layer base {
+  /* night mode: same tokens, different values */
+  [data-theme="night"] {
+    --color-bg: oklch(0.2 0.015 55);
+    --color-surface: oklch(0.26 0.02 55);
+    --color-ink: oklch(0.93 0.015 80);
+    --color-muted: oklch(0.74 0.02 70);
+    --color-line: oklch(0.93 0.015 80 / 0.14);
+    --color-accent: oklch(0.74 0.12 42);
+    --color-moss: oklch(0.68 0.08 130);
+    --color-onink: oklch(0.2 0.015 55);
+  }
+}

@@ -17,8 +17,8 @@ Ordered top to bottom. Each section leaves the site deployable. Design reference
 - [x] `Header.astro` with nav links, used from `Layout.astro`
 - [ ] Layout basics: `<!doctype html>`, import `global.css`, `title` and `description` props
 - [ ] Fonts: Instrument Serif, Geist, Geist Mono
-- [ ] Theme tokens in `@theme`: colours, font families, 760px breakpoint, 1240px page width, gutter `clamp(20px, 4vw, 48px)`
-- [ ] Night theme: same tokens overridden under `[data-theme="night"]`
+- [x] Theme tokens in `@theme`: colours, font families, 760px breakpoint, 1240px page width, gutter `clamp(20px, 4vw, 48px)`
+- [x] Night theme: same tokens overridden under `[data-theme="night"]`
 - [ ] Base styles: body background and text, link underline style, `::selection`, grain overlay
 - [ ] Header, desktop: avatar logo and name linking home, pill links with active state, Résumé button, sticky with blur
 - [ ] Header, mobile (under 760px): Menu button, full-screen `<dialog>` with numbered links and Résumé button, scroll lock, close when a same-page anchor is clicked

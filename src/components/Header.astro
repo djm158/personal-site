@@ -8,17 +8,29 @@ const links = [
 ];
 ---
 
-<header>
-  <nav>
-    {
-      links.map((l) => (
-        <a
-          href={l.href}
-          aria-current={pathname.startsWith(l.href) ? "page" : undefined}
-        >
-          {l.label}
-        </a>
-      ))
-    }
+<header
+  class="bg-bg/84 backdrop-blur-[14px] border-b border-line sticky top-0 z-40"
+>
+  <nav
+    class="max-w-page px-gutter flex justify-between items-center mx-auto py-3"
+  >
+    <a href="/" class="font-medium text-[15px]">Daniel McGrath</a>
+    <div class="flex gap-0.5">
+      {
+        links.map((l) => (
+          <a
+            href={l.href}
+            class="rounded-full hover:bg-surface aria-[current=page]:bg-surface px-3.5 py-2 font-[450] text-sm transition-colors duration-200"
+            aria-current={pathname.startsWith(l.href) ? "page" : undefined}
+          >
+            {l.label}
+          </a>
+        ))
+      }
+      <a
+        class="rounded-full hover:-translate-y-0.5 transition-transform px-4 py-2.25 font-medium text-onink bg-ink ml-2 text-sm duration-200"
+        href="/resume">Résumé</a
+      >
+    </div>
   </nav>
 </header>
