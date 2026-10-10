@@ -1,43 +1,32 @@
-# Astro Starter Kit: Minimal
+# personal-site
+
+The next version of [danielmcgrath.xyz](https://danielmcgrath.xyz): portfolio, blog and résumé. Work in progress; see [BACKLOG.md](./BACKLOG.md) for what's done and what's next.
+
+## Stack
+
+- [Astro](https://astro.build) with TypeScript, building a fully static site
+- React for the few pieces that need state in the browser
+- Tailwind CSS v4
+- Deployed on Netlify on every push to `main`
+
+## Development
+
+Requires Node 22 (see `.nvmrc`) and [pnpm](https://pnpm.io).
 
 ```sh
-pnpm create astro@latest -- --template minimal
+pnpm install
+pnpm dev       # dev server at http://localhost:4321
+pnpm build     # production build to ./dist
+pnpm preview   # serve the production build locally
 ```
 
-> 🧑‍🚀 **Seasoned astronaut?** Delete this file. Have fun!
-
-## 🚀 Project Structure
-
-Inside of your Astro project, you'll see the following folders and files:
+## Structure
 
 ```text
-/
-├── public/
-├── src/
-│   └── pages/
-│       └── index.astro
-└── package.json
+src/
+├── components/   # Astro components (and React islands)
+├── layouts/      # page shells
+├── pages/        # one file per route
+└── styles/       # global CSS and Tailwind theme
+public/           # static files served as-is
 ```
-
-Astro looks for `.astro` or `.md` files in the `src/pages/` directory. Each page is exposed as a route based on its file name.
-
-There's nothing special about `src/components/`, but that's where we like to put any Astro/React/Vue/Svelte/Preact components.
-
-Any static assets, like images, can be placed in the `public/` directory.
-
-## 🧞 Commands
-
-All commands are run from the root of the project, from a terminal:
-
-| Command                   | Action                                           |
-| :------------------------ | :----------------------------------------------- |
-| `pnpm install`             | Installs dependencies                            |
-| `pnpm dev`             | Starts local dev server at `localhost:4321`      |
-| `pnpm build`           | Build your production site to `./dist/`          |
-| `pnpm preview`         | Preview your build locally, before deploying     |
-| `pnpm astro ...`       | Run CLI commands like `astro add`, `astro check` |
-| `pnpm astro -- --help` | Get help using the Astro CLI                     |
-
-## 👀 Want to learn more?
-
-Feel free to check [our documentation](https://docs.astro.build) or jump into our [Discord server](https://astro.build/chat).

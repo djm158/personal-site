@@ -6,10 +6,11 @@ Ordered top to bottom. Each section leaves the site deployable. Design reference
 ## 0. Repo and deploy
 
 - [x] Scaffold Astro with React and Tailwind
-- [ ] First commit, add the GitHub remote, push
-- [ ] Replace the template `README.md`; decide whether to keep `AGENTS.md` / `CLAUDE.md`
-- [ ] Add `netlify.toml` (build `pnpm build`, publish `dist`) and pin Node 22 with `.nvmrc`
-- [ ] Create a Netlify site for this repo so every push gets a preview URL (leave the live domain alone for now)
+- [x] First commit, add the GitHub remote, push
+- [x] Replace the template `README.md`; decide whether to keep `AGENTS.md` / `CLAUDE.md`
+- [x] Pin Node 22 with `.nvmrc`
+- [ ] Add `netlify.toml` (build `pnpm build`, publish `dist`) so the build settings live in the repo, not only in the Netlify UI
+- [x] Create a Netlify site for this repo so every push gets a preview URL (leave the live domain alone for now)
 
 ## 1. Foundation
 
