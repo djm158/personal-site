@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@300..700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--bg:oklch(0.965 0.012 80);--surface:oklch(0.92 0.024 75);--ink:oklch(0.25 0.025 50);--muted:oklch(0.46 0.025 55);--line:oklch(0.25 0.025 50 / 0.14);--accent:oklch(0.52 0.12 42);--moss:oklch(0.55 0.08 130);--hair:oklch(0.6 0.145 42);--hair2:oklch(0.48 0.12 38);--skin:oklch(0.88 0.045 65);--skin2:oklch(0.8 0.06 55);--onink:oklch(0.965 0.012 80)}
+:root[data-theme="night"]{--bg:oklch(0.2 0.015 55);--surface:oklch(0.26 0.02 55);--ink:oklch(0.93 0.015 80);--muted:oklch(0.74 0.02 70);--line:oklch(0.93 0.015 80 / 0.14);--moss:oklch(0.68 0.08 130);--onink:oklch(0.2 0.015 55)}
+html,body{margin:0;background:var(--bg);color:var(--ink);font-family:Geist,system-ui,sans-serif;-webkit-font-smoothing:antialiased;transition:background .5s,color .5s}
+a{color:var(--ink);text-decoration-color:var(--accent);text-underline-offset:3px}a:hover{color:var(--accent)}
+::selection{background:var(--accent);color:var(--onink)}
+@keyframes dmMarq{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+@keyframes dmSpin{to{transform:rotate(360deg)}}
+@keyframes dmPulse{0%,100%{opacity:1}50%{opacity:.3}}
+</style>
+</helmet>
+<div style="min-height:100vh;position:relative;overflow-x:hidden">
+<sc-if value="{{ showGrain }}" hint-placeholder-val="{{ true }}">
+<div style="position:fixed;inset:0;pointer-events:none;z-index:60;opacity:0.5;background-image:url(&quot;data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.35 0 0 0 0 0.25 0 0 0 0 0.15 0 0 0 0.16 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E&quot;)"></div>
+</sc-if>
+
+<header style="position:sticky;top:0;z-index:40;backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);background:color-mix(in oklch, var(--bg) 84%, transparent);border-bottom:1px solid var(--line)">
+<nav style="max-width:1240px;margin:0 auto;padding:12px clamp(20px,4vw,48px);display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap">
+<button onClick="{{ goHome }}" style="display:flex;align-items:center;gap:12px;background:none;border:0;padding:0;cursor:pointer;color:var(--ink);font:500 15px Geist,sans-serif">
+<svg width="36" height="36" viewBox="0 0 200 200" style="display:block;transition:transform .5s cubic-bezier(.3,1.6,.5,1)" style-hover="transform:rotate(-10deg) scale(1.08)"><circle cx="100" cy="100" r="100" fill="var(--surface)"></circle><ellipse cx="100" cy="106" rx="46" ry="52" fill="var(--skin)"></ellipse><ellipse cx="98" cy="60" rx="52" ry="24" fill="var(--hair)"></ellipse><ellipse cx="112" cy="45" rx="42" ry="20" fill="var(--hair)" transform="rotate(8 112 45)"></ellipse><path d="M56 116 Q58 168 100 174 Q142 168 144 116 Q138 138 100 132 Q62 138 56 116 Z" fill="var(--hair)"></path><circle cx="79" cy="110" r="17" fill="none" stroke="oklch(0.45 0.02 60)" stroke-width="7"></circle><circle cx="121" cy="110" r="17" fill="none" stroke="oklch(0.45 0.02 60)" stroke-width="7"></circle></svg>
+<span>Daniel McGrath</span>
+</button>
+<sc-if value="{{ isMobile }}" hint-placeholder-val="{{ false }}">
+<button onClick="{{ toggleMenu }}" aria-label="Menu" style="display:flex;align-items:center;gap:8px;background:var(--surface);color:var(--ink);border:0;border-radius:999px;padding:12px 18px;min-height:44px;font:500 14px Geist,sans-serif;cursor:pointer;transition:background .25s, transform .25s cubic-bezier(.3,1.6,.5,1)" style-hover="background:var(--line);transform:translateY(-1px)" style-active="transform:scale(.94)">{{ menuLabel }}</button>
+</sc-if>
+
+<sc-if value="{{ isDesktop }}" hint-placeholder-val="{{ true }}">
+<div style="display:flex;align-items:center;gap:2px;flex-wrap:wrap">
+<sc-for list="{{ navItems }}" as="n" hint-placeholder-count="4">
+<button onClick="{{ n.go }}" style="background:{{ n.bg }};color:var(--ink);border:0;border-radius:999px;padding:8px 14px;font:450 14px Geist,sans-serif;cursor:pointer;transition:background .2s" style-hover="background:var(--surface)">{{ n.label }}</button>
+</sc-for>
+<button onClick="{{ goResume }}" style="margin-left:8px;display:flex;align-items:center;gap:8px;background:var(--ink);color:var(--onink);border:0;border-radius:999px;padding:9px 16px;font:500 14px Geist,sans-serif;cursor:pointer;transition:transform .2s" style-hover="transform:translateY(-2px)">Résumé</button>
+</div>
+</sc-if>
+</nav>
+</header>
+<sc-if value="{{ isMobile }}" hint-placeholder-val="{{ false }}">
+<div aria-hidden="{{ menuHidden }}" style="position:fixed;inset:0;z-index:80;background:var(--bg);display:flex;flex-direction:column;padding:12px 20px 32px;overflow-y:auto;opacity:{{ menuOpacity }};visibility:{{ menuVis }};pointer-events:{{ menuPE }};transition:opacity .35s cubic-bezier(.2,.8,.2,1), visibility 0s linear {{ menuVisDelay }}">
+<div style="display:flex;justify-content:space-between;align-items:center;min-height:44px">
+<span style="font:500 12px 'Geist Mono',monospace;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)">Menu</span>
+<button onClick="{{ toggleMenu }}" aria-label="Close menu" style="background:var(--surface);color:var(--ink);border:0;border-radius:999px;padding:12px 18px;min-height:44px;font:500 14px Geist,sans-serif;cursor:pointer;transition:background .25s, transform .25s cubic-bezier(.3,1.6,.5,1)" style-hover="background:var(--line);transform:rotate(-3deg)" style-active="transform:scale(.94)">Close ✕</button>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;justify-content:center;gap:4px">
+<sc-for list="{{ navItems }}" as="n" hint-placeholder-count="4">
+<button onClick="{{ n.go }}" style="display:flex;justify-content:space-between;align-items:baseline;text-align:left;background:none;color:var(--ink);border:0;border-bottom:1px solid var(--line);padding:18px 4px;font:400 clamp(48px,14vw,72px)/1 'Instrument Serif',serif;letter-spacing:-0.02em;cursor:pointer;opacity:{{ menuOpacity }};transform:translateY({{ n.y }});transition:opacity .45s cubic-bezier(.2,.8,.2,1) {{ n.delay }}, transform .55s cubic-bezier(.2,.8,.2,1) {{ n.delay }}, color .25s, padding .35s cubic-bezier(.2,.8,.2,1)" style-hover="color:var(--accent);padding-left:14px" style-active="color:var(--accent)"><span>{{ n.label }}</span><span style="font:500 12px 'Geist Mono',monospace;color:var(--accent)">{{ n.num }}</span></button>
+</sc-for>
+</div>
+<button onClick="{{ goResume }}" style="display:flex;justify-content:center;background:var(--ink);color:var(--onink);border:0;border-radius:999px;padding:16px;min-height:52px;font:500 16px Geist,sans-serif;cursor:pointer;opacity:{{ menuOpacity }};transform:translateY({{ menuBtnY }});transition:opacity .45s ease .25s, transform .55s cubic-bezier(.2,.8,.2,1) .25s, box-shadow .25s" style-hover="box-shadow:0 12px 24px -12px var(--ink)" style-active="transform:scale(.97)">Résumé ↗</button>
+</div>
+</sc-if>
+
+<main ref="{{ mainRef }}">
+<sc-if value="{{ isHome }}" hint-placeholder-val="{{ true }}">
+<section ref="{{ heroRef }}" data-screen-label="Home" style="position:relative;overflow:hidden">
+<div ref="{{ glowRef }}" style="position:absolute;left:0;top:0;width:560px;height:560px;margin:-280px 0 0 -280px;border-radius:50%;background:radial-gradient(circle, color-mix(in oklch, var(--hair) 30%, transparent) 0%, transparent 62%);filter:blur(24px);pointer-events:none;transform:translate(900px,300px);transition:transform 1s cubic-bezier(.2,.7,.2,1)"></div>
+<div style="position:relative;max-width:1240px;margin:0 auto;padding:clamp(56px,8vw,112px) clamp(20px,4vw,48px) clamp(56px,7vw,96px);display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,400px),1fr));gap:clamp(40px,5vw,72px);align-items:center">
+<div>
+<div style="display:inline-flex;align-items:center;gap:10px;padding:7px 14px 7px 11px;border:1px solid var(--line);border-radius:999px;font:500 12px 'Geist Mono',monospace;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);margin-bottom:32px;background:var(--bg)"><span style="width:8px;height:8px;border-radius:50%;background:var(--moss);animation:dmPulse 2.4s infinite"></span>Open to senior full stack roles</div>
+<h1 style="margin:0;font:400 clamp(68px,10vw,150px)/0.88 'Instrument Serif',serif;letter-spacing:-0.03em">Hi, I'm <span style="font-style:italic;color:var(--accent);display:inline-flex"><span style="display:inline-block;transition:transform .35s cubic-bezier(.3,1.8,.5,1)" style-hover="transform:translateY(-0.14em) rotate(-6deg)">D</span><span style="display:inline-block;transition:transform .35s cubic-bezier(.3,1.8,.5,1)" style-hover="transform:translateY(-0.14em) rotate(5deg)">a</span><span style="display:inline-block;transition:transform .35s cubic-bezier(.3,1.8,.5,1)" style-hover="transform:translateY(-0.14em) rotate(-4deg)">n</span><span style="display:inline-block;transition:transform .35s cubic-bezier(.3,1.8,.5,1)" style-hover="transform:translateY(-0.2em) scale(1.3)">.</span></span></h1>
+<p style="margin:28px 0 0;font:300 clamp(20px,2.1vw,27px)/1.35 Geist,sans-serif;letter-spacing:-0.01em;max-width:30ch;text-wrap:pretty">A senior full stack engineer who sweats the details, from the database to the last pixel. Most recently at Wizard AI — now looking for what's next.</p>
+<div style="display:flex;gap:12px;margin-top:40px;flex-wrap:wrap">
+<button onClick="{{ goProjects }}" style="background:var(--ink);color:var(--onink);border:0;border-radius:999px;padding:15px 24px;font:500 15px Geist,sans-serif;cursor:pointer;transition:transform .2s,box-shadow .2s" style-hover="transform:translateY(-2px);box-shadow:0 12px 24px -12px var(--ink)">See the work</button>
+<button onClick="{{ goContact }}" style="background:var(--bg);color:var(--ink);border:1px solid var(--line);border-radius:999px;padding:15px 24px;font:500 15px Geist,sans-serif;cursor:pointer;transition:border-color .2s" style-hover="border-color:var(--ink)">Say hello</button>
+</div>
+</div>
+<div style="display:flex;flex-direction:column;align-items:center;gap:14px">
+<div style="position:relative;width:min(100%,420px);aspect-ratio:1">
+<div style="position:absolute;inset:-4%;border-radius:50%;border:1.5px dashed var(--line);animation:dmSpin 80s linear infinite"></div>
+<svg ref="{{ avatarRef }}" onClick="{{ poke }}" viewBox="0 0 200 200" style="position:relative;width:100%;height:100%;display:block;cursor:pointer;transition:transform .5s cubic-bezier(.3,1.6,.5,1)" style-active="transform:scale(0.96) rotate(-3deg)">
+<defs><clipPath id="dmClip"><circle cx="100" cy="100" r="100"></circle></clipPath></defs>
+<g clip-path="url(#dmClip)">
+<circle cx="100" cy="100" r="100" fill="var(--surface)"></circle>
+<clipPath id="dmShirt"><ellipse cx="100" cy="222" rx="90" ry="62"></ellipse></clipPath>
+<g clip-path="url(#dmShirt)">
+<rect x="0" y="150" width="200" height="60" fill="var(--moss)"></rect>
+</g>
+<rect x="84" y="140" width="32" height="34" rx="10" fill="var(--skin2)"></rect>
+<circle cx="56" cy="112" r="9" fill="var(--skin2)"></circle>
+<circle cx="144" cy="112" r="9" fill="var(--skin2)"></circle>
+<ellipse cx="100" cy="106" rx="44" ry="50" fill="var(--skin)"></ellipse>
+<rect x="54" y="62" width="20" height="44" rx="9" fill="var(--hair)"></rect>
+<rect x="126" y="62" width="20" height="44" rx="9" fill="var(--hair)"></rect>
+<circle cx="56" cy="112" r="9" fill="var(--skin2)"></circle>
+<circle cx="144" cy="112" r="9" fill="var(--skin2)"></circle>
+<ellipse cx="100" cy="106" rx="44" ry="50" fill="var(--skin)"></ellipse>
+<ellipse cx="98" cy="60" rx="50" ry="22" fill="var(--hair)"></ellipse>
+<ellipse cx="112" cy="46" rx="40" ry="19" fill="var(--hair)" transform="rotate(8 112 46)"></ellipse>
+<path d="M80 50 Q104 36 136 44" stroke="var(--hair2)" stroke-opacity=".35" stroke-width="3" fill="none" stroke-linecap="round"></path>
+<path d="M58 116 Q60 164 100 170 Q140 164 142 116 Q136 136 120 135 Q100 131 80 135 Q64 136 58 116 Z" fill="var(--hair)"></path>
+<path ref="{{ mouthRef }}" d="M92 146 Q100 151 108 146" stroke="#9C5A4A" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"></path>
+<rect x="66" y="82" width="24" height="5" rx="2.5" fill="var(--hair2)"></rect>
+<rect x="110" y="82" width="24" height="5" rx="2.5" fill="var(--hair2)"></rect>
+<g ref="{{ eyesRef }}" style="transform-box:fill-box;transform-origin:center;transition:transform .12s">
+<g ref="{{ pupilsRef }}"><circle cx="79" cy="110" r="5" fill="#8A6A3E"></circle><circle cx="121" cy="110" r="5" fill="#8A6A3E"></circle><circle cx="79" cy="110" r="2.2" fill="var(--ink)"></circle><circle cx="121" cy="110" r="2.2" fill="var(--ink)"></circle></g>
+</g>
+<ellipse cx="100" cy="124" rx="6" ry="4" fill="var(--skin2)"></ellipse>
+<circle cx="79" cy="110" r="17" fill="oklch(1 0 0)" fill-opacity=".14" stroke="oklch(0.5 0.02 60)" stroke-opacity=".85" stroke-width="4.5"></circle>
+<circle cx="121" cy="110" r="17" fill="oklch(1 0 0)" fill-opacity=".14" stroke="oklch(0.5 0.02 60)" stroke-opacity=".85" stroke-width="4.5"></circle>
+<path d="M95 106 Q100 101 105 106" stroke="oklch(0.5 0.02 60)" stroke-opacity=".85" stroke-width="4" fill="none"></path>
+</g>
+</svg>
+</div>
+<div style="height:18px;font:500 12px 'Geist Mono',monospace;color:var(--muted)">{{ clickHint }}</div>
+</div>
+</div>
+</section>
+
+<div style="border-block:1px solid var(--line);overflow:hidden;padding:20px 0">{{ marquee }}</div>
+
+<section ref="{{ aboutRef }}" style="max-width:1240px;margin:0 auto;padding:clamp(72px,9vw,128px) clamp(20px,4vw,48px);display:flex;flex-wrap:wrap;gap:24px clamp(32px,5vw,80px)">
+<div style="flex:0 0 200px;font:500 12px 'Geist Mono',monospace;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);padding-top:12px">01 — About</div>
+<div style="flex:1 1 520px;min-width:0">
+<p style="margin:0;font:400 clamp(30px,3.6vw,50px)/1.12 'Instrument Serif',serif;letter-spacing:-0.01em;text-wrap:pretty">I got into software by soldering bike power meters and flying quadcopters with hand gestures. These days I build <em style="color:var(--accent)">whole products</em> — APIs and data models, component systems, and the small interactions that make it all feel cared for.</p>
+<p style="margin:28px 0 0;font:300 19px/1.6 Geist,sans-serif;color:var(--muted);max-width:58ch;text-wrap:pretty">I work across the stack in TypeScript — React on the client, Node on the server — with a soft spot for polished UI. I still think like an embedded engineer about every byte and frame.</p>
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;margin-top:48px">
+<sc-for list="{{ offScreen }}" as="o" hint-placeholder-count="3">
+<div style="background:var(--surface);border-radius:18px;padding:22px 22px 24px;transition:transform .4s cubic-bezier(.3,1.5,.5,1)" style-hover="transform:translateY(-4px) rotate(-1deg)">
+<div style="font:400 44px/1 'Instrument Serif',serif;color:var(--accent);margin-bottom:14px">{{ o.big }}</div>
+<div style="font:500 11px 'Geist Mono',monospace;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:6px">{{ o.label }}</div>
+<div style="font:400 15px/1.5 Geist,sans-serif">{{ o.text }}</div>
+</div>
+</sc-for>
+</div>
+</div>
+</section>
+
+<section style="max-width:1240px;margin:0 auto;padding:0 clamp(20px,4vw,48px) clamp(72px,9vw,128px);display:flex;flex-wrap:wrap;gap:32px clamp(32px,5vw,80px)">
+<div style="flex:0 1 320px"><div style="font:500 12px 'Geist Mono',monospace;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:14px">02 — Experience</div><h2 style="margin:0 0 22px;font:400 clamp(44px,5vw,68px)/1 'Instrument Serif',serif;letter-spacing:-0.02em">Eight years, <em style="color:var(--accent)">whole stack</em></h2><button onClick="{{ goResume }}" style="background:none;border:0;border-bottom:1px solid var(--ink);padding:4px 0;font:500 15px Geist,sans-serif;color:var(--ink);cursor:pointer">Full résumé →</button></div>
+<div style="flex:1 1 520px;min-width:0;display:flex;flex-direction:column;border-bottom:1px solid var(--line)">
+<sc-for list="{{ rolePreview }}" as="r" hint-placeholder-count="6">
+<button onClick="{{ r.open }}" style="display:flex;flex-wrap:wrap;gap:8px 24px;align-items:baseline;text-align:left;background:none;border:0;border-top:1px solid var(--line);padding:22px 0;cursor:pointer;color:var(--ink);transition:padding .35s cubic-bezier(.2,.8,.2,1)" style-hover="padding-left:16px">
+<span style="flex:0 0 96px;font:500 12px 'Geist Mono',monospace;color:var(--muted)">{{ r.years }}</span>
+<span style="flex:1 1 220px;font:400 clamp(24px,2.3vw,30px)/1.15 'Instrument Serif',serif">{{ r.co }}</span>
+<span style="flex:0 1 240px;font:400 15px Geist,sans-serif;color:var(--muted)">{{ r.title }}</span>
+</button>
+</sc-for>
+</div>
+</section>
+
+<section style="max-width:1240px;margin:0 auto;padding:0 clamp(20px,4vw,48px) clamp(72px,9vw,128px)">
+<div style="display:flex;justify-content:space-between;align-items:end;gap:20px;margin-bottom:36px;flex-wrap:wrap">
+<div><div style="font:500 12px 'Geist Mono',monospace;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:14px">03 — Selected work</div><h2 style="margin:0;font:400 clamp(44px,5.5vw,76px)/1 'Instrument Serif',serif;letter-spacing:-0.02em">Things I've <em style="color:var(--accent)">built</em></h2></div>
+<button onClick="{{ goProjects }}" style="background:none;border:0;border-bottom:1px solid var(--ink);padding:4px 0;font:500 15px Geist,sans-serif;color:var(--ink);cursor:pointer">All projects →</button>
+</div>
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:20px">
+<sc-for list="{{ featured }}" as="p" hint-placeholder-count="3">
+<a href="{{ p.url }}" target="_blank" onMouseEnter="{{ p.enter }}" onMouseLeave="{{ p.leave }}" style="position:relative;display:block;aspect-ratio:4/5;text-decoration:none;color:var(--ink);background:var(--surface);border-radius:22px;overflow:hidden;transition:transform .5s cubic-bezier(.2,.8,.2,1),box-shadow .5s" style-hover="transform:translateY(-6px);box-shadow:0 34px 50px -34px var(--ink);color:var(--ink)">
+<div style="position:absolute;inset:0;background:repeating-linear-gradient(135deg, transparent 0 11px, var(--line) 11px 12px);display:grid;place-items:center;transform:scale({{ p.scale }});transition:transform .8s cubic-bezier(.2,.8,.2,1)"><span style="font:500 12px 'Geist Mono',monospace;color:var(--muted);background:var(--surface);padding:4px 8px;border-radius:6px">{{ p.shot }}</span></div>
+<span style="position:absolute;top:16px;left:16px;font:500 11px 'Geist Mono',monospace;letter-spacing:.05em;text-transform:uppercase;background:var(--bg);padding:6px 10px;border-radius:999px">{{ p.kind }}</span>
+<span style="position:absolute;top:16px;right:16px;font:500 11px 'Geist Mono',monospace;color:var(--muted)">{{ p.num }}</span>
+<div style="position:absolute;left:12px;right:12px;bottom:12px;background:var(--bg);border-radius:14px;padding:18px 20px"><h3 style="margin:0;font:400 30px/1.05 'Instrument Serif',serif">{{ p.title }}</h3></div>
+<div style="position:absolute;left:12px;right:12px;bottom:12px;background:var(--ink);color:var(--onink);border-radius:14px;padding:20px;transform:translateY({{ p.ov }});transition:transform .55s cubic-bezier(.2,.9,.2,1)">
+<h3 style="margin:0 0 10px;font:400 30px/1.05 'Instrument Serif',serif">{{ p.title }}</h3>
+<p style="margin:0 0 16px;font:400 15px/1.5 Geist,sans-serif;opacity:.85">{{ p.desc }}</p>
+<div style="display:flex;justify-content:space-between;align-items:center;gap:12px;font:500 11px 'Geist Mono',monospace;letter-spacing:.04em;text-transform:uppercase"><span>{{ p.tags }}</span><span>View ↗</span></div>
+</div>
+</a>
+</sc-for>
+</div>
+</section>
+
+<section style="background:var(--surface)">
+<div style="max-width:1240px;margin:0 auto;padding:clamp(72px,9vw,120px) clamp(20px,4vw,48px);display:flex;flex-wrap:wrap;gap:32px clamp(32px,5vw,80px)">
+<div style="flex:0 1 320px"><div style="font:500 12px 'Geist Mono',monospace;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:14px">04 — Writing</div><h2 style="margin:0 0 22px;font:400 clamp(44px,5vw,68px)/1 'Instrument Serif',serif;letter-spacing:-0.02em">Notes from the <em style="color:var(--accent)">trail</em></h2><button onClick="{{ goBlog }}" style="background:none;border:0;border-bottom:1px solid var(--ink);padding:4px 0;font:500 15px Geist,sans-serif;color:var(--ink);cursor:pointer">Read the blog →</button></div>
+<div style="flex:1 1 520px;min-width:0;display:flex;flex-direction:column">
+<sc-for list="{{ latestPosts }}" as="b" hint-placeholder-count="3">
+<button onClick="{{ b.open }}" style="display:flex;flex-wrap:wrap;gap:8px 24px;align-items:baseline;text-align:left;background:none;border:0;border-top:1px solid var(--line);padding:26px 0;cursor:pointer;color:var(--ink);transition:padding .35s cubic-bezier(.2,.8,.2,1)" style-hover="padding-left:16px">
+<span style="flex:0 0 96px;font:500 12px 'Geist Mono',monospace;color:var(--muted)">{{ b.dateShort }}</span>
+<span style="flex:1 1 300px;font:400 clamp(24px,2.3vw,30px)/1.15 'Instrument Serif',serif">{{ b.title }}</span>
+<span style="font:500 11px 'Geist Mono',monospace;text-transform:uppercase;letter-spacing:.05em;color:var(--accent)">{{ b.tag }}</span>
+</button>
+</sc-for>
+</div>
+</div>
+</section>
+
+<section ref="{{ contactRef }}" style="max-width:1240px;margin:0 auto;padding:clamp(80px,10vw,136px) clamp(20px,4vw,48px);display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,380px),1fr));gap:clamp(40px,6vw,96px)">
+<div>
+<div style="font:500 12px 'Geist Mono',monospace;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:16px">05 — Contact</div>
+<h2 style="margin:0 0 24px;font:400 clamp(60px,8vw,116px)/0.9 'Instrument Serif',serif;letter-spacing:-0.03em">Let's <em style="color:var(--accent)">talk.</em></h2>
+<p style="margin:0 0 36px;font:300 20px/1.5 Geist,sans-serif;color:var(--muted);max-width:34ch;text-wrap:pretty">Hiring for your team, want to collaborate, or just want a Philly running route? Drop me a note — I read everything.</p>
+<div style="display:flex;flex-direction:column;gap:12px;font:500 14px 'Geist Mono',monospace">
+<a href="https://github.com/djm158" target="_blank">github.com/djm158 ↗</a>
+<a href="resume.pdf" target="_blank">resume.pdf ↗</a>
+</div>
+</div>
+<div style="background:var(--surface);border-radius:24px;padding:clamp(24px,3.5vw,44px)">
+<sc-if value="{{ notSent }}" hint-placeholder-val="{{ true }}">
+<div style="display:flex;flex-direction:column;gap:22px">
+<div><div style="font:500 11px 'Geist Mono',monospace;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:12px">What's this about?</div>
+<div style="display:flex;gap:8px;flex-wrap:wrap">
+<sc-for list="{{ topics }}" as="t" hint-placeholder-count="4">
+<button onClick="{{ t.pick }}" style="border:1px solid {{ t.border }};background:{{ t.bg }};color:{{ t.color }};border-radius:999px;padding:8px 16px;font:500 13px Geist,sans-serif;cursor:pointer;transition:all .2s">{{ t.label }}</button>
+</sc-for>
+</div></div>
+<label style="display:flex;flex-direction:column;gap:8px;font:500 11px 'Geist Mono',monospace;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)">Name<input value="{{ fName }}" onChange="{{ setName }}" placeholder="Your name" style="background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:14px 16px;font:400 16px Geist,sans-serif;color:var(--ink);outline:none;letter-spacing:0;text-transform:none" style-focus="border-color:var(--accent)"></label>
+<label style="display:flex;flex-direction:column;gap:8px;font:500 11px 'Geist Mono',monospace;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)">Email<input value="{{ fEmail }}" onChange="{{ setEmail }}" type="email" placeholder="you@domain.com" style="background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:14px 16px;font:400 16px Geist,sans-serif;color:var(--ink);outline:none;letter-spacing:0;text-transform:none" style-focus="border-color:var(--accent)"></label>
+<label style="display:flex;flex-direction:column;gap:8px;font:500 11px 'Geist Mono',monospace;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)">Message<textarea value="{{ fMsg }}" onChange="{{ setMsg }}" rows="5" placeholder="Tell me a little about it…" style="background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:14px 16px;font:400 16px/1.5 Geist,sans-serif;color:var(--ink);outline:none;resize:vertical;letter-spacing:0;text-transform:none" style-focus="border-color:var(--accent)"></textarea></label>
+<div style="display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap">
+<span style="font:400 14px Geist,sans-serif;color:var(--accent)">{{ formErr }}</span>
+<button onClick="{{ send }}" style="background:var(--ink);color:var(--onink);border:0;border-radius:999px;padding:15px 26px;font:500 15px Geist,sans-serif;cursor:pointer;transition:transform .2s" style-hover="transform:translateY(-2px)">Send message →</button>
+</div>
+</div>
+</sc-if>
+<sc-if value="{{ sent }}" hint-placeholder-val="{{ false }}">
+<div style="min-height:360px;display:flex;flex-direction:column;justify-content:center;gap:16px">
+<div style="width:56px;height:56px;border-radius:50%;background:var(--moss);color:var(--onink);display:grid;place-items:center;font:500 24px Geist,sans-serif">✓</div>
+<h3 style="margin:0;font:400 48px/1 'Instrument Serif',serif">Thanks, {{ fName }}!</h3>
+<p style="margin:0;font:300 18px/1.5 Geist,sans-serif;color:var(--muted);max-width:34ch">Got it. I'll get back to you at {{ fEmail }} within a couple of days.</p>
+<button onClick="{{ reset }}" style="align-self:flex-start;background:none;border:0;border-bottom:1px solid var(--ink);padding:4px 0;font:500 14px Geist,sans-serif;color:var(--ink);cursor:pointer">Send another</button>
+</div>
+</sc-if>
+</div>
+</section>
+</sc-if>
+
+<sc-if value="{{ isProjects }}" hint-placeholder-val="{{ false }}">
+<section data-screen-label="Projects" style="max-width:1240px;margin:0 auto;padding:clamp(56px,8vw,104px) clamp(20px,4vw,48px)">
+<div style="font:500 12px 'Geist Mono',monospace;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:16px">Projects · {{ projectCount }}</div>
+<h1 style="margin:0 0 20px;font:400 clamp(60px,8.5vw,120px)/0.92 'Instrument Serif',serif;letter-spacing:-0.03em">Work &amp; <em style="color:var(--accent)">side quests</em></h1>
+<p style="margin:0 0 40px;font:300 20px/1.5 Geist,sans-serif;color:var(--muted);max-width:50ch;text-wrap:pretty">Shipped products, open source, and a few hardware experiments from my embedded days.</p>
+<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:32px">
+<sc-for list="{{ projFilters }}" as="f" hint-placeholder-count="5">
+<button onClick="{{ f.pick }}" style="border:1px solid {{ f.border }};background:{{ f.bg }};color:{{ f.color }};border-radius:999px;padding:8px 16px;font:500 13px Geist,sans-serif;cursor:pointer;transition:all .2s">{{ f.label }}</button>
+</sc-for>
+</div>
+<div style="display:flex;flex-direction:column;border-bottom:1px solid var(--line)">
+<sc-for list="{{ projectList }}" as="p" hint-placeholder-count="6">
+<a href="{{ p.url }}" target="_blank" onMouseEnter="{{ p.enter }}" onMouseLeave="{{ p.leave }}" style="display:flex;flex-wrap:wrap;gap:10px 28px;align-items:center;padding:30px 12px;border-top:1px solid var(--line);text-decoration:none;color:var(--ink);transition:background .3s,padding .4s cubic-bezier(.2,.8,.2,1);border-radius:4px" style-hover="background:var(--surface);padding-left:28px;color:var(--ink)">
+<span style="flex:0 0 40px;font:500 12px 'Geist Mono',monospace;color:var(--muted)">{{ p.num }}</span>
+<span style="flex:1 1 280px;font:400 clamp(30px,3.4vw,46px)/1 'Instrument Serif',serif">{{ p.title }}</span>
+<span style="flex:1 1 300px;font:400 15px/1.5 Geist,sans-serif;color:var(--muted)">{{ p.desc }}</span>
+<span style="flex:0 0 150px;font:500 11px 'Geist Mono',monospace;letter-spacing:.05em;text-transform:uppercase;color:var(--accent)">{{ p.kind }}</span>
+<span style="font:400 20px 'Geist Mono',monospace">↗</span>
+</a>
+</sc-for>
+</div>
+<div ref="{{ floatRef }}" style="position:fixed;left:0;top:0;z-index:30;pointer-events:none;width:280px;opacity:{{ floatOpacity }};transition:opacity .25s, transform .45s cubic-bezier(.2,.8,.2,1)">
+<div style="aspect-ratio:4/3;border-radius:16px;background:repeating-linear-gradient(135deg, transparent 0 10px, var(--line) 10px 11px);background-color:var(--bg);border:1px solid var(--line);box-shadow:0 30px 50px -24px var(--ink);display:grid;place-items:center;transform:rotate(-4deg)"><span style="font:500 12px 'Geist Mono',monospace;color:var(--muted)">{{ floatShot }}</span></div>
+</div>
+</section>
+</sc-if>
+
+<sc-if value="{{ isBlog }}" hint-placeholder-val="{{ false }}">
+<section data-screen-label="Blog" style="max-width:960px;margin:0 auto;padding:clamp(56px,8vw,104px) clamp(20px,4vw,48px)">
+<div style="font:500 12px 'Geist Mono',monospace;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:16px">Writing · {{ postCount }} posts</div>
+<h1 style="margin:0 0 20px;font:400 clamp(60px,8.5vw,120px)/0.92 'Instrument Serif',serif;letter-spacing:-0.03em">The <em style="color:var(--accent)">blog</em></h1>
+<p style="margin:0 0 40px;font:300 20px/1.5 Geist,sans-serif;color:var(--muted);max-width:46ch">Web development, running, and whatever I'm figuring out at the moment.</p>
+<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:24px">
+<sc-for list="{{ blogFilters }}" as="f" hint-placeholder-count="4">
+<button onClick="{{ f.pick }}" style="border:1px solid {{ f.border }};background:{{ f.bg }};color:{{ f.color }};border-radius:999px;padding:8px 16px;font:500 13px Geist,sans-serif;cursor:pointer;transition:all .2s">{{ f.label }}</button>
+</sc-for>
+</div>
+<sc-for list="{{ postList }}" as="b" hint-placeholder-count="4">
+<button onClick="{{ b.open }}" style="display:block;width:100%;text-align:left;background:none;border:0;border-top:1px solid var(--line);padding:34px 0;cursor:pointer;color:var(--ink);transition:padding .4s cubic-bezier(.2,.8,.2,1)" style-hover="padding-left:16px">
+<div style="display:flex;gap:16px;font:500 12px 'Geist Mono',monospace;color:var(--muted);margin-bottom:12px"><span>{{ b.date }}</span><span style="color:var(--accent);text-transform:uppercase;letter-spacing:.05em">{{ b.tag }}</span></div>
+<div style="font:400 clamp(30px,3.4vw,44px)/1.05 'Instrument Serif',serif;margin-bottom:12px">{{ b.title }}</div>
+<div style="font:400 16px/1.55 Geist,sans-serif;color:var(--muted);max-width:62ch">{{ b.excerpt }}</div>
+</button>
+</sc-for>
+</section>
+</sc-if>
+
+<sc-if value="{{ isPost }}" hint-placeholder-val="{{ false }}">
+<article data-screen-label="Post" style="max-width:720px;margin:0 auto;padding:clamp(48px,7vw,96px) clamp(20px,4vw,48px)">
+<button onClick="{{ goBlog }}" style="background:none;border:0;padding:0;font:500 13px 'Geist Mono',monospace;color:var(--muted);cursor:pointer;margin-bottom:44px">← All posts</button>
+<div style="display:flex;gap:16px;flex-wrap:wrap;font:500 12px 'Geist Mono',monospace;color:var(--muted);margin-bottom:20px"><span>{{ post.date }}</span><span style="color:var(--accent);text-transform:uppercase;letter-spacing:.05em">{{ post.tag }}</span><span>{{ post.read }}</span></div>
+<h1 style="margin:0 0 32px;font:400 clamp(46px,6vw,78px)/1 'Instrument Serif',serif;letter-spacing:-0.02em;text-wrap:balance">{{ post.title }}</h1>
+<p style="margin:0 0 32px;font:300 22px/1.55 Geist,sans-serif;text-wrap:pretty">{{ post.excerpt }}</p>
+<div style="aspect-ratio:16/9;border-radius:18px;background:repeating-linear-gradient(135deg, transparent 0 10px, var(--line) 10px 11px);background-color:var(--surface);display:grid;place-items:center;margin-bottom:36px"><span style="font:500 12px 'Geist Mono',monospace;color:var(--muted)">post body renders from markdown</span></div>
+<button onClick="{{ post.next }}" style="display:block;width:100%;text-align:left;background:var(--surface);border:0;border-radius:18px;padding:24px 28px;cursor:pointer;color:var(--ink);transition:transform .3s" style-hover="transform:translateY(-3px)"><div style="font:500 11px 'Geist Mono',monospace;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:8px">Next post →</div><div style="font:400 28px/1.1 'Instrument Serif',serif">{{ post.nextTitle }}</div></button>
+</article>
+</sc-if>
+
+<sc-if value="{{ isResume }}" hint-placeholder-val="{{ false }}">
+<section data-screen-label="Résumé" style="max-width:1240px;margin:0 auto;padding:clamp(56px,8vw,104px) clamp(20px,4vw,48px)">
+<div style="font:500 12px 'Geist Mono',monospace;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:16px">Résumé · 2018 — 2026</div>
+<h1 style="margin:0 0 24px;font:400 clamp(60px,8.5vw,120px)/0.92 'Instrument Serif',serif;letter-spacing:-0.03em">The <em style="color:var(--accent)">long</em> version</h1>
+<p style="margin:0 0 32px;font:300 clamp(19px,1.9vw,24px)/1.45 Geist,sans-serif;max-width:52ch;text-wrap:pretty">Senior/staff-level software engineer with 8+ years of hands-on product engineering, specializing in React/TypeScript with full-stack ownership across backend, data, performance, accessibility, and production systems.</p>
+<div style="display:flex;flex-wrap:wrap;gap:10px 24px;align-items:center;font:500 13px 'Geist Mono',monospace">
+<a href="mailto:daniel.mcgrath9@gmail.com">daniel.mcgrath9@gmail.com</a>
+<a href="https://linkedin.com/in/djmcg" target="_blank">linkedin.com/in/djmcg ↗</a>
+<a href="https://github.com/djm158" target="_blank">github.com/djm158 ↗</a>
+</div>
+<div style="margin-top:clamp(48px,6vw,72px)">
+<div style="font:500 11px 'Geist Mono',monospace;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:14px">Timeline</div>
+<div style="display:flex;gap:4px">
+<sc-for list="{{ timeline }}" as="t" hint-placeholder-count="6">
+<button onClick="{{ t.go }}" onMouseEnter="{{ t.enter }}" onMouseLeave="{{ t.leave }}" style="flex:{{ t.flex }} 1 0;min-width:0;background:none;border:0;padding:0;cursor:pointer;text-align:left;color:var(--ink)">
+<div style="height:14px;border-radius:999px;background:{{ t.bg }};transform:scaleY({{ t.sy }});transition:background .3s,transform .35s cubic-bezier(.3,1.6,.5,1)"></div>
+<div style="margin-top:10px;font:500 11px 'Geist Mono',monospace;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ t.short }}</div>
+<div style="margin-top:2px;font:500 11px 'Geist Mono',monospace;color:var(--muted);overflow:hidden;white-space:nowrap">{{ t.year }}</div>
+</button>
+</sc-for>
+</div>
+</div>
+<div style="display:flex;flex-wrap:wrap;gap:40px clamp(32px,5vw,72px);margin-top:clamp(40px,5vw,64px);align-items:flex-start">
+<div style="flex:3 1 560px;min-width:0;border-bottom:1px solid var(--line)">
+<sc-for list="{{ roles }}" as="r" hint-placeholder-count="6">
+<article id="{{ r.id }}" onMouseEnter="{{ r.enter }}" onMouseLeave="{{ r.leave }}" style="display:flex;flex-wrap:wrap;gap:12px 40px;padding:36px 0;border-top:1px solid var(--line);opacity:{{ r.op }};transition:opacity .4s">
+<div style="flex:0 0 160px;display:flex;flex-direction:column;gap:6px;font:500 12px 'Geist Mono',monospace;color:var(--muted)"><span style="color:{{ r.dateColor }};transition:color .3s">{{ r.dates }}</span><span>{{ r.dur }}</span><span>{{ r.loc }}</span></div>
+<div style="flex:1 1 380px;min-width:0">
+<div style="display:flex;flex-wrap:wrap;align-items:baseline;gap:6px 16px"><h2 style="margin:0;font:400 clamp(36px,3.6vw,48px)/1 'Instrument Serif',serif;letter-spacing:-0.01em">{{ r.co }}</h2><span style="font:400 16px Geist,sans-serif;color:var(--muted)">{{ r.title }}</span></div>
+<ul style="margin:20px 0 0;padding:0;list-style:none;display:flex;flex-direction:column;gap:12px">
+<sc-for list="{{ r.bullets }}" as="b" hint-placeholder-count="3">
+<li style="display:flex;gap:14px;font:400 16px/1.6 Geist,sans-serif;text-wrap:pretty"><span style="flex:0 0 6px;height:6px;border-radius:50%;background:var(--accent);margin-top:.62em"></span><span>{{ b }}</span></li>
+</sc-for>
+</ul>
+<div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:20px">
+<sc-for list="{{ r.tags }}" as="t" hint-placeholder-count="4">
+<span style="font:500 11px 'Geist Mono',monospace;padding:5px 10px;border-radius:999px;background:{{ t.bg }};color:{{ t.color }};transition:all .3s">{{ t.label }}</span>
+</sc-for>
+</div>
+</div>
+</article>
+</sc-for>
+</div>
+<aside style="flex:1 1 300px;min-width:0;position:sticky;top:88px;display:flex;flex-direction:column;gap:16px">
+<div style="background:var(--surface);border-radius:22px;padding:26px 24px 28px">
+<div style="display:flex;justify-content:space-between;align-items:baseline;gap:12px;margin-bottom:8px"><div style="font:500 11px 'Geist Mono',monospace;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)">Technical skills</div><button onClick="{{ clearSkill }}" style="background:none;border:0;padding:0;font:500 11px 'Geist Mono',monospace;color:var(--accent);cursor:pointer;opacity:{{ clearOp }}">clear</button></div>
+<p style="margin:0 0 20px;font:400 italic 22px/1.2 'Instrument Serif',serif;min-height:2.4em;text-wrap:pretty">{{ skillNote }}</p>
+<div style="display:flex;flex-direction:column;gap:18px">
+<sc-for list="{{ skillGroups }}" as="g" hint-placeholder-count="4">
+<div><div style="font:500 11px 'Geist Mono',monospace;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-bottom:8px">{{ g.label }}</div>
+<div style="display:flex;flex-wrap:wrap;gap:6px">
+<sc-for list="{{ g.items }}" as="k" hint-placeholder-count="5">
+<button onClick="{{ k.pick }}" style="border:1px solid {{ k.border }};background:{{ k.bg }};color:{{ k.color }};border-radius:999px;padding:6px 12px;font:500 12px Geist,sans-serif;cursor:pointer;transition:all .2s">{{ k.label }}</button>
+</sc-for>
+</div></div>
+</sc-for>
+</div>
+</div>
+<div style="background:var(--surface);border-radius:22px;padding:24px">
+<div style="font:500 11px 'Geist Mono',monospace;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:12px">Education</div>
+<div style="font:400 28px/1.05 'Instrument Serif',serif;margin-bottom:6px">University of Pittsburgh</div>
+<div style="font:400 15px/1.5 Geist,sans-serif">B.S. Computer Engineering</div>
+<div style="font:400 15px/1.5 Geist,sans-serif;color:var(--muted)">Summa Cum Laude · 3.8 GPA · Dec 2017</div>
+</div>
+<a href="resume.pdf" target="_blank" style="display:flex;justify-content:space-between;align-items:center;background:var(--ink);color:var(--onink);border-radius:22px;padding:20px 24px;font:500 15px Geist,sans-serif;text-decoration:none;transition:transform .2s" style-hover="transform:translateY(-2px);color:var(--onink)">Download PDF <span style="font-family:'Geist Mono',monospace">↓</span></a>
+</aside>
+</div>
+</section>
+</sc-if>
+</main>
+
+<footer style="border-top:1px solid var(--line)">
+<div style="max-width:1240px;margin:0 auto;padding:28px clamp(20px,4vw,48px);display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;font:500 12px 'Geist Mono',monospace;color:var(--muted)">
+<span>© 2026 Daniel McGrath · Made in Philadelphia</span>
+<div style="display:flex;gap:20px"><a href="https://github.com/djm158" target="_blank" style="color:var(--muted)">GitHub</a><button onClick="{{ goResume }}" style="background:none;border:0;padding:0;font:inherit;color:var(--muted);cursor:pointer;text-decoration:underline;text-decoration-color:var(--accent);text-underline-offset:3px">Résumé</button></div>
+</div>
+</footer>
+
+<div style="position:fixed;left:50%;bottom:28px;z-index:70;transform:translate(-50%,{{ toastY }});opacity:{{ toastOpacity }};transition:all .5s cubic-bezier(.2,1.4,.4,1);background:var(--ink);color:var(--onink);border-radius:999px;padding:12px 20px;font:500 13px 'Geist Mono',monospace;pointer-events:none;white-space:nowrap">{{ toast }}</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;accent&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;Terracotta&quot;,&quot;Clay&quot;,&quot;Ochre&quot;,&quot;Moss&quot;],&quot;default&quot;:&quot;Terracotta&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;grain&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;},&quot;nightMode&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;}}">
+const ROLES = [
+  { co: 'Wizard', short: 'Wizard', title: 'Staff Software Engineer', start: [2026, 1], end: [2026, 9], loc: 'Remote', tags: ['React', 'TypeScript', 'MySQL', 'MongoDB', 'GraphQL', 'Type-GraphQL', 'MobX', 'GCP', 'GitHub Actions', 'HTML', 'Git'], bullets: [
+    'Shipped a social voting feature end to end: MySQL schema, Type-GraphQL API with scoped authorization, and a React client supporting shareable polls and guest voting.',
+    'Brought First Contentful Paint down to approximately 2.6s on a client-rendered React SPA by removing component-library barrel imports, replacing CSS-only loading states with paint-eligible SVG, and enabling static asset compression.',
+    "Delivered the customer application's mobile-to-desktop redesign, introducing a breakpoint system, MobX-backed navigation, and a reusable drawer pattern that replaced legacy modals.",
+    'Audited accessibility across a 25+ package monorepo, added JSX accessibility linting and axe checks, and fixed WCAG issues across checkout, chat, product detail, gallery, and reviews.'] },
+  { co: 'Commsor', short: 'Commsor', title: 'Senior Full-stack Engineer', start: [2025, 4], end: [2025, 12], loc: 'Remote', tags: ['Next.js', 'TypeScript', 'React', 'Tailwind CSS', 'shadcn/ui', 'Inngest', 'Elasticsearch', 'Supabase', 'PostgreSQL', 'HTML', 'Git'], bullets: [
+    'Joined as the first full-time engineer and owned hands-on product delivery across frontend, backend, and data systems for a warm-introduction platform.',
+    'Rebuilt contact discovery and network crawling with Inngest, Elasticsearch, and Supabase, adding chunked processing and concurrency controls and cutting large crawls from hours to minutes.',
+    'Implemented end-to-end introduction workflows in Next.js and TypeScript, including connection selection, rich-text email templates, status tracking, and delivery through connected Google accounts.',
+    'Migrated authentication from NextAuth to Better Auth and added workspace role-based permissions, validated Server Actions, and PostgreSQL row-level security for tenant isolation.',
+    'Developed the HubSpot integration for CRM list synchronization, account-owner mapping, and authenticated APIs that surfaced relevant introduction paths inside HubSpot.'] },
+  { co: 'Nearform', short: 'Nearform', title: 'Senior Software Engineer', start: [2022, 6], end: [2025, 4], loc: 'Remote', tags: ['React', 'TypeScript', 'React Query', 'Next.js', 'GraphQL', 'Tailwind CSS', 'shadcn/ui', 'Docker', 'HTML', 'Git'], bullets: [
+    'Developed the frontend integration for a Module Federation migration at a Fortune 500 e-commerce client, decoupling independently owned storefront apps from shared navigation and package releases.',
+    'Owned frontend development for an internal application-health monitoring tool at a major telecommunications client, building a data-heavy React/TypeScript interface with React Query.',
+    "Contributed to Victory and victory-native-xl, and helped migrate Nearform's public website using Next.js and Sanity CMS."] },
+  { co: 'WizeHive', short: 'WizeHive', title: 'Software Engineer', start: [2020, 9], end: [2022, 6], loc: 'Conshohocken, PA', tags: ['React', 'GraphQL', 'Apollo', 'React Flow', 'HTML', 'Git'], bullets: [
+    'Developed core features for a GraphQL/Apollo rewrite of a legacy grant-management platform, replacing parts of the existing configurable workflow system.',
+    'Created a visual workflow editor with React Flow that let administrators drag, drop, and configure stages in grant-management workflows.'] },
+  { co: 'Vistar Media', short: 'Vistar', title: 'Software Engineer', start: [2018, 9], end: [2020, 9], loc: 'Philadelphia, PA', tags: ['React', 'TypeScript', 'Python', 'Flask', 'AWS', 'Datadog', 'Docker', 'Linux', 'HTML', 'Git'], bullets: [
+    'Developed React/TypeScript features for the buy side of a digital-out-of-home advertising platform, working in a large Bazel-based codebase with an internal design system.',
+    'Worked across Python/Flask APIs and Redshift data migrations, and participated in AWS on-call rotations with Datadog monitoring.'] },
+  { co: 'Computer Enterprises Inc.', short: 'CEI', title: 'Associate Developer', start: [2018, 1], end: [2018, 9], loc: 'Plymouth Meeting, PA', tags: ['Azure', 'R', 'Web Components', 'C#/.NET', 'HTML', 'Git'], bullets: [
+    "Worked with a national self-storage client's data science team to productionize parallel R workloads on Azure Batch, including repeatable deployment and production monitoring.",
+    'Prototyped an insurance-policy application with Web Components in a C#/.NET consultancy environment.'] }
+];
+const SKILLS = [
+  ['Languages', ['TypeScript', 'JavaScript', 'Python', 'HTML', 'CSS/Sass']],
+  ['Frontend', ['React', 'Next.js', 'React Query', 'MobX', 'Tailwind CSS', 'shadcn/ui', 'React Flow', 'React Testing Library']],
+  ['Backend & Data', ['Node.js', 'GraphQL', 'Apollo', 'Type-GraphQL', 'Flask', 'PostgreSQL', 'MySQL', 'MongoDB', 'Supabase', 'Elasticsearch']],
+  ['Cloud & DevOps', ['AWS', 'GCP', 'Azure', 'Vercel', 'Inngest', 'GitHub Actions', 'Docker', 'Datadog', 'Git', 'Linux']]
+];
+const MON = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+const months = r => (r.end[0] - r.start[0]) * 12 + r.end[1] - r.start[1];
+const durStr = m => { const y = Math.floor(m / 12), mo = m % 12; return [y ? y + (y > 1 ? ' yrs' : ' yr') : '', mo ? mo + ' mos' : ''].filter(Boolean).join(' '); };
+const PROJECTS = [
+  { title: 'Wizard AI', kind: 'Work', desc: 'Placeholder — a line on what you built and shipped most recently.', tags: 'React · TypeScript', shot: 'product screenshot', url: '#' },
+  { title: 'Gesture Quadcopter', kind: 'Hardware', desc: 'Fly like Iron Man: piloting a quadcopter with nothing but hand gestures.', tags: 'Embedded · Sensors', shot: 'quadcopter photo', url: 'https://github.com/djm158/ECE1160_Final_Project' },
+  { title: 'Pedal Power', kind: 'Hardware', desc: 'A DIY cycling power meter — strain gauges, firmware, and a lot of test rides.', tags: 'Embedded · C', shot: 'power meter build', url: 'https://github.com/djm158/PedalPower_Embedded' },
+  { title: 'Run Calculator', kind: 'Web', desc: 'Pace, time, and distance — solve for any one from the other two.', tags: 'React', shot: 'calculator UI', url: 'https://github.com/djm158/runcalculator' },
+  { title: 'Help Wanted Bot', kind: 'Open source', desc: 'A bot that surfaces GitHub issues tagged "help wanted" for new contributors.', tags: 'Node · Heroku', shot: 'bot feed', url: 'https://github.com/djm158/help-wanted-bot' },
+  { title: 'Pomo Dojo', kind: 'Web', desc: 'A no-nonsense Pomodoro timer for deep-work sessions.', tags: 'JavaScript', shot: 'timer UI', url: 'https://github.com/djm158/pomo' },
+  { title: 'danielmcgrath.xyz', kind: 'Open source', desc: 'This site — rebuilt from the ground up.', tags: 'React', shot: 'this site', url: 'https://github.com/djm158/danielmcgrath.xyz' }
+];
+const POSTS = [
+  { title: 'How to build a Twitter bot with Node.js and Heroku', date: '05 March 2018', dateShort: 'Mar 2018', tag: 'Web development', read: '8 min read', excerpt: "A step-by-step build of a bot that tweets open GitHub issues tagged 'help wanted' — from API keys to a free Heroku deploy." },
+  { title: 'Post marathon recap', date: '25 November 2017', dateShort: 'Nov 2017', tag: 'Running', read: '5 min read', excerpt: 'My first marathon: a chilly, windy day in Philadelphia, not enough sleep, and 26.2 miles of lessons.' },
+  { title: 'How to come up with ideas as an engineer', date: '13 November 2017', dateShort: 'Nov 2017', tag: 'Entrepreneurship', read: '4 min read', excerpt: "I always assumed I'd be the one building other people's ideas. Here's how I started finding my own." },
+  { title: 'Building my first website', date: '07 November 2017', dateShort: 'Nov 2017', tag: 'Web development', read: '3 min read', excerpt: 'Hello, world — why I built this site, and the start of a journey toward web development.' }
+];
+const PFILTERS = ['All', 'Work', 'Web', 'Hardware', 'Open source'];
+const BFILTERS = ['All', 'Web development', 'Running', 'Entrepreneurship'];
+const TOPICS = ['A role', 'Collaboration', 'A blog post', 'Just saying hi'];
+const HUES = { Terracotta: 42, Clay: 28, Ochre: 72, Moss: 135 };
+const HINTS = ['', 'hey!', 'that tickles', 'okay, okay…', 'one more and…'];
+const pad = n => String(n).padStart(2, '0');
+
+class Component extends DCLogic {
+  state = { page: 'home', postIdx: 0, pf: 'All', bf: 'All', hov: null, hovRow: null, hovRole: null, skill: null, clicks: 0, night: null, toast: '', topic: 'A role', fName: '', fEmail: '', fMsg: '', sent: false, err: '' };
+  mainRef = React.createRef(); heroRef = React.createRef(); glowRef = React.createRef(); avatarRef = React.createRef(); eyesRef = React.createRef();
+  pupilsRef = React.createRef(); mouthRef = React.createRef(); aboutRef = React.createRef(); contactRef = React.createRef(); floatRef = React.createRef();
+
+  componentDidMount() {
+    this.onResize = () => { const m = window.innerWidth < 760; if (m !== this.state.mobile) this.setState({ mobile: m, menu: false }); };
+    this.onResize(); window.addEventListener('resize', this.onResize);
+    try { const s = JSON.parse(localStorage.getItem('dm-nav') || 'null'); if (s) this.setState(s); } catch (e) {}
+    this.onMove = e => { this.mx = e.clientX; this.my = e.clientY; if (!this.raf) this.raf = requestAnimationFrame(this.tick); };
+    window.addEventListener('mousemove', this.onMove);
+    this.applyTheme();
+  }
+  componentDidUpdate() { this.applyTheme(); document.body.style.overflow = (this.state.mobile && this.state.menu) ? 'hidden' : ''; }
+  componentWillUnmount() { window.removeEventListener('mousemove', this.onMove); window.removeEventListener('resize', this.onResize); }
+
+  tick = () => {
+    this.raf = null; const mx = this.mx, my = this.my;
+    const h = this.heroRef.current, g = this.glowRef.current;
+    if (h && g) { const r = h.getBoundingClientRect(); g.style.transform = `translate(${mx - r.left}px,${my - r.top}px)`; }
+    const a = this.avatarRef.current, p = this.pupilsRef.current;
+    if (a && p) {
+      const r = a.getBoundingClientRect(); const dx = mx - (r.left + r.width / 2), dy = my - (r.top + r.height * 0.57);
+      const d = Math.hypot(dx, dy) || 1, k = Math.min(1, d / 260) * 4.5;
+      p.setAttribute('transform', `translate(${(dx / d * k).toFixed(2)} ${(dy / d * k).toFixed(2)})`);
+    }
+    const f = this.floatRef.current; if (f) f.style.transform = `translate(${mx + 28}px,${my - 110}px)`;
+  };
+
+  isNight() { return this.state.night ?? this.props.nightMode ?? false; }
+  applyTheme() {
+    const night = this.isNight(), hue = HUES[this.props.accent ?? 'Terracotta'] ?? 42, r = document.documentElement;
+    r.dataset.theme = night ? 'night' : 'day';
+    r.style.setProperty('--accent', `oklch(${night ? 0.74 : 0.52} 0.12 ${hue})`);
+  }
+
+  nav(page, extra = {}, after) {
+    const commit = () => {
+      this.setState({ page, hovRow: null, ...extra });
+      try { localStorage.setItem('dm-nav', JSON.stringify({ page, postIdx: extra.postIdx ?? this.state.postIdx })); } catch (e) {}
+      window.scrollTo(0, 0);
+    };
+    const m = this.mainRef.current;
+    const same = page === this.state.page && (extra.postIdx == null || extra.postIdx === this.state.postIdx);
+    const reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (same || !m || !m.animate || reduce) { if (!same) commit(); after && setTimeout(after, 30); return; }
+    m.getAnimations().forEach(a => a.cancel());
+    const token = (this.navToken = (this.navToken || 0) + 1);
+    const out = m.animate([{ opacity: 1, transform: 'none', filter: 'blur(0)' }, { opacity: 0, transform: 'translateY(-12px)', filter: 'blur(4px)' }], { duration: 220, easing: 'cubic-bezier(.4,0,.2,1)', fill: 'forwards' });
+    out.onfinish = () => {
+      if (token !== this.navToken) return;
+      commit();
+      requestAnimationFrame(() => {
+        if (token !== this.navToken) return;
+        const inn = m.animate([{ opacity: 0, transform: 'translateY(22px)', filter: 'blur(4px)' }, { opacity: 1, transform: 'none', filter: 'blur(0)' }], { duration: 520, easing: 'cubic-bezier(.2,.8,.2,1)', fill: 'backwards' });
+        out.cancel();
+        inn.onfinish = () => inn.cancel();
+        after && setTimeout(after, 60);
+      });
+    };
+  }
+  jump(ref) {
+    const go = () => { const el = this[ref].current; if (el) window.scrollTo({ top: el.getBoundingClientRect().top + window.scrollY - 70, behavior: 'smooth' }); };
+    if (this.state.page !== 'home') this.nav('home', {}, go); else go();
+  }
+
+  poke = () => {
+    const m = this.mouthRef.current;
+    if (m) { m.setAttribute('d', 'M95 148 A5 5 0 1 0 105 148 A5 5 0 1 0 95 148 Z'); m.setAttribute('fill', '#9C5A4A'); clearTimeout(this.mt); this.mt = setTimeout(() => { m.setAttribute('d', 'M92 146 Q100 151 108 146'); m.setAttribute('fill', 'none'); }, 320); }
+    const e = this.eyesRef.current; if (e) { e.style.transform = 'scaleY(0.1)'; setTimeout(() => { e.style.transform = ''; }, 150); }
+    const c = this.state.clicks + 1;
+    if (c >= 5) {
+      const night = !this.isNight();
+      this.setState({ clicks: 0, night, toast: night ? 'Night ride unlocked — lights on.' : 'Back to daylight.' });
+      clearTimeout(this.tt); this.tt = setTimeout(() => this.setState({ toast: '' }), 3200);
+    } else this.setState({ clicks: c });
+  };
+
+  chip(active) {
+    return { bg: active ? 'var(--ink)' : 'transparent', color: active ? 'var(--onink)' : 'var(--ink)', border: active ? 'var(--ink)' : 'var(--line)' };
+  }
+
+  send = () => {
+    const { fName, fEmail, fMsg } = this.state;
+    if (!fName.trim()) return this.setState({ err: 'Who am I talking to?' });
+    if (!/^\S+@\S+\.\S+$/.test(fEmail)) return this.setState({ err: 'That email looks off.' });
+    if (fMsg.trim().length < 5) return this.setState({ err: 'Add a few words?' });
+    this.setState({ sent: true, err: '' });
+  };
+
+  resumeVals() {
+    const s = this.state, sk = s.skill;
+    const hit = r => sk && r.tags.includes(sk);
+    const grey = 'color-mix(in oklch, var(--ink) 18%, transparent)';
+    const goRole = i => () => { const el = document.getElementById('role-' + i); if (el) window.scrollTo({ top: el.getBoundingClientRect().top + window.scrollY - 80, behavior: 'smooth' }); };
+    const used = ROLES.filter(hit).map(r => r.short);
+    const note = !sk ? 'Pick a skill to see where I used it.' : used.length ? `${sk} at ${used.length > 1 ? used.slice(0, -1).join(', ') + ' & ' + used.at(-1) : used[0]}.` : `${sk}: part of the daily toolkit.`;
+    return {
+      timeline: ROLES.map((r, i) => ({ r, i })).reverse().map(({ r, i }) => {
+        const on = s.hovRole === i || hit(r);
+        return { short: r.short, year: r.start[0], flex: months(r), bg: on ? 'var(--accent)' : grey, sy: on ? 1.5 : 1, go: goRole(i), enter: () => this.setState({ hovRole: i }), leave: () => this.setState({ hovRole: null }) };
+      }),
+      roles: ROLES.map((r, i) => ({
+        ...r, id: 'role-' + i,
+        dates: `${MON[r.start[1] - 1]} ${r.start[0]} — ${MON[r.end[1] - 1]} ${r.end[0]}`, dur: durStr(months(r)),
+        op: sk && !hit(r) ? 0.3 : 1, dateColor: s.hovRole === i || hit(r) ? 'var(--accent)' : 'var(--muted)',
+        tags: r.tags.map(t => ({ label: t, bg: t === sk ? 'var(--accent)' : 'var(--surface)', color: t === sk ? 'var(--onink)' : 'var(--ink)' })),
+        enter: () => this.setState({ hovRole: i }), leave: () => this.setState({ hovRole: null })
+      })),
+      skillGroups: SKILLS.map(([label, items]) => ({ label, items: items.map(k => ({ label: k, ...this.chip(sk === k), border: sk === k ? 'var(--ink)' : 'var(--line)', bg: sk === k ? 'var(--ink)' : 'var(--bg)', pick: () => this.setState({ skill: sk === k ? null : k }) })) })),
+      rolePreview: ROLES.map((r, i) => ({ co: r.co, title: r.title, years: r.start[0] === r.end[0] ? String(r.start[0]) : `${r.start[0]}–${String(r.end[0]).slice(2)}`, open: () => { this.nav('resume'); setTimeout(goRole(i), 80); } })),
+      skillNote: note, clearSkill: () => this.setState({ skill: null }), clearOp: sk ? 1 : 0
+    };
+  }
+
+  renderVals() {
+    const s = this.state, page = s.page;
+    const openPost = i => () => this.nav('post', { postIdx: i });
+    const proj = PROJECTS.map((p, i) => ({ ...p, num: pad(i + 1) }));
+    const posts = POSTS.map((b, i) => ({ ...b, open: openPost(i) }));
+    const post = POSTS[s.postIdx] || POSTS[0];
+    const nextIdx = (s.postIdx + 1) % POSTS.length;
+    const items = ['React', 'TypeScript', 'Node', 'Design systems', 'Web performance', 'Accessibility', 'Interaction design', 'Philadelphia', '26.2 mi'];
+    const marquee = React.createElement('div', { style: { display: 'flex', width: 'max-content', animation: 'dmMarq 45s linear infinite', whiteSpace: 'nowrap' } },
+      [...items, ...items].map((t, i) => React.createElement('span', { key: i, style: { display: 'inline-flex', alignItems: 'center', gap: 32, paddingRight: 32, font: "400 36px/1 'Instrument Serif',serif", fontStyle: i % 2 ? 'italic' : 'normal' } },
+        t, React.createElement('span', { style: { width: 9, height: 9, borderRadius: '50%', background: 'var(--accent)', display: 'inline-block' } }))));
+    const navDefs = [['Work', 'projects', () => this.nav('projects')], ['Writing', 'blog', () => this.nav('blog')], ['About', '-', () => this.jump('aboutRef')], ['Contact', '-', () => this.jump('contactRef')]];
+    const curPage = page === 'post' ? 'blog' : page;
+    const hovRow = s.hovRow != null ? proj[s.hovRow] : null;
+
+    return {
+      showGrain: this.props.grain ?? true,
+      isHome: page === 'home', isProjects: page === 'projects', isBlog: page === 'blog', isPost: page === 'post',
+      navItems: navDefs.map(([label, key, go], i) => ({ label, num: '0' + (i + 1), y: (s.mobile && s.menu) ? '0' : '16px', delay: (s.mobile && s.menu) ? (0.06 + i * 0.05) + 's' : '0s', go: () => { this.setState({ menu: false }); go(); }, bg: key === curPage ? 'var(--surface)' : 'transparent' })),
+      isMobile: !!s.mobile, isDesktop: !s.mobile, menuOpen: !!(s.mobile && s.menu), menuOpacity: (s.mobile && s.menu) ? 1 : 0, menuVis: (s.mobile && s.menu) ? 'visible' : 'hidden', menuPE: (s.mobile && s.menu) ? 'auto' : 'none', menuVisDelay: (s.mobile && s.menu) ? '0s' : '.35s', menuHidden: (s.mobile && s.menu) ? 'false' : 'true', menuBtnY: (s.mobile && s.menu) ? '0' : '12px',
+      toggleMenu: () => this.setState({ menu: !s.menu }), menuLabel: s.menu ? 'Close ✕' : 'Menu',
+      goHome: () => this.nav('home'), goProjects: () => this.nav('projects'), goBlog: () => this.nav('blog'), goContact: () => this.jump('contactRef'), goResume: () => this.nav('resume'), isResume: page === 'resume',
+      ...this.resumeVals(),
+      mainRef: this.mainRef, heroRef: this.heroRef, glowRef: this.glowRef, avatarRef: this.avatarRef, eyesRef: this.eyesRef, mouthRef: this.mouthRef, pupilsRef: this.pupilsRef,
+      aboutRef: this.aboutRef, contactRef: this.contactRef, floatRef: this.floatRef,
+      poke: this.poke, clickHint: HINTS[s.clicks] || '',
+      marquee,
+      offScreen: [
+        { big: '26.2', label: 'Running', text: 'Finished my first marathon on a cold, windy Philly morning. Not my last.' },
+        { big: 'watts', label: 'Cycling', text: "Built my own power meter because I wanted the numbers — and I'm still chasing them." },
+        { big: 'Philly', label: 'Home base', text: 'You can find me on the Schuylkill River Trail most weekends.' }
+      ],
+      featured: proj.slice(0, 3).map((p, i) => {
+        const on = s.hov === i || !!s.mobile;
+        return { ...p, ov: on ? '0%' : 'calc(100% + 16px)', scale: on ? 1.07 : 1, enter: () => this.setState({ hov: i }), leave: () => this.setState({ hov: null }) };
+      }),
+      latestPosts: posts.slice(0, 3),
+      topics: TOPICS.map(t => ({ label: t, ...this.chip(s.topic === t), pick: () => this.setState({ topic: t }) })),
+      fName: s.fName, fEmail: s.fEmail, fMsg: s.fMsg, formErr: s.err,
+      setName: e => this.setState({ fName: e.target.value, err: '' }),
+      setEmail: e => this.setState({ fEmail: e.target.value, err: '' }),
+      setMsg: e => this.setState({ fMsg: e.target.value, err: '' }),
+      send: this.send, sent: s.sent, notSent: !s.sent,
+      reset: () => this.setState({ sent: false, fMsg: '' }),
+      projectCount: pad(PROJECTS.length),
+      projFilters: PFILTERS.map(f => ({ label: f, ...this.chip(s.pf === f), pick: () => this.setState({ pf: f }) })),
+      projectList: proj.map((p, i) => ({ ...p, idx: i })).filter(p => s.pf === 'All' || p.kind === s.pf)
+        .map(p => ({ ...p, enter: () => this.setState({ hovRow: p.idx }), leave: () => this.setState({ hovRow: null }) })),
+      floatOpacity: hovRow ? 1 : 0, floatShot: hovRow ? hovRow.shot : '',
+      postCount: pad(POSTS.length),
+      blogFilters: BFILTERS.map(f => ({ label: f, ...this.chip(s.bf === f), pick: () => this.setState({ bf: f }) })),
+      postList: posts.filter(b => s.bf === 'All' || b.tag === s.bf),
+      post: { ...post, next: openPost(nextIdx), nextTitle: POSTS[nextIdx].title },
+      toast: s.toast, toastOpacity: s.toast ? 1 : 0, toastY: s.toast ? '0' : '20px'
+    };
+  }
+}
+</script>
+</body>
+</html>
