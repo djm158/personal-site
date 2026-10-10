@@ -20,11 +20,6 @@
   --color-skin: oklch(0.88 0.045 65);
   --color-skin2: oklch(0.8 0.06 55);
 
-  /* fonts */
-  --font-sans: "Geist", system-ui, sans-serif;
-  --font-serif: "Instrument Serif", serif;
-  --font-mono: "Geist Mono", monospace;
-
   /* layout */
   --breakpoint-nav: 760px;
   --spacing-gutter: clamp(20px, 4vw, 48px);
@@ -49,4 +44,10 @@
     --color-moss: oklch(0.68 0.08 130);
     --color-onink: oklch(0.2 0.015 55);
   }
+}
+
+@theme inline {
+  --font-sans: var(--font-geist);
+  --font-serif: var(--font-instrument-serif);
+  --font-mono: var(--font-geist-mono);
 }

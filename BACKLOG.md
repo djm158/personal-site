@@ -16,7 +16,7 @@ Ordered top to bottom. Each section leaves the site deployable. Design reference
 
 - [x] `Header.astro` with nav links, used from `Layout.astro`
 - [ ] Layout basics: `<!doctype html>`, import `global.css`, `title` and `description` props
-- [ ] Fonts: Instrument Serif, Geist, Geist Mono
+- [x] Fonts: Instrument Serif, Geist, Geist Mono
 - [x] Theme tokens in `@theme`: colours, font families, 760px breakpoint, 1240px page width, gutter `clamp(20px, 4vw, 48px)`
 - [x] Night theme: same tokens overridden under `[data-theme="night"]`
 - [ ] Base styles: body background and text, link underline style, `::selection`, grain overlay
