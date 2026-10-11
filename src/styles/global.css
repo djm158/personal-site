@@ -44,6 +44,21 @@
     --color-moss: oklch(0.68 0.08 130);
     --color-onink: oklch(0.2 0.015 55);
   }
+
+  a {
+    text-decoration-line: underline;
+    color: var(--color-ink);
+    text-decoration-color: var(--color-accent);
+    text-underline-offset: 3px;
+  }
+  a:hover {
+    color: var(--color-accent);
+  }
+
+  ::selection {
+    background: var(--color-accent);
+    color: var(--color-onink);
+  }
 }
 
 @theme inline {
