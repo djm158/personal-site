@@ -2,9 +2,26 @@
 
 ---
 
-<footer>
-  <p>© 2026 Daniel McGrath · Made in Philadelphia</p>
-  <a href="https://github.com/djm158">Github</a>
-  <!-- TODO: add resume link -->
-  <a href="/">Resume</a>
+<footer class="border-line border-t">
+  <div
+    class="mx-auto max-w-page px-gutter flex flex-wrap gap-4 py-7 justify-between items-center text-xs font-medium font-mono text-muted"
+  >
+    <p>
+      © {new Date().getFullYear()} Daniel McGrath · Made in Philadelphia
+    </p>
+    <div class="flex gap-5">
+      <a
+        href="https://github.com/djm158"
+        target="_blank"
+        rel="noopener"
+        class="underline underline-offset-[3px] decoration-accent"
+      >
+        GitHub
+      </a>
+      <a
+        href="/resume"
+        class="underline underline-offset-[3px] decoration-accent">Résumé</a
+      >
+    </div>
+  </div>
 </footer>
