@@ -9,8 +9,9 @@ const { links, pathname } = Astro.props;
 <button
   id="mobile-menu-open-btn"
   class="nav:hidden cursor-pointer text-sm rounded-full bg-surface min-h-11 py-3 px-4.5 font-medium transition-[background-color,translate,scale] duration-250 ease-[ease,var(--ease-spring),var(--ease-spring)] active:scale-94 hover:bg-line hover:-translate-y-px"
-  >Menu</button
 >
+  Menu
+</button>
 <dialog
   aria-label="Navigation menu"
   id="mobile-menu"
@@ -18,39 +19,41 @@ const { links, pathname } = Astro.props;
 >
   <div class="flex flex-col min-h-full px-5 pt-3 pb-8">
     <div class="flex justify-between items-center min-h-11">
-      <span class="uppercase font-mono text-xs text-muted tracking-[0.08em]"
-        >Menu</span
-      >
+      <span class="uppercase font-mono text-xs text-muted tracking-[0.08em]">
+        Menu
+      </span>
       <button
         id="mobile-menu-close-btn"
         class="cursor-pointer text-sm active:scale-94 font-medium min-h-11 bg-surface py-3 px-4.5 rounded-full hover:bg-line hover:-rotate-3 transition-[background-color,rotate,scale] duration-250 ease-[ease,var(--ease-spring),var(--ease-spring)]"
       >
         <span>Close</span>
-        <span class="uppercase" aria-hidden="true">✕</span></button
-      >
+        <span class="uppercase" aria-hidden="true">
+          ✕
+        </span>
+      </button>
     </div>
     <div class="flex flex-col flex-1 gap-1 justify-center">
-      {
-        links.map((l, idx) => (
-          <a
-            href={l.href}
-            class="no-underline py-4.5 px-1  tracking-[-0.02em] hover:pl-3.5 transition-[padding,color] ease-soft duration-[0.35s,0.25s] border-line border-b flex justify-between items-baseline"
-            aria-current={pathname.startsWith(l.href) ? "page" : undefined}
-          >
-            <span class="font-serif leading-none text-[clamp(48px,14vw,72px)]">
-              {l.label}
-            </span>
-            <span class="font-mono text-xs font-medium text-accent">
-              {(idx + 1).toString().padStart(2, "0")}
-            </span>
-          </a>
-        ))
-      }
+      {links.map((l, idx) => (
+        <a
+          href={l.href}
+          class="no-underline py-4.5 px-1 tracking-[-0.02em] hover:pl-3.5 transition-[padding,color] ease-soft duration-[0.35s,0.25s] border-line border-b flex justify-between items-baseline"
+          aria-current={pathname.startsWith(l.href) ? "page" : undefined}
+        >
+          <span class="font-serif leading-none text-[clamp(48px,14vw,72px)]">
+            {l.label}
+          </span>
+          <span class="font-mono text-xs font-medium text-accent">
+            {(idx + 1).toString().padStart(2, "0")}
+          </span>
+        </a>
+      ))}
     </div>
     <a
       class="no-underline text-base font-medium min-h-13 bg-ink text-onink hover:text-onink items-center flex justify-center rounded-full p-4 transition-shadow hover:shadow-[0_12px_24px_-12px_var(--color-ink)] duration-250 active:scale-97"
-      href="/resume">Résumé <span aria-hidden="true">↗</span></a
+      href="/resume"
     >
+      Résumé <span aria-hidden="true">↗</span>
+    </a>
   </div>
 </dialog>
 
