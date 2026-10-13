@@ -1,15 +1,15 @@
 import * as z from "zod";
 
-export const Link = z.strictObject({
+export const linkSchema = z.strictObject({
   label: z.string(),
   url: z.url(),
 });
 
-export const YearMonth = z.string().regex(/^\d{4}-(0[1-9]|1[0-2])$/, {
+export const yearMonthSchema = z.string().regex(/^\d{4}-(0[1-9]|1[0-2])$/, {
   message: "Invalid format. Must be YYYY-MM (e.g., 2026-10)",
 });
 
-export const Role = z.strictObject({
+export const roleSchema = z.strictObject({
   id: z.string().regex(/^[a-z0-9]+(-[a-z0-9]+)*$/, {
     message:
       "Invalid id. Use lowercase letters, digits and hyphens (e.g., vistar-media)",
@@ -17,34 +17,39 @@ export const Role = z.strictObject({
   company: z.string(),
   title: z.string(),
   location: z.string(),
-  start: YearMonth,
-  end: YearMonth.optional(),
+  start: yearMonthSchema,
+  end: yearMonthSchema.optional(),
   bullets: z.array(z.string()).min(1),
   tags: z.array(z.string()).optional(),
   short: z.string().optional(),
 });
 
-export const Skill = z.strictObject({
+export const skillSchema = z.strictObject({
   name: z.string(),
   items: z.array(z.string()).min(1),
 });
 
-export const Education = z.strictObject({
+export const educationSchema = z.strictObject({
   school: z.string(),
   degree: z.string(),
-  graduated: YearMonth,
+  graduated: yearMonthSchema,
   gpa: z.string().optional(),
   honors: z.string().optional(),
 });
 
-export const Resume = z.strictObject({
+export const resumeSchema = z.strictObject({
   name: z.string(),
   email: z.email(),
-  links: z.array(Link),
+  links: z.array(linkSchema),
   summary: z.string(),
-  roles: z.array(Role).min(1),
-  skills: z.array(Skill).min(1),
-  education: z.array(Education).min(1),
+  roles: z.array(roleSchema).min(1),
+  skills: z.array(skillSchema).min(1),
+  education: z.array(educationSchema).min(1),
 });
 
-export type Resume = z.infer<typeof Resume>;
+export type Link = z.infer<typeof linkSchema>;
+export type YearMonth = z.infer<typeof yearMonthSchema>;
+export type Role = z.infer<typeof roleSchema>;
+export type Skill = z.infer<typeof skillSchema>;
+export type Education = z.infer<typeof educationSchema>;
+export type Resume = z.infer<typeof resumeSchema>;
