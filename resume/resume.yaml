@@ -1,0 +1,177 @@
+name: Daniel McGrath
+
+email: daniel.mcgrath9@gmail.com
+
+links:
+  - label: danielmcgrath.xyz
+    url: https://danielmcgrath.xyz
+  - label: github.com/djm158
+    url: https://github.com/djm158
+  - label: linkedin.com/in/djmcg
+    url: https://www.linkedin.com/in/djmcg/
+
+summary: >-
+  Senior/staff-level software engineer with 8+ years of hands-on product engineering,
+  specializing in React/TypeScript with full-stack ownership across backend, data,
+  performance, accessibility, and production systems.
+
+roles:
+  - id: wizard
+    company: Wizard AI
+    title: Staff Software Engineer
+    location: Remote
+    start: "2026-01"
+    end: "2026-09"
+    bullets:
+      - >-
+        Shipped a social voting feature end to end: MySQL schema, Type-GraphQL API with
+        scoped authorization, and a React client supporting shareable polls and guest
+        voting.
+      - >-
+        Brought First Contentful Paint down to approximately 2.6s on a client-rendered
+        React SPA by removing component-library barrel imports, replacing CSS-only
+        loading states with paint-eligible SVG, and enabling static asset compression.
+      - >-
+        Delivered the customer application's mobile-to-desktop redesign, introducing a
+        breakpoint system, MobX-backed navigation, and a reusable drawer pattern that
+        replaced legacy modals.
+      - >-
+        Audited accessibility across a 25+ package monorepo, added JSX accessibility
+        linting and axe checks, and fixed WCAG issues across checkout, chat, product
+        detail, gallery, and reviews.
+
+  - id: commsor
+    company: Commsor
+    title: Senior Full-stack Engineer
+    location: Remote
+    start: "2025-04"
+    end: "2025-12"
+    bullets:
+      - >-
+        Joined as the first full-time engineer and owned hands-on product delivery
+        across frontend, backend, and data systems for a warm-introduction platform.
+      - >-
+        Rebuilt contact discovery and network crawling with Inngest, Elasticsearch, and
+        Supabase, adding chunked processing and concurrency controls and cutting large
+        crawls from hours to minutes.
+      - >-
+        Implemented end-to-end introduction workflows in Next.js and TypeScript,
+        including connection selection, rich-text email templates, status tracking, and
+        delivery through connected Google accounts.
+      - >-
+        Migrated authentication from NextAuth to Better Auth and added workspace
+        role-based permissions, validated Server Actions, and PostgreSQL row-level
+        security for tenant isolation.
+      - >-
+        Developed the HubSpot integration for CRM list synchronization, account-owner
+        mapping, and authenticated APIs that surfaced relevant introduction paths inside
+        HubSpot.
+
+  - id: nearform
+    company: Nearform
+    title: Senior Software Engineer
+    location: Remote
+    start: "2022-06"
+    end: "2025-04"
+    bullets:
+      - >-
+        Developed the frontend integration for a Module Federation migration at a
+        Fortune 500 e-commerce client, decoupling independently owned storefront apps
+        from shared navigation and package releases.
+      - >-
+        Owned frontend development for an internal application-health monitoring tool at
+        a major telecommunications client, building a data-heavy React/TypeScript
+        interface with React Query.
+      - >-
+        Contributed to Victory and victory-native-xl, and helped migrate Nearform's
+        public website using Next.js and Sanity CMS.
+
+  - id: wizehive
+    company: WizeHive
+    title: Software Engineer
+    location: Conshohocken, PA
+    start: "2020-09"
+    end: "2022-06"
+    bullets:
+      - >-
+        Developed core features for a GraphQL/Apollo rewrite of a legacy
+        grant-management platform, replacing parts of the existing configurable workflow
+        system.
+      - >-
+        Created a visual workflow editor with React Flow that let administrators drag,
+        drop, and configure stages in grant-management workflows.
+
+  - id: vistar-media
+    company: Vistar Media
+    title: Software Engineer
+    location: Philadelphia, PA
+    start: "2018-09"
+    end: "2020-09"
+    bullets:
+      - >-
+        Developed React/TypeScript features for the buy side of a digital-out-of-home
+        advertising platform, working in a large Bazel-based codebase with an internal
+        design system.
+      - >-
+        Worked across Python/Flask APIs and Redshift data migrations, and participated in
+        AWS on-call rotations with Datadog monitoring.
+
+  - id: computer-enterprises
+    company: Computer Enterprises Inc.
+    title: Associate Developer
+    location: Plymouth Meeting, PA
+    start: "2018-01"
+    end: "2018-09"
+    bullets:
+      - >-
+        Worked with a national self-storage client's data science team to productionize
+        parallel R workloads on Azure Batch, including repeatable deployment and
+        production monitoring.
+      - >-
+        Prototyped an insurance-policy application with Web Components in a C#/.NET
+        consultancy environment.
+
+skills:
+  - name: Languages
+    items: [TypeScript, JavaScript, Python, HTML, CSS/Sass]
+  - name: Frontend
+    items:
+      - React
+      - Next.js
+      - React Query
+      - MobX
+      - Tailwind CSS
+      - shadcn/ui
+      - React Flow
+      - React Testing Library
+  - name: Backend & Data
+    items:
+      - Node.js
+      - GraphQL
+      - Apollo
+      - Type-GraphQL
+      - Flask
+      - PostgreSQL
+      - MySQL
+      - MongoDB
+      - Supabase
+      - Elasticsearch
+  - name: Cloud & DevOps
+    items:
+      - AWS
+      - GCP
+      - Azure
+      - Vercel
+      - Inngest
+      - GitHub Actions
+      - Docker
+      - Datadog
+      - Git
+      - Linux
+
+education:
+  - school: University of Pittsburgh
+    degree: B.S. Computer Engineering
+    graduated: "2017-12"
+    gpa: "3.8"
+    honors: Summa Cum Laude

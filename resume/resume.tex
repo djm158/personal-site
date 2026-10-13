@@ -1,0 +1,110 @@
+\documentclass[10pt,letterpaper]{article}
+
+\usepackage[letterpaper,left=0.42in,right=0.42in,top=0.32in,bottom=0.32in]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage{microtype}
+\usepackage{enumitem}
+\usepackage{titlesec}
+\usepackage[hidelinks]{hyperref}
+\usepackage{tabularx}
+\usepackage{array}
+\usepackage{iftex}
+\usepackage{needspace}
+
+\ifPDFTeX
+  \input{glyphtounicode}
+  \pdfgentounicode=1
+\fi
+
+\pagestyle{empty}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{0pt}
+\setlist[itemize]{leftmargin=1.05em,itemsep=0.1pt,topsep=0.45pt,parsep=0pt,partopsep=0pt}
+\titleformat{\section}{\normalsize\bfseries\uppercase}{}{0em}{}[\vspace{-0.5em}\rule{\textwidth}{0.4pt}]
+\titlespacing*{\section}{0pt}{2.8pt}{1.3pt}
+\urlstyle{same}
+
+\newcommand{\role}[4]{%
+  \Needspace{2.5\baselineskip}%
+  \textbf{#1} \hfill #2\\[-2pt]
+  \textit{#3} \hfill \textit{#4}\\[-4.4pt]
+}
+
+\begin{document}
+\fontsize{9.6pt}{10.35pt}\selectfont
+
+\begin{center}
+  {\Large\bfseries DANIEL MCGRATH}\\[2pt]
+  \small
+  \href{mailto:daniel.mcgrath9@gmail.com}{daniel.mcgrath9@gmail.com}
+  \; $\diamond$ \;
+  \href{https://danielmcgrath.xyz}{danielmcgrath.xyz}
+  \; $\diamond$ \;
+  \href{https://github.com/djm158}{github.com/djm158}
+  \; $\diamond$ \;
+  \href{https://www.linkedin.com/in/djmcg/}{linkedin.com/in/djmcg}
+\end{center}
+\vspace{-6pt}
+
+\section{Summary}
+Senior/staff-level software engineer with 8+ years of hands-on product engineering, specializing in React/TypeScript with full-stack ownership across backend, data, performance, accessibility, and production systems.
+
+\section{Experience}
+
+\role{Wizard AI}{January 2026 -- September 2026}{Staff Software Engineer}{Remote}
+\begin{itemize}
+  \item Shipped a social voting feature end to end: MySQL schema, Type-GraphQL API with scoped authorization, and a React client supporting shareable polls and guest voting.
+  \item Brought First Contentful Paint down to approximately 2.6s on a client-rendered React SPA by removing component-library barrel imports, replacing CSS-only loading states with paint-eligible SVG, and enabling static asset compression.
+  \item Delivered the customer application's mobile-to-desktop redesign, introducing a breakpoint system, MobX-backed navigation, and a reusable drawer pattern that replaced legacy modals.
+  \item Audited accessibility across a 25+ package monorepo, added JSX accessibility linting and axe checks, and fixed WCAG issues across checkout, chat, product detail, gallery, and reviews.
+\end{itemize}
+
+\role{Commsor}{April 2025 -- December 2025}{Senior Full-stack Engineer}{Remote}
+\begin{itemize}
+  \item Joined as the first full-time engineer and owned hands-on product delivery across frontend, backend, and data systems for a warm-introduction platform.
+  \item Rebuilt contact discovery and network crawling with Inngest, Elasticsearch, and Supabase, adding chunked processing and concurrency controls and cutting large crawls from hours to minutes.
+  \item Implemented end-to-end introduction workflows in Next.js and TypeScript, including connection selection, rich-text email templates, status tracking, and delivery through connected Google accounts.
+  \item Migrated authentication from NextAuth to Better Auth and added workspace role-based permissions, validated Server Actions, and PostgreSQL row-level security for tenant isolation.
+  \item Developed the HubSpot integration for CRM list synchronization, account-owner mapping, and authenticated APIs that surfaced relevant introduction paths inside HubSpot.
+\end{itemize}
+
+\role{Nearform}{June 2022 -- April 2025}{Senior Software Engineer}{Remote}
+\begin{itemize}
+  \item Developed the frontend integration for a Module Federation migration at a Fortune 500 e-commerce client, decoupling independently owned storefront apps from shared navigation and package releases.
+  \item Owned frontend development for an internal application-health monitoring tool at a major telecommunications client, building a data-heavy React/TypeScript interface with React Query.
+  \item Contributed to Victory and victory-native-xl, and helped migrate Nearform's public website using Next.js and Sanity CMS.
+\end{itemize}
+
+\role{WizeHive}{September 2020 -- June 2022}{Software Engineer}{Conshohocken, PA}
+\begin{itemize}
+  \item Developed core features for a GraphQL/Apollo rewrite of a legacy grant-management platform, replacing parts of the existing configurable workflow system.
+  \item Created a visual workflow editor with React Flow that let administrators drag, drop, and configure stages in grant-management workflows.
+\end{itemize}
+
+\role{Vistar Media}{September 2018 -- September 2020}{Software Engineer}{Philadelphia, PA}
+\begin{itemize}
+  \item Developed React/TypeScript features for the buy side of a digital-out-of-home advertising platform, working in a large Bazel-based codebase with an internal design system.
+  \item Worked across Python/Flask APIs and Redshift data migrations, and participated in AWS on-call rotations with Datadog monitoring.
+\end{itemize}
+
+\role{Computer Enterprises Inc.}{January 2018 -- September 2018}{Associate Developer}{Plymouth Meeting, PA}
+\begin{itemize}
+  \item Worked with a national self-storage client's data science team to productionize parallel R workloads on Azure Batch, including repeatable deployment and production monitoring.
+  \item Prototyped an insurance-policy application with Web Components in a C\#/.NET consultancy environment.
+\end{itemize}
+
+\section{Technical Skills}
+\small
+\textbf{Languages:} TypeScript, JavaScript, Python, HTML, CSS/Sass \\
+\textbf{Frontend:} React, Next.js, React Query, MobX, Tailwind CSS, shadcn/ui, React Flow, React Testing Library \\
+\textbf{Backend \& Data:} Node.js, GraphQL, Apollo, Type-GraphQL, Flask, PostgreSQL, MySQL, MongoDB, Supabase, Elasticsearch \\
+\textbf{Cloud \& DevOps:} AWS, GCP, Azure, Vercel, Inngest, GitHub Actions, Docker, Datadog, Git, Linux
+\normalsize
+
+\section{Education}
+\small
+\textbf{University of Pittsburgh} -- B.S. Computer Engineering, \textit{Summa Cum Laude}, GPA: 3.8 \hfill December 2017
+\normalsize
+
+\end{document}

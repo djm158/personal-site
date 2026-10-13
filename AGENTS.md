@@ -45,8 +45,8 @@ with `astro dev stop`, `astro dev status` and `astro dev logs`.
 Planned; check `BACKLOG.md` for what exists.
 
 - Blog posts and projects are markdown content collections with Zod schemas.
-- Résumé data is parsed from the LaTeX source under `resume/` at build time. The same file
-  is compiled to `resume.pdf`.
+- Résumé data lives in `resume/resume.yaml`, the single source of truth. The site reads it
+  directly, and the LaTeX for `resume.pdf` is generated from it. Nothing parses LaTeX.
 
 ## Design reference
 

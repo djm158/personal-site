@@ -3,6 +3,15 @@
 Ordered top to bottom. Each section leaves the site deployable. Design reference: the
 `Portfolio.dc.html` project in claude.ai/design.
 
+## v1 scope
+
+v1 is the home page and the résumé. The blog and projects pages stay hidden until there is
+content for them, so the working order is: finish section 1, then 4 (Résumé), then 5 (Home),
+then 6 (Polish and launch). Sections 2 and 3 come after launch.
+
+- [ ] Hide Work and Writing from the header and mobile menu; remove the `/projects` stub page
+- [ ] Home page for v1: leave out the featured projects and latest posts sections, and point the hero's "see my work" button somewhere that exists
+
 ## 0. Repo and deploy
 
 - [x] Scaffold Astro with React and Tailwind
@@ -45,22 +54,22 @@ Ordered top to bottom. Each section leaves the site deployable. Design reference
 
 ## 4. Résumé
 
-- [ ] **Blocked on you:** add the latest `.tex` and `resume.cls` under `resume/`
+Data-first: `resume/resume.yaml` is the source of truth. The site reads it directly and the
+LaTeX (then the PDF) is generated from it. Nothing parses LaTeX in the build.
+
+- [x] Add the latest résumé source as `resume/resume.tex`
+- [x] Design the data shape: name, links, summary, roles (company, title, location, start, end, bullets, plus site-only `tags` and `short`), skill groups, education
+- [x] Zod schema for that shape; export the inferred TypeScript type
+- [x] Move the content of `resume.tex` into `resume/resume.yaml`
+- [x] Loader `src/lib/resume/load.ts`: read the YAML, validate with the schema, return typed data; invalid data fails the build
 - [ ] Set up Vitest
-- [ ] Parser, test-first, `src/lib/parse-resume.ts`:
-  - [ ] split the file into `rSection` blocks
-  - [ ] roles from `rSubsection`: company, dates, title, location, bullets
-  - [ ] dates into year and month, including `Present` and short month names
-  - [ ] skills table into groups
-  - [ ] education and summary
-  - [ ] LaTeX cleanup: `\&`, `%` comments, `\textit{}`, trailing `\\` and commas
-  - [ ] optional `% site-tags:` and `% site-short:` comments per role
-  - [ ] derive each role's tags by matching skill names against its bullets
-- [ ] Zod schema for the parsed result; a bad parse fails the build
+- [ ] Helpers, test-first: format a date range, months in a role, total duration
 - [ ] `/resume`: summary and links, role list with dates, duration and tags, education card, Download PDF button
 - [ ] Timeline bar with segment widths proportional to months in each role
 - [ ] React island: pick a skill to highlight the roles that used it and dim the rest
-- [ ] Build `/resume.pdf` with tectonic in the Netlify build; fall back to a GitHub Action if tectonic won't run there
+- [ ] LaTeX generator, test-first: an escape function (`&`, `#`, `%`, `$`, `_`, `{`, `}`, `~`, `^`, `\`), then a template that renders the full `.tex` from the data
+- [ ] Golden test: the generated `.tex` matches the current hand-written `resume.tex`; then delete the hand-written file and stop committing generated output
+- [ ] Build `/resume.pdf` from the generated `.tex` with tectonic in the Netlify build; fall back to a GitHub Action if tectonic won't run there
 
 ## 5. Home
 
