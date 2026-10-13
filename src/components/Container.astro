@@ -1,0 +1,24 @@
+---
+import type { HTMLTag, Polymorphic } from "astro/types";
+
+type Props<Tag extends HTMLTag> = Polymorphic<{ as: Tag }> & {
+  width?: keyof typeof widths;
+};
+
+const widths = {
+  page: "max-w-page",
+  blog: "max-w-blog",
+  post: "max-w-post",
+};
+
+const {
+  as: Tag = "div",
+  width = "page",
+  class: className,
+  ...rest
+} = Astro.props;
+---
+
+<Tag class:list={["px-gutter mx-auto", widths[width], className]} {...rest}>
+  <slot />
+</Tag>

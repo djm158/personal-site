@@ -24,7 +24,8 @@ Ordered top to bottom. Each section leaves the site deployable. Design reference
 - [x] Header, mobile (under 760px): Menu button, full-screen `<dialog>` with numbered links and Résumé button, scroll lock, close when a same-page anchor is clicked
 - [x] Mobile menu motion: overlay fades in and out (350ms), links rise 16px and fade in staggered by 50ms, Résumé button follows; hover and pressed states on the Menu, Close, link and Résumé controls
 - [x] Footer
-- [ ] Extract shared pieces as they repeat: `Container`, `Eyebrow`, `Button` (filled, outlined, text link), `Chip`
+- [x] Extract shared pieces: `Container`, `Eyebrow`, `Button` (filled, outlined, soft)
+- [ ] Shared pieces still to come, when first used: text link (underlined, on the home page), `Chip` (filters and skill picker), the larger hero `Button` size
 
 ## 2. Blog
 

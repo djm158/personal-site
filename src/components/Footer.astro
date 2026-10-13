@@ -1,8 +1,9 @@
 ---
+import Container from "./Container.astro";
 ---
 
 <footer class="border-line border-t">
-  <div class="mx-auto max-w-page px-gutter flex flex-wrap gap-4 py-7 justify-between items-center text-xs font-medium font-mono text-muted">
+  <Container class="text-muted flex flex-wrap items-center justify-between gap-4 py-7 font-mono text-xs font-medium">
     <p>© {new Date().getFullYear()} Daniel McGrath · Made in Philadelphia</p>
     <div class="flex gap-5">
       <a
@@ -17,5 +18,5 @@
         Résumé
       </a>
     </div>
-  </div>
+  </Container>
 </footer>

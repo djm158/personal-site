@@ -1,16 +1,20 @@
 ---
+import Button from "./Button.astro";
+import Eyebrow from "./Eyebrow.astro";
+
 interface Props {
   links: { label: string; href: string; current: boolean }[];
 }
 const { links } = Astro.props;
 ---
 
-<button
+<Button
   id="mobile-menu-open-btn"
-  class="nav:hidden cursor-pointer text-sm rounded-full bg-surface min-h-11 py-3 px-4.5 font-medium transition-[background-color,translate,scale] duration-250 ease-[ease,var(--ease-spring),var(--ease-spring)] active:scale-94 hover:bg-line hover:-translate-y-px"
+  variant="soft"
+  class="nav:hidden hover:-translate-y-px"
 >
   Menu
-</button>
+</Button>
 <dialog
   aria-label="Navigation menu"
   id="mobile-menu"
@@ -18,16 +22,11 @@ const { links } = Astro.props;
 >
   <div class="flex flex-col min-h-full px-5 pt-3 pb-8">
     <div class="flex justify-between items-center min-h-11">
-      <span class="uppercase font-mono text-xs text-muted tracking-[0.08em]">
-        Menu
-      </span>
-      <button
-        id="mobile-menu-close-btn"
-        class="cursor-pointer text-sm active:scale-94 font-medium min-h-11 bg-surface py-3 px-4.5 rounded-full hover:bg-line hover:-rotate-3 transition-[background-color,rotate,scale] duration-250 ease-[ease,var(--ease-spring),var(--ease-spring)]"
-      >
+      <Eyebrow>Menu</Eyebrow>
+      <Button id="mobile-menu-close-btn" variant="soft" class="hover:-rotate-3">
         Close
         <span aria-hidden="true">✕</span>
-      </button>
+      </Button>
     </div>
     <div class="flex flex-col flex-1 gap-1 justify-center">
       {links.map((l, idx) => (
@@ -46,12 +45,13 @@ const { links } = Astro.props;
         </a>
       ))}
     </div>
-    <a
-      class="menu-resume no-underline text-base font-medium min-h-13 bg-ink text-onink hover:text-onink items-center flex justify-center rounded-full p-4 hover:shadow-[0_12px_24px_-12px_var(--color-ink)] active:scale-97"
+    <Button
       href="/resume"
+      size="lg"
+      class="menu-resume hover:shadow-[0_12px_24px_-12px_var(--color-ink)] active:scale-97"
     >
       Résumé <span aria-hidden="true">↗</span>
-    </a>
+    </Button>
   </div>
 </dialog>
 

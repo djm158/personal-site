@@ -1,4 +1,6 @@
 ---
+import Button from "./Button.astro";
+import Container from "./Container.astro";
 import MobileMenu from "./MobileMenu.astro";
 
 const { pathname } = Astro.url;
@@ -14,7 +16,7 @@ const links = [
 ---
 
 <header class="bg-bg/84 backdrop-blur-[14px] border-b border-line sticky top-0 z-40">
-  <nav class="max-w-page px-gutter flex justify-between items-center mx-auto py-3">
+  <Container as="nav" class="flex items-center justify-between py-3">
     <a href="/" class="font-medium text-[15px] hover:text-ink no-underline">
       Daniel McGrath
     </a>
@@ -28,13 +30,14 @@ const links = [
           {l.label}
         </a>
       ))}
-      <a
-        class="no-underline rounded-full hover:text-onink hover:-translate-y-0.5 transition-transform px-4 py-2.25 font-medium text-onink bg-ink ml-2 text-sm duration-200"
+      <Button
         href="/resume"
+        size="sm"
+        class="ml-2 transition-transform duration-200 hover:-translate-y-0.5"
       >
         Résumé
-      </a>
+      </Button>
     </div>
     <MobileMenu links={links} />
-  </nav>
+  </Container>
 </header>
