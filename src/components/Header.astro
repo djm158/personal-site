@@ -7,7 +7,10 @@ const links = [
   { label: "Writing", href: "/blog" },
   { label: "About", href: "/#about" },
   { label: "Contact", href: "/#contact" },
-];
+].map((link) => ({
+  ...link,
+  current: pathname.startsWith(link.href),
+}));
 ---
 
 <header class="bg-bg/84 backdrop-blur-[14px] border-b border-line sticky top-0 z-40">
@@ -20,7 +23,7 @@ const links = [
         <a
           href={l.href}
           class="no-underline rounded-full hover:bg-surface hover:text-ink aria-[current=page]:bg-surface px-3.5 py-2 font-[450] text-sm transition-colors duration-200"
-          aria-current={pathname.startsWith(l.href) ? "page" : undefined}
+          aria-current={l.current ? "page" : undefined}
         >
           {l.label}
         </a>
@@ -32,6 +35,6 @@ const links = [
         Résumé
       </a>
     </div>
-    <MobileMenu links={links} pathname={pathname} />
+    <MobileMenu links={links} />
   </nav>
 </header>

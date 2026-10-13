@@ -1,9 +1,8 @@
 ---
 interface Props {
-  links: { label: string; href: string }[];
-  pathname: string;
+  links: { label: string; href: string; current: boolean }[];
 }
-const { links, pathname } = Astro.props;
+const { links } = Astro.props;
 ---
 
 <button
@@ -26,18 +25,17 @@ const { links, pathname } = Astro.props;
         id="mobile-menu-close-btn"
         class="cursor-pointer text-sm active:scale-94 font-medium min-h-11 bg-surface py-3 px-4.5 rounded-full hover:bg-line hover:-rotate-3 transition-[background-color,rotate,scale] duration-250 ease-[ease,var(--ease-spring),var(--ease-spring)]"
       >
-        <span>Close</span>
-        <span class="uppercase" aria-hidden="true">
-          ✕
-        </span>
+        Close
+        <span aria-hidden="true">✕</span>
       </button>
     </div>
     <div class="flex flex-col flex-1 gap-1 justify-center">
       {links.map((l, idx) => (
         <a
           href={l.href}
-          class="no-underline py-4.5 px-1 tracking-[-0.02em] hover:pl-3.5 transition-[padding,color] ease-soft duration-[0.35s,0.25s] border-line border-b flex justify-between items-baseline"
-          aria-current={pathname.startsWith(l.href) ? "page" : undefined}
+          style={{ "--i": idx }}
+          class="menu-link no-underline py-4.5 px-1 tracking-[-0.02em] hover:pl-3.5 border-line border-b flex justify-between items-baseline"
+          aria-current={l.current ? "page" : undefined}
         >
           <span class="font-serif leading-none text-[clamp(48px,14vw,72px)]">
             {l.label}
@@ -49,7 +47,7 @@ const { links, pathname } = Astro.props;
       ))}
     </div>
     <a
-      class="no-underline text-base font-medium min-h-13 bg-ink text-onink hover:text-onink items-center flex justify-center rounded-full p-4 transition-shadow hover:shadow-[0_12px_24px_-12px_var(--color-ink)] duration-250 active:scale-97"
+      class="menu-resume no-underline text-base font-medium min-h-13 bg-ink text-onink hover:text-onink items-center flex justify-center rounded-full p-4 hover:shadow-[0_12px_24px_-12px_var(--color-ink)] active:scale-97"
       href="/resume"
     >
       Résumé <span aria-hidden="true">↗</span>
@@ -61,15 +59,91 @@ const { links, pathname } = Astro.props;
   const dialog = document.querySelector<HTMLDialogElement>("#mobile-menu");
   const openBtn = document.querySelector("#mobile-menu-open-btn");
   const closeBtn = document.querySelector("#mobile-menu-close-btn");
-  openBtn?.addEventListener("click", () => {
-    dialog?.showModal();
-  });
-  closeBtn?.addEventListener("click", () => {
-    dialog?.close();
-  });
-  dialog?.addEventListener("click", (e) => {
-    if (e.target instanceof Element && e.target.closest("a")) {
-      dialog?.close();
-    }
-  });
+  if (dialog && openBtn && closeBtn) {
+    const closeMenu = async () => {
+      dialog.setAttribute("data-closing", "true");
+      await Promise.allSettled(
+        dialog.getAnimations().map(({ finished }) => finished),
+      );
+      dialog.removeAttribute("data-closing");
+      dialog.close();
+    };
+    openBtn.addEventListener("click", () => {
+      dialog.showModal();
+    });
+    closeBtn.addEventListener("click", () => {
+      closeMenu();
+    });
+    dialog.addEventListener("click", (e) => {
+      if (e.target instanceof Element && e.target.closest("a")) {
+        closeMenu();
+      }
+    });
+    dialog.addEventListener("cancel", (e) => {
+      e.preventDefault();
+      closeMenu();
+    });
+  }
 </script>
+<style>
+  dialog::backdrop {
+    background: transparent;
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    dialog {
+      opacity: 0;
+      transition: opacity 0.35s var(--ease-soft);
+    }
+
+    dialog .menu-link {
+      opacity: 0;
+      translate: 0 16px;
+      transition:
+        translate var(--ease-soft) 550ms,
+        opacity var(--ease-soft) 450ms,
+        padding var(--ease-soft) 350ms,
+        color 250ms;
+    }
+
+    dialog .menu-resume {
+      opacity: 0;
+      translate: 0 12px;
+      transition:
+        box-shadow 250ms,
+        scale 250ms,
+        opacity 450ms,
+        translate 550ms var(--ease-soft);
+    }
+
+    dialog[open]:not([data-closing]) {
+      opacity: 1;
+    }
+
+    dialog[open]:not([data-closing]) .menu-link {
+      opacity: 1;
+      translate: 0 0;
+      transition-delay:
+        calc(60ms + var(--i) * 50ms), calc(60ms + var(--i) * 50ms), 0s, 0s;
+    }
+
+    dialog[open]:not([data-closing]) .menu-resume {
+      opacity: 1;
+      translate: 0 0;
+      transition-delay: 0s, 0s, 250ms, 250ms;
+    }
+
+    @starting-style {
+      dialog[open]:not([data-closing]) {
+        opacity: 0;
+      }
+      dialog[open]:not([data-closing]) .menu-link {
+        opacity: 0;
+        translate: 0 16px;
+      }
+      dialog[open]:not([data-closing]) .menu-resume {
+        opacity: 0;
+        translate: 0 12px;
+      }
+    }
+  }
+</style>
