@@ -23,16 +23,22 @@ const nonPortfolioLinks = resume.links.filter(
 ---
 
 <Layout title="Résumé">
-  <Container>
-    <Eyebrow size="md">
+  <Container as="section" class="py-[clamp(56px,8vw,104px)]">
+    <Eyebrow as="p" size="md" class="mb-4">
       Résumé · {firstYear} — {lastYear}
     </Eyebrow>
-    <h1>The long version</h1>
-    <p>{resume.summary}</p>
-    <div>
+    <h1 class="font-serif text-[clamp(60px,8.5vw,120px)]/[0.92] mb-6 tracking-[-0.03em]">
+      The <em class="text-accent">long</em> version
+    </h1>
+    <p class="font-light text-[clamp(19px,1.9vw,24px)]/[1.45] text-pretty max-w-[52ch] mb-8">
+      {resume.summary}
+    </p>
+    <div class="flex gap-x-6 gap-y-2.5 flex-wrap items-center font-mono font-medium text-[13px]">
       <a href={`mailto:${resume.email}`}>{resume.email}</a>
       {nonPortfolioLinks.map(({ url, label }) => (
-        <a href={url}>{label}</a>
+        <a href={url}>
+          {label} <span aria-hidden="true">↗</span>
+        </a>
       ))}
     </div>
   </Container>

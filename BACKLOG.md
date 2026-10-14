@@ -35,6 +35,7 @@ then 6 (Polish and launch). Sections 2 and 3 come after launch.
 - [x] Footer
 - [x] Extract shared pieces: `Container`, `Eyebrow`, `Button` (filled, outlined, soft)
 - [ ] Shared pieces still to come, when first used: text link (underlined, on the home page), `Chip` (filters and skill picker), the larger hero `Button` size
+- [ ] Type scale tokens in `@theme` (display, page title, lede, body, label) with their line-heights, once sizes start repeating; replace the inline `text-[clamp(...)]` classes
 
 ## 2. Blog
 
