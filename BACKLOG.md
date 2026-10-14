@@ -62,8 +62,8 @@ LaTeX (then the PDF) is generated from it. Nothing parses LaTeX in the build.
 - [x] Zod schema for that shape; export the inferred TypeScript type
 - [x] Move the content of `resume.tex` into `resume/resume.yaml`
 - [x] Loader `src/lib/resume/load.ts`: read the YAML, validate with the schema, return typed data; invalid data fails the build
-- [ ] Set up Vitest
-- [ ] Helpers, test-first: format a date range, months in a role, total duration
+- [x] Set up Vitest
+- [x] Helpers, test-first: format a date range, months in a role, format a duration (total duration is `inclusiveMonths` from the earliest start to the latest end, done on the page)
 - [ ] `/resume`: summary and links, role list with dates, duration and tags, education card, Download PDF button
 - [ ] Timeline bar with segment widths proportional to months in each role
 - [ ] React island: pick a skill to highlight the roles that used it and dim the rest

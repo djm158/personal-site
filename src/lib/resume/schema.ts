@@ -5,24 +5,33 @@ export const linkSchema = z.strictObject({
   url: z.url(),
 });
 
-export const yearMonthSchema = z.string().regex(/^\d{4}-(0[1-9]|1[0-2])$/, {
-  message: "Invalid format. Must be YYYY-MM (e.g., 2026-10)",
-});
+export type YearMonth = `${number}-${number}`;
 
-export const roleSchema = z.strictObject({
-  id: z.string().regex(/^[a-z0-9]+(-[a-z0-9]+)*$/, {
-    message:
-      "Invalid id. Use lowercase letters, digits and hyphens (e.g., vistar-media)",
-  }),
-  company: z.string(),
-  title: z.string(),
-  location: z.string(),
-  start: yearMonthSchema,
-  end: yearMonthSchema.optional(),
-  bullets: z.array(z.string()).min(1),
-  tags: z.array(z.string()).optional(),
-  short: z.string().optional(),
-});
+export const yearMonthSchema = z.custom<YearMonth>(
+  (value) => typeof value === "string" && /^\d{4}-(0[1-9]|1[0-2])$/.test(value),
+  { message: "Invalid format. Must be YYYY-MM (e.g., 2026-10)" },
+);
+
+export const roleSchema = z
+  .strictObject({
+    id: z.string().regex(/^[a-z0-9]+(-[a-z0-9]+)*$/, {
+      message:
+        "Invalid id. Use lowercase letters, digits and hyphens (e.g., vistar-media)",
+    }),
+    company: z.string(),
+    title: z.string(),
+    location: z.string(),
+    start: yearMonthSchema,
+    end: yearMonthSchema.optional(),
+    bullets: z.array(z.string()).min(1),
+    tags: z.array(z.string()).optional(),
+    short: z.string().optional(),
+  })
+  // YYYY-MM strings sort chronologically, so a string comparison is enough
+  .refine((role) => !role.end || role.end >= role.start, {
+    message: "end must not be before start",
+    path: ["end"],
+  });
 
 export const skillSchema = z.strictObject({
   name: z.string(),
@@ -48,7 +57,6 @@ export const resumeSchema = z.strictObject({
 });
 
 export type Link = z.infer<typeof linkSchema>;
-export type YearMonth = z.infer<typeof yearMonthSchema>;
 export type Role = z.infer<typeof roleSchema>;
 export type Skill = z.infer<typeof skillSchema>;
 export type Education = z.infer<typeof educationSchema>;
