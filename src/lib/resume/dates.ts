@@ -15,9 +15,12 @@ const MONTH_NAMES = [
   "December",
 ];
 
-const getYearAndMonth = (d: YearMonth) => d.split("-").map(Number);
+export const getYearAndMonth = (d: YearMonth): [number, number] => {
+  const [year, month] = d.split("-").map(Number);
+  return [year, month];
+};
 
-const formatYearMonth = (d: YearMonth) => {
+export const formatYearMonth = (d: YearMonth): string => {
   const [year, month] = getYearAndMonth(d);
   return `${MONTH_NAMES[month - 1].slice(0, 3)} ${year}`;
 };

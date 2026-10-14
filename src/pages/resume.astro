@@ -1,0 +1,39 @@
+---
+import Container from "../components/Container.astro";
+import Eyebrow from "../components/Eyebrow.astro";
+import Layout from "../layouts/Layout.astro";
+import { getYearAndMonth } from "../lib/resume/dates";
+import { loadResume } from "../lib/resume/load";
+const resume = loadResume();
+
+const startsSorted = resume.roles.map((r) => r.start).sort();
+const [firstYear] = getYearAndMonth(startsSorted[0]);
+const endsSorted = resume.roles
+  .map((r) => r.end)
+  .filter((end) => end !== undefined)
+  .sort();
+const isCurrent = resume.roles.some((r) => !r.end);
+const lastYear = isCurrent
+  ? "Present"
+  : getYearAndMonth(endsSorted[endsSorted.length - 1])[0];
+
+const nonPortfolioLinks = resume.links.filter(
+  (link) => new URL(link.url).hostname !== "danielmcgrath.xyz",
+);
+---
+
+<Layout title="Résumé">
+  <Container>
+    <Eyebrow size="md">
+      Résumé · {firstYear} — {lastYear}
+    </Eyebrow>
+    <h1>The long version</h1>
+    <p>{resume.summary}</p>
+    <div>
+      <a href={`mailto:${resume.email}`}>{resume.email}</a>
+      {nonPortfolioLinks.map(({ url, label }) => (
+        <a href={url}>{label}</a>
+      ))}
+    </div>
+  </Container>
+</Layout>
