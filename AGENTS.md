@@ -21,6 +21,8 @@ unblocking:
 pnpm dev       # dev server at http://localhost:4321
 pnpm build     # production build to ./dist
 pnpm preview   # serve the production build
+pnpm test      # run unit tests
+pnpm check     # run astro check
 ```
 
 When an agent starts the dev server, use background mode: `astro dev --background`. Manage it
