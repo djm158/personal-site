@@ -25,6 +25,12 @@ pnpm test      # run unit tests
 pnpm check     # run astro check
 ```
 
+Before calling a piece of work done, run `pnpm check`, `pnpm test --run` and `pnpm build`. The
+build does not type-check, so a page can build while `pnpm check` fails.
+
+TypeScript is pinned to 6 in `devDependencies` because `astro check` fails with TypeScript 7.
+Keep it on 6 when updating dependencies until `@astrojs/check` supports 7.
+
 When an agent starts the dev server, use background mode: `astro dev --background`. Manage it
 with `astro dev stop`, `astro dev status` and `astro dev logs`.
 
