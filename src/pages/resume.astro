@@ -2,7 +2,11 @@
 import Container from "../components/Container.astro";
 import Eyebrow from "../components/Eyebrow.astro";
 import Layout from "../layouts/Layout.astro";
-import { getYearAndMonth } from "../lib/resume/dates";
+import {
+  getYearAndMonth,
+  inclusiveMonths,
+  currentYearMonth,
+} from "../lib/resume/dates";
 import { loadResume } from "../lib/resume/load";
 const resume = loadResume();
 
@@ -13,9 +17,10 @@ const endsSorted = resume.roles
   .filter((end) => end !== undefined)
   .sort();
 const isCurrent = resume.roles.some((r) => !r.end);
-const lastYear = isCurrent
-  ? "Present"
-  : getYearAndMonth(endsSorted[endsSorted.length - 1])[0];
+const todayYearMonth = currentYearMonth(new Date());
+const latestEnd = isCurrent
+  ? todayYearMonth
+  : endsSorted[endsSorted.length - 1];
 
 const nonPortfolioLinks = resume.links.filter(
   (link) => new URL(link.url).hostname !== "danielmcgrath.xyz",
@@ -25,7 +30,8 @@ const nonPortfolioLinks = resume.links.filter(
 <Layout title="Résumé">
   <Container as="section" class="py-[clamp(56px,8vw,104px)]">
     <Eyebrow as="p" size="md" class="mb-4">
-      Résumé · {firstYear} — {lastYear}
+      Résumé · {firstYear} —{" "}
+      {isCurrent ? "Present" : getYearAndMonth(latestEnd)[0]}
     </Eyebrow>
     <h1 class="font-serif text-[clamp(60px,8.5vw,120px)]/[0.92] mb-6 tracking-[-0.03em]">
       The <em class="text-accent">long</em> version
@@ -40,6 +46,28 @@ const nonPortfolioLinks = resume.links.filter(
           {label} <span aria-hidden="true">↗</span>
         </a>
       ))}
+    </div>
+
+    <div class="mt-[clamp(48px,6vw,72px)]">
+      <Eyebrow as="div" size="sm" class="mb-3.5">
+        Timeline
+      </Eyebrow>
+      <div class="flex gap-1 font-mono text-[11px] font-medium">
+        {resume.roles.toReversed().map((role) => (
+          <div
+            style={{
+              flex: `${inclusiveMonths(role.start, role.end ?? todayYearMonth)} 1 0`,
+            }}
+            class="min-w-0"
+          >
+            <div class="h-3.5 bg-ink/18 rounded-full"></div>
+            <div class="truncate mt-2.5">{role.short ?? role.company}</div>
+            <div class="truncate mt-0.5 text-muted">
+              {getYearAndMonth(role.start)[0]}
+            </div>
+          </div>
+        ))}
+      </div>
     </div>
   </Container>
 </Layout>

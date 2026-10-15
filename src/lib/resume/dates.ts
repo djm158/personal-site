@@ -15,6 +15,10 @@ const MONTH_NAMES = [
   "December",
 ];
 
+export const currentYearMonth = (d: Date): YearMonth => {
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}` as YearMonth;
+};
+
 export const getYearAndMonth = (d: YearMonth): [number, number] => {
   const [year, month] = d.split("-").map(Number);
   return [year, month];
