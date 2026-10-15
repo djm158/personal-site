@@ -7,6 +7,8 @@ import {
   resumeSpan,
   roleMonths,
   toYearMonth,
+  formatRange,
+  formatDuration,
 } from "../lib/resume/dates";
 import { loadResume } from "../lib/resume/load";
 const resume = loadResume();
@@ -60,6 +62,49 @@ const nonPortfolioLinks = resume.links.filter(
               {getYearAndMonth(role.start)[0]}
             </div>
           </div>
+        ))}
+      </div>
+    </div>
+
+    <div class="flex flex-wrap mt-[clamp(40px,5vw,64px)]">
+      <!-- Roles List -->
+      <div class="flex-[3_1_560px] min-w-0 border-b border-line">
+        {resume.roles.map((role) => (
+          <article
+            id={role.id}
+            data-role={role.id}
+            data-tags={role.tags?.join(",")}
+            data-short={role.short ?? role.company}
+            class="flex flex-wrap gap-y-3 gap-x-10 py-9 border-t-line border-t scroll-mt-20"
+          >
+            <div class="flex-[0_0_160px] flex flex-col font-mono font-medium text-muted text-xs gap-1.5">
+              <p>{formatRange(role.start, role.end)}</p>
+              <p>{formatDuration(roleMonths(role, todayYearMonth))}</p>
+              <p>{role.location}</p>
+            </div>
+            <div class="flex-[1_1_380px] min-w-0">
+              <div class="flex flex-wrap items-baseline gap-y-1.5 gap-x-4">
+                <h2 class="font-serif text-[clamp(36px,3.6vw,48px)] tracking-[-0.01em] leading-none">
+                  {role.company}
+                </h2>
+                <span class="text-muted">{role.title}</span>
+              </div>
+              <ul class="flex flex-col gap-3 mt-5" role="list">
+                {role.bullets.map((bullet) => (
+                  <li class="flex gap-3.5 text-base/[1.6] text-pretty before:content-[''] before:size-1.5 before:shrink-0 before:mt-[.62em] before:rounded-full before:bg-accent">
+                    {bullet}
+                  </li>
+                ))}
+              </ul>
+              <div class="flex flex-wrap gap-1.5 mt-5">
+                {role.tags?.map((tag) => (
+                  <span class="font-mono font-medium text-[11px] py-1.25 px-2.5 rounded-full text-ink bg-surface">
+                    {tag}
+                  </span>
+                ))}
+              </div>
+            </div>
+          </article>
         ))}
       </div>
     </div>
