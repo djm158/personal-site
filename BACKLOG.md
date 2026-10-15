@@ -3,14 +3,19 @@
 Ordered top to bottom. Each section leaves the site deployable. Design reference: the
 `Portfolio.dc.html` project in claude.ai/design.
 
-## v1 scope
+## v0 scope
 
-v1 is the home page and the résumé. The blog and projects pages stay hidden until there is
-content for them, so the working order is: finish section 1, then 4 (Résumé), then 5 (Home),
-then 6 (Polish and launch). Sections 2 and 3 come after launch.
+v0 ships fast so work can move on to projects: the résumé as it stands (no skill picker) and a
+landing page with the hero, about and a brief résumé. Everything below this section that v0
+skips comes back afterwards, starting with section 3 (Projects), then the picker.
 
 - [ ] Hide Work and Writing from the header and mobile menu; remove the `/projects` stub page
-- [ ] Home page for v1: leave out the featured projects and latest posts sections, and point the hero's "see my work" button somewhere that exists
+- [ ] Layout: `description` prop and meta tag; per-page titles for home and résumé
+- [ ] Home hero: status badge, heading, intro, buttons (static: no per-letter hover, no avatar behaviour); point "see my work" at `/resume`
+- [ ] Home about section with the three cards
+- [ ] Home experience list from the résumé data, each row linking to `/resume#<role id>`
+- [ ] Add `netlify.toml`
+- [ ] Point danielmcgrath.xyz at this repo
 
 ## 0. Repo and deploy
 
@@ -41,7 +46,6 @@ then 6 (Polish and launch). Sections 2 and 3 come after launch.
 
 - [ ] Content collection with Zod schema: `title`, `date`, `tags`, `excerpt`
 - [ ] Migrate the four posts and their three images from `djm158/portfolio-v2` `_posts/`; write excerpts (the design has one per post)
-- [ ] Check the old site's post URLs and keep the same slugs so existing links still work
 - [ ] `/blog`: post list, post count, tag filter chips
 - [ ] `/blog/[slug]`: title, date, tag, read time (computed), rendered markdown, next-post link
 - [ ] Typography styles for rendered markdown: headings, code blocks, images, lists, links
@@ -100,4 +104,4 @@ LaTeX (then the PDF) is generated from it. Nothing parses LaTeX in the build.
 - [ ] Performance pass: Lighthouse, image optimisation with `astro:assets`, consider self-hosting fonts
 - [ ] Update the small nav avatar to match the new hero face
 - [ ] Decide on the hero line "Most recently at Wizard AI"
-- [ ] Point the existing Netlify site for danielmcgrath.xyz at this repo; verify the form and old post links on the live domain
+- [ ] Verify the contact form on the live domain
