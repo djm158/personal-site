@@ -22,6 +22,24 @@ roles:
     location: Remote
     start: "2026-01"
     end: "2026-09"
+    short: Wizard
+    tags:
+      [
+        TypeScript,
+        HTML,
+        CSS/Sass,
+        React,
+        MobX,
+        Node.js,
+        GraphQL,
+        TypeGraphQL,
+        MySQL,
+        MongoDB,
+        Datadog,
+        GCP,
+        GitHub Actions,
+        Git,
+      ]
     bullets:
       - >-
         Shipped a social voting feature end to end: MySQL schema, Type-GraphQL API with
@@ -46,6 +64,26 @@ roles:
     location: Remote
     start: "2025-04"
     end: "2025-12"
+    short: Commsor
+    tags:
+      [
+        TypeScript,
+        HTML,
+        CSS/Sass,
+        React,
+        Tailwind CSS,
+        shadcn/ui,
+        Next.js,
+        Zustand,
+        Better Auth,
+        Node.js,
+        Supabase,
+        PostgreSQL,
+        Vercel,
+        Elasticsearch,
+        Inngest,
+        Git,
+      ]
     bullets:
       - >-
         Joined as the first full-time engineer and owned hands-on product delivery
@@ -73,6 +111,25 @@ roles:
     location: Remote
     start: "2022-06"
     end: "2025-04"
+    short: Nearform
+    tags:
+      [
+        React,
+        TypeScript,
+        HTML,
+        CSS/Sass,
+        Next.js,
+        React Query,
+        GraphQL,
+        Tailwind CSS,
+        shadcn/ui,
+        Docker,
+        Module Federation,
+        Micro Frontends,
+        Webpack,
+        React Testing Library,
+        Git,
+      ]
     bullets:
       - >-
         Developed the frontend integration for a Module Federation migration at a
@@ -92,6 +149,8 @@ roles:
     location: Conshohocken, PA
     start: "2020-09"
     end: "2022-06"
+    short: WizeHive
+    tags: [HTML, CSS/Sass, React, React Flow, GraphQL, Apollo, Git]
     bullets:
       - >-
         Developed core features for a GraphQL/Apollo rewrite of a legacy
@@ -107,6 +166,22 @@ roles:
     location: Philadelphia, PA
     start: "2018-09"
     end: "2020-09"
+    short: Vistar
+    tags:
+      [
+        TypeScript,
+        Python,
+        HTML,
+        CSS/Sass,
+        React,
+        Redux,
+        Flask,
+        AWS,
+        Docker,
+        Datadog,
+        Linux,
+        Git,
+      ]
     bullets:
       - >-
         Developed React/TypeScript features for the buy side of a digital-out-of-home
@@ -122,6 +197,8 @@ roles:
     location: Plymouth Meeting, PA
     start: "2018-01"
     end: "2018-09"
+    short: CEI
+    tags: [JavaScript, R, C#/.NET, HTML, CSS/Sass, Web Components, Azure, Git]
     bullets:
       - >-
         Worked with a national self-storage client's data science team to productionize
@@ -133,29 +210,36 @@ roles:
 
 skills:
   - name: Languages
-    items: [TypeScript, JavaScript, Python, HTML, CSS/Sass]
+    items: [TypeScript, JavaScript, Python, R, C#/.NET, HTML, CSS/Sass]
   - name: Frontend
     items:
       - React
       - Next.js
       - React Query
       - MobX
+      - Redux
+      - Zustand
       - Tailwind CSS
       - shadcn/ui
       - React Flow
       - React Testing Library
+      - Web Components
+      - Module Federation
+      - Micro Frontends
+      - Webpack
   - name: Backend & Data
     items:
       - Node.js
       - GraphQL
       - Apollo
-      - Type-GraphQL
+      - TypeGraphQL
       - Flask
       - PostgreSQL
       - MySQL
       - MongoDB
       - Supabase
       - Elasticsearch
+      - Better Auth
   - name: Cloud & DevOps
     items:
       - AWS

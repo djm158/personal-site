@@ -66,8 +66,11 @@ LaTeX (then the PDF) is generated from it. Nothing parses LaTeX in the build.
 - [x] Set up Vitest
 - [x] Helpers, test-first: format a date range, months in a role, format a duration (total duration is `inclusiveMonths` from the earliest start to the latest end, done on the page)
 - [ ] `/resume`: summary and links, role list with dates, duration and tags, education card, Download PDF button
-- [ ] Timeline bar with segment widths proportional to months in each role
-- [ ] React island: pick a skill to highlight the roles that used it and dim the rest
+- [x] Add `tags` and `short` to each role in `resume.yaml`; check every role tag appears in a skill group
+- [ ] Timeline bar with segment widths proportional to months in each role; segments link to `#role-n`
+- [ ] Skill picker: toggle-button pills and a small `<script>` that marks matching roles, timeline segments and tags with `data-hit`; styling stays in static classes; clicking the selected pill clears it
+- [ ] Skill note under the picker heading: "Pick a skill to see where I used it." by default, "React at X & Y." when picked, a fallback when no role uses the skill; set by the same script, in an `aria-live` region
+- [ ] Hover link: hovering or focusing a timeline segment highlights that role's dates, and hovering a role highlights its segment
 - [ ] LaTeX generator, test-first: an escape function (`&`, `#`, `%`, `$`, `_`, `{`, `}`, `~`, `^`, `\`), then a template that renders the full `.tex` from the data
 - [ ] Golden test: the generated `.tex` matches the current hand-written `resume.tex`; then delete the hand-written file and stop committing generated output
 - [ ] Build `/resume.pdf` from the generated `.tex` with tectonic in the Netlify build; fall back to a GitHub Action if tectonic won't run there
