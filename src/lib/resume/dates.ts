@@ -1,4 +1,4 @@
-import type { YearMonth } from "./schema";
+import type { YearMonth, Role } from "./schema";
 
 const MONTH_NAMES = [
   "January",
@@ -15,7 +15,31 @@ const MONTH_NAMES = [
   "December",
 ];
 
-export const currentYearMonth = (d: Date): YearMonth => {
+export const roleMonths = (
+  role: Pick<Role, "start" | "end">,
+  today: YearMonth,
+): number => inclusiveMonths(role.start, role.end ?? today);
+
+export type Span = { start: YearMonth; end: YearMonth; isCurrent: boolean };
+
+// A role with no end runs until today, so a current role makes the span end today
+export const resumeSpan = (
+  roles: Pick<Role, "start" | "end">[],
+  today: YearMonth,
+): Span => {
+  // YYYY-MM strings compare chronologically, so plain < and > find the extremes
+  const start = roles
+    .map((r) => r.start)
+    .reduce((earliest, start) => (start < earliest ? start : earliest));
+  const end = roles
+    .map((r) => r.end ?? today)
+    .reduce((latest, end) => (end > latest ? end : latest));
+  const isCurrent = roles.some((r) => !r.end);
+
+  return { start, end, isCurrent };
+};
+
+export const toYearMonth =(d: Date): YearMonth => {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}` as YearMonth;
 };
 

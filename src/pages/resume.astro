@@ -4,25 +4,19 @@ import Eyebrow from "../components/Eyebrow.astro";
 import Layout from "../layouts/Layout.astro";
 import {
   getYearAndMonth,
-  inclusiveMonths,
-  currentYearMonth,
+  resumeSpan,
+  roleMonths,
+  toYearMonth,
 } from "../lib/resume/dates";
 import { loadResume } from "../lib/resume/load";
 const resume = loadResume();
 
-const startsSorted = resume.roles.map((r) => r.start).sort();
-const [firstYear] = getYearAndMonth(startsSorted[0]);
-const endsSorted = resume.roles
-  .map((r) => r.end)
-  .filter((end) => end !== undefined)
-  .sort();
-const isCurrent = resume.roles.some((r) => !r.end);
-const todayYearMonth = currentYearMonth(new Date());
-const latestEnd = isCurrent
-  ? todayYearMonth
-  : endsSorted[endsSorted.length - 1];
+const todayYearMonth = toYearMonth(new Date());
+const span = resumeSpan(resume.roles, todayYearMonth);
+const [firstYear] = getYearAndMonth(span.start);
 
 const nonPortfolioLinks = resume.links.filter(
+  // TODO: use Astro.site.hostname instead of hard coding
   (link) => new URL(link.url).hostname !== "danielmcgrath.xyz",
 );
 ---
@@ -31,7 +25,7 @@ const nonPortfolioLinks = resume.links.filter(
   <Container as="section" class="py-[clamp(56px,8vw,104px)]">
     <Eyebrow as="p" size="md" class="mb-4">
       Résumé · {firstYear} —{" "}
-      {isCurrent ? "Present" : getYearAndMonth(latestEnd)[0]}
+      {span.isCurrent ? "Present" : getYearAndMonth(span.end)[0]}
     </Eyebrow>
     <h1 class="font-serif text-[clamp(60px,8.5vw,120px)]/[0.92] mb-6 tracking-[-0.03em]">
       The <em class="text-accent">long</em> version
@@ -56,7 +50,7 @@ const nonPortfolioLinks = resume.links.filter(
         {resume.roles.toReversed().map((role) => (
           <div
             style={{
-              flex: `${inclusiveMonths(role.start, role.end ?? todayYearMonth)} 1 0`,
+              flex: `${roleMonths(role, todayYearMonth)} 1 0`,
             }}
             class="min-w-0"
           >
