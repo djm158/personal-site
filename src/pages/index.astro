@@ -2,15 +2,17 @@
 import Avatar from "../components/Avatar.astro";
 import Button from "../components/Button.astro";
 import Container from "../components/Container.astro";
+import Eyebrow from "../components/Eyebrow.astro";
 import Layout from "../layouts/Layout.astro";
+import { formatYearSpan } from "../lib/resume/dates";
 import { loadResume } from "../lib/resume/load";
 
-const { email } = loadResume();
+const { email, roles } = loadResume();
 ---
 
 <Layout description="Daniel McGrath is a software engineer in Philadelphia building React and TypeScript products, with full-stack ownership from backend to accessibility.">
   <section>
-    <Container class="grid grid-cols-[repeat(auto-fit,minmax(min(100%,400px),1fr))] items-center gap-[clamp(40px,5vw,72px)] pt-[clamp(56px,8vw,112px)] pb-[clamp(56px,7vw,96px)]">
+    <Container class="grid grid-cols-[repeat(auto-fit,minmax(min(100%,400px),1fr))] items-center gap-[clamp(40px,5vw,72px)] pt-[clamp(56px,8vw,112px)]">
       <div>
         <div class="inline-flex items-center gap-2.5 font-mono font-medium text-xs uppercase mb-8 text-muted rounded-full border tracking-wider border-line py-1.75 pl-2.75 pr-3.5">
           <span class="size-2 rounded-full bg-moss motion-safe:animate-pulse"></span>
@@ -20,9 +22,9 @@ const { email } = loadResume();
           Hi, I'm <em class="text-accent">Dan.</em>
         </h1>
         <p class="mt-7 font-light text-[clamp(20px,2.1vw,27px)]/[1.35] tracking-[-0.01em] max-w-[30ch] text-pretty">
-          A senior full stack engineer who sweats the details, from the database
-          to the last pixel. Most recently at Wizard AI, now looking for what's
-          next.
+          A senior product engineer building end-to-end in TypeScript—where
+          clean architecture meets obsessive UI polish. Most recently Staff
+          Engineer at Wizard AI.
         </p>
         <div class="flex flex-wrap gap-3 mt-10">
           <Button
@@ -30,7 +32,7 @@ const { email } = loadResume();
             size="xl"
             class="transition-[translate,box-shadow] duration-200 hover:-translate-y-0.5 hover:shadow-[0_12px_24px_-12px_var(--color-ink)]"
           >
-            See the work
+            View résumé
           </Button>
           <Button href={`mailto:${email}`} variant="outlined" size="xl">
             Say hello
@@ -40,4 +42,66 @@ const { email } = loadResume();
       <Avatar class="mx-auto w-[min(100%,420px)]" />
     </Container>
   </section>
+  <Container
+    as="section"
+    id="about"
+    class="flex flex-wrap gap-x-[clamp(32px,5vw,80px)] gap-y-6 py-[clamp(72px,9vw,128px)]"
+  >
+    <Eyebrow as="h2" class="basis-50 shrink-0 grow-0 pt-3">
+      01 — About
+    </Eyebrow>
+    <div class="flex-[1_1_520px] min-w-0">
+      <p class="font-serif text-[clamp(30px,3.6vw,50px)]/[1.12] tracking-[-0.01em] text-pretty">
+        I got into software by soldering bike power meters and flying
+        quadcopters with hand gestures. These days I build{" "}
+        <em class="text-accent">whole products</em> — APIs and data models,
+        component systems, and the quiet details that make software feel
+        effortless.
+      </p>
+      <p class="mt-7 font-light text-[19px]/[1.6] text-muted max-w-[58ch] text-pretty">
+        I work across the stack in TypeScript — React on the client, Node on the
+        server — with a soft spot for polished UI. I still think like an
+        embedded engineer about every byte and frame.
+      </p>
+    </div>
+  </Container>
+  <Container
+    as="section"
+    class="flex flex-wrap gap-x-[clamp(32px,5vw,80px)] gap-y-8 pb-[clamp(72px,9vw,128px)]"
+  >
+    <div class="flex-[0_1_320px]">
+      <Eyebrow as="p" class="mb-3.5">
+        02 — Experience
+      </Eyebrow>
+      <h2 class="font-serif text-[clamp(44px,5vw,68px)]/none tracking-[-0.02em] mb-5.5">
+        Eight years, <em class="text-accent">whole stack</em>
+      </h2>
+      <a
+        href="/resume"
+        class="inline-block py-1 border-b border-ink font-medium text-[15px] text-ink no-underline"
+      >
+        Full résumé <span aria-hidden="true">→</span>
+      </a>
+    </div>
+    <ul role="list" class="flex-[1_1_520px] min-w-0 border-b border-line">
+      {roles.map((role) => (
+        <li>
+          <a
+            href={`/resume#${role.id}`}
+            class="flex flex-wrap items-baseline gap-x-6 gap-y-2 py-5.5 border-t border-line text-ink no-underline motion-safe:transition-[padding] motion-safe:duration-350 motion-safe:ease-[cubic-bezier(.2,.8,.2,1)] hover:pl-4 focus-visible:pl-4"
+          >
+            <span class="flex-[0_0_96px] font-mono font-medium text-xs text-muted">
+              {formatYearSpan(role.start, role.end)}
+            </span>
+            <span class="flex-[1_1_220px] font-serif text-[clamp(24px,2.3vw,30px)]/[1.15]">
+              {role.company}
+            </span>
+            <span class="flex-[0_1_240px] text-[15px] text-muted">
+              {role.title}
+            </span>
+          </a>
+        </li>
+      ))}
+    </ul>
+  </Container>
 </Layout>

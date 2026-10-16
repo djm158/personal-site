@@ -70,7 +70,18 @@ export const formatRange = (start: YearMonth, end?: YearMonth): string => {
   return `${formattedStart} — ${formattedEnd}`;
 };
 
-export const formatDuration = (numMonths: number): string => {
+// Compact years for the home page: "2026", "2022–25", or "2024–Present" for a current role
+export const formatYearSpan = (start: YearMonth, end?: YearMonth): string => {
+  const [startYear] = getYearAndMonth(start);
+  if (!end) return `${startYear}–Present`;
+
+  const [endYear] = getYearAndMonth(end);
+  return startYear === endYear
+    ? String(startYear)
+    : `${startYear}–${String(endYear).slice(2)}`;
+};
+
+export const formatDuration =(numMonths: number): string => {
   const years = Math.floor(numMonths / 12);
   const months = numMonths % 12;
 

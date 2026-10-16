@@ -12,8 +12,8 @@ skips comes back afterwards, starting with section 3 (Projects), then the picker
 - [x] Hide Work and Writing from the header and mobile menu; remove the `/projects` stub page
 - [x] Layout: `description` prop and meta tag; per-page titles for home and résumé
 - [x] Home hero: hard-coded status badge, heading, intro, static avatar SVG, buttons (no per-letter hover, no avatar behaviour); point "See the work" at `/resume` and "Say hello" at a `mailto:` link
-- [ ] Home about section with the three cards
-- [ ] Home experience list from the résumé data, each row linking to `/resume#<role id>`
+- [x] Home about section: label and the two paragraphs, with `id="about"` for the nav link (the three cards wait until their content is refined)
+- [x] Home experience list from the résumé data, each row linking to `/resume#<role id>`
 - [ ] Add `netlify.toml`
 - [ ] Point danielmcgrath.xyz at this repo
 
@@ -88,7 +88,7 @@ LaTeX (then the PDF) is generated from it. Nothing parses LaTeX in the build.
 - [ ] Avatar behaviour: eyes follow the cursor, blink and mouth change on click, cursor glow in the hero
 - [ ] Night mode: five clicks on the avatar toggles it, toast message, saved to `localStorage`, applied before first paint to avoid a flash
 - [ ] Marquee strip
-- [ ] About section with the three cards
+- [ ] About section: the three cards, once their content is refined
 - [ ] Experience list from the résumé data, each row linking to that role on `/resume`
 - [ ] Featured project cards: description panel slides up on hover, always visible on touch devices
 - [ ] Latest three posts

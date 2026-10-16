@@ -2,6 +2,7 @@ import { describe, expect, test } from "vitest";
 import {
   formatDuration,
   formatRange,
+  formatYearSpan,
   inclusiveMonths,
   resumeSpan,
   roleMonths,
@@ -29,6 +30,17 @@ describe("formatRange", () => {
     ["across years", "2025-03", "2026-07", "Mar 2025 — Jul 2026"],
   ])("%s", (_name, start, end, expected) => {
     expect(formatRange(start, end)).toBe(expected);
+  });
+});
+
+describe("formatYearSpan", () => {
+  test.each<[string, YearMonth, YearMonth | undefined, string]>([
+    ["within one year", "2026-01", "2026-09", "2026"],
+    ["across years", "2022-03", "2025-11", "2022–25"],
+    ["across a decade", "2019-06", "2021-02", "2019–21"],
+    ["no end date", "2024-05", undefined, "2024–Present"],
+  ])("%s", (_name, start, end, expected) => {
+    expect(formatYearSpan(start, end)).toBe(expected);
   });
 });
 
