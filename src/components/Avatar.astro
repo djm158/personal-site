@@ -1,0 +1,92 @@
+---
+import type { HTMLAttributes } from "astro/types";
+
+type Props = HTMLAttributes<"svg">;
+
+const { class: className, ...rest } = Astro.props;
+---
+
+<!-- Markup ported as-is from the design; the eyes and pupils groups are kept for section 5 behaviour -->
+<svg
+  viewBox="0 0 200 200"
+  role="img"
+  aria-label="Illustrated portrait of Dan"
+  class:list={["block", className]}
+  {...rest}
+>
+  <defs>
+    <clipPath id="dmClip"><circle cx="100" cy="100" r="100"></circle></clipPath>
+  </defs>
+  <g clip-path="url(#dmClip)">
+    <circle cx="100" cy="100" r="100" fill="var(--color-surface)"></circle>
+    <clipPath id="dmShirt"><ellipse cx="100" cy="222" rx="90" ry="62"></ellipse></clipPath>
+    <g clip-path="url(#dmShirt)">
+      <rect x="0" y="150" width="200" height="60" fill="var(--color-moss)"></rect>
+    </g>
+    <rect x="84" y="140" width="32" height="34" rx="10" fill="var(--color-skin2)"></rect>
+    <circle cx="56" cy="112" r="9" fill="var(--color-skin2)"></circle>
+    <circle cx="144" cy="112" r="9" fill="var(--color-skin2)"></circle>
+    <ellipse cx="100" cy="106" rx="44" ry="50" fill="var(--color-skin)"></ellipse>
+    <rect x="54" y="62" width="20" height="44" rx="9" fill="var(--color-hair)"></rect>
+    <rect x="126" y="62" width="20" height="44" rx="9" fill="var(--color-hair)"></rect>
+    <circle cx="56" cy="112" r="9" fill="var(--color-skin2)"></circle>
+    <circle cx="144" cy="112" r="9" fill="var(--color-skin2)"></circle>
+    <ellipse cx="100" cy="106" rx="44" ry="50" fill="var(--color-skin)"></ellipse>
+    <ellipse cx="98" cy="60" rx="50" ry="22" fill="var(--color-hair)"></ellipse>
+    <ellipse cx="112" cy="46" rx="40" ry="19" fill="var(--color-hair)" transform="rotate(8 112 46)"
+    ></ellipse>
+    <path
+      d="M80 50 Q104 36 136 44"
+      stroke="var(--color-hair2)"
+      stroke-opacity=".35"
+      stroke-width="3"
+      fill="none"
+      stroke-linecap="round"></path>
+    <path
+      d="M58 116 Q60 164 100 170 Q140 164 142 116 Q136 136 120 135 Q100 131 80 135 Q64 136 58 116 Z"
+      fill="var(--color-hair)"></path>
+    <path
+      data-mouth
+      d="M92 146 Q100 151 108 146"
+      stroke="#9C5A4A"
+      stroke-width="2.5"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      fill="none"></path>
+    <rect x="66" y="82" width="24" height="5" rx="2.5" fill="var(--color-hair2)"></rect>
+    <rect x="110" y="82" width="24" height="5" rx="2.5" fill="var(--color-hair2)"></rect>
+    <g data-eyes style="transform-box:fill-box;transform-origin:center">
+      <g data-pupils>
+        <circle cx="79" cy="110" r="5" fill="#8A6A3E"></circle>
+        <circle cx="121" cy="110" r="5" fill="#8A6A3E"></circle>
+        <circle cx="79" cy="110" r="2.2" fill="var(--color-ink)"></circle>
+        <circle cx="121" cy="110" r="2.2" fill="var(--color-ink)"></circle>
+      </g>
+    </g>
+    <ellipse cx="100" cy="124" rx="6" ry="4" fill="var(--color-skin2)"></ellipse>
+    <circle
+      cx="79"
+      cy="110"
+      r="17"
+      fill="oklch(1 0 0)"
+      fill-opacity=".14"
+      stroke="oklch(0.5 0.02 60)"
+      stroke-opacity=".85"
+      stroke-width="4.5"></circle>
+    <circle
+      cx="121"
+      cy="110"
+      r="17"
+      fill="oklch(1 0 0)"
+      fill-opacity=".14"
+      stroke="oklch(0.5 0.02 60)"
+      stroke-opacity=".85"
+      stroke-width="4.5"></circle>
+    <path
+      d="M95 106 Q100 101 105 106"
+      stroke="oklch(0.5 0.02 60)"
+      stroke-opacity=".85"
+      stroke-width="4"
+      fill="none"></path>
+  </g>
+</svg>

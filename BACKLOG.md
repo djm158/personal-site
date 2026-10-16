@@ -11,7 +11,7 @@ skips comes back afterwards, starting with section 3 (Projects), then the picker
 
 - [x] Hide Work and Writing from the header and mobile menu; remove the `/projects` stub page
 - [x] Layout: `description` prop and meta tag; per-page titles for home and résumé
-- [ ] Home hero: status badge, heading, intro, buttons (static: no per-letter hover, no avatar behaviour); point "see my work" at `/resume`
+- [x] Home hero: hard-coded status badge, heading, intro, static avatar SVG, buttons (no per-letter hover, no avatar behaviour); point "See the work" at `/resume` and "Say hello" at a `mailto:` link
 - [ ] Home about section with the three cards
 - [ ] Home experience list from the résumé data, each row linking to `/resume#<role id>`
 - [ ] Add `netlify.toml`
@@ -104,6 +104,6 @@ LaTeX (then the PDF) is generated from it. Nothing parses LaTeX in the build.
 - [ ] Accessibility pass: keyboard navigation, focus styles, contrast in both themes, axe checks
 - [ ] Performance pass: Lighthouse, image optimisation with `astro:assets`, consider self-hosting fonts
 - [ ] Update the small nav avatar to match the new hero face
-- [ ] Decide on the hero line "Most recently at Wizard AI"
+- [x] Decide on the hero line "Most recently at Wizard AI" (keep it)
 - [ ] Verify the contact form on the live domain
 - [ ] Heartbeat rebuild every month so date-derived content stays current (years of experience in the résumé description, "Present" durations): a scheduled GitHub Action calling a Netlify build hook

@@ -1,7 +1,43 @@
 ---
+import Avatar from "../components/Avatar.astro";
+import Button from "../components/Button.astro";
+import Container from "../components/Container.astro";
 import Layout from "../layouts/Layout.astro";
+import { loadResume } from "../lib/resume/load";
+
+const { email } = loadResume();
 ---
 
-<Layout
-  description="Daniel McGrath is a software engineer in Philadelphia building React and TypeScript products, with full-stack ownership from backend to accessibility."
-/>
+<Layout description="Daniel McGrath is a software engineer in Philadelphia building React and TypeScript products, with full-stack ownership from backend to accessibility.">
+  <section>
+    <Container class="grid grid-cols-[repeat(auto-fit,minmax(min(100%,400px),1fr))] items-center gap-[clamp(40px,5vw,72px)] pt-[clamp(56px,8vw,112px)] pb-[clamp(56px,7vw,96px)]">
+      <div>
+        <div class="inline-flex items-center gap-2.5 font-mono font-medium text-xs uppercase mb-8 text-muted rounded-full border tracking-wider border-line py-1.75 pl-2.75 pr-3.5">
+          <span class="size-2 rounded-full bg-moss motion-safe:animate-pulse"></span>
+          Open to senior frontend and full stack roles
+        </div>
+        <h1 class="font-serif text-[clamp(68px,10vw,150px)]/[0.88] tracking-[-0.03em]">
+          Hi, I'm <em class="text-accent">Dan.</em>
+        </h1>
+        <p class="mt-7 font-light text-[clamp(20px,2.1vw,27px)]/[1.35] tracking-[-0.01em] max-w-[30ch] text-pretty">
+          A senior full stack engineer who sweats the details, from the database
+          to the last pixel. Most recently at Wizard AI, now looking for what's
+          next.
+        </p>
+        <div class="flex flex-wrap gap-3 mt-10">
+          <Button
+            href="/resume"
+            size="xl"
+            class="transition-[translate,box-shadow] duration-200 hover:-translate-y-0.5 hover:shadow-[0_12px_24px_-12px_var(--color-ink)]"
+          >
+            See the work
+          </Button>
+          <Button href={`mailto:${email}`} variant="outlined" size="xl">
+            Say hello
+          </Button>
+        </div>
+      </div>
+      <Avatar class="mx-auto w-[min(100%,420px)]" />
+    </Container>
+  </section>
+</Layout>
