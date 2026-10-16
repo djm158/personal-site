@@ -1,5 +1,6 @@
 ---
 import "../styles/global.css";
+import AvatarMini from "../assets/avatar-mini.svg";
 import { Font } from "astro:assets";
 import Header from "../components/Header.astro";
 import Footer from "../components/Footer.astro";
@@ -22,7 +23,7 @@ const fullTitle = title ? `${title} · ${siteName}` : siteName;
     <meta name="description" content={description} />
     <title>{fullTitle}</title>
     <link rel="icon" href="/favicon.ico" sizes="32x32" />
-    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="icon" href={AvatarMini.src} type="image/svg+xml" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <Font cssVariable="--font-geist" preload />
     <Font cssVariable="--font-geist-mono" />

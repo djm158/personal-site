@@ -96,7 +96,7 @@ LaTeX (then the PDF) is generated from it. Nothing parses LaTeX in the build.
 
 ## 6. Polish and launch
 
-- [x] Per-page titles and descriptions; favicon from the nav avatar (`favicon.svg`, 32px `favicon.ico`, `apple-touch-icon.png`)
+- [x] Per-page titles and descriptions; favicon from the nav avatar (`src/assets/avatar-mini.svg`, also used in the header; 32px `favicon.ico` and `apple-touch-icon.png` rendered from it)
 - [ ] Open Graph tags
 - [ ] Sitemap and RSS feed
 - [ ] 404 page

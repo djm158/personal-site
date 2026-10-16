@@ -1,4 +1,5 @@
 ---
+import AvatarMini from "../assets/avatar-mini.svg";
 import Button from "./Button.astro";
 import Container from "./Container.astro";
 import MobileMenu from "./MobileMenu.astro";
@@ -16,56 +17,10 @@ const links = [{ label: "About", href: "/#about" }].map((link) => ({
       href="/"
       class="group flex items-center gap-3 font-medium text-[15px] hover:text-ink no-underline"
     >
-      <!-- Same face as public/favicon.svg, but on theme tokens so it follows night mode -->
-      <svg
-        viewBox="0 0 200 200"
+      <AvatarMini
         aria-hidden="true"
         class="block size-9 motion-safe:transition-transform motion-safe:duration-500 motion-safe:ease-(--ease-spring) motion-safe:group-hover:-rotate-10 motion-safe:group-hover:scale-108"
-      >
-        <circle cx="100" cy="100" r="100" fill="var(--color-surface)"></circle>
-        <ellipse
-          cx="100"
-          cy="106"
-          rx="46"
-          ry="52"
-          fill="var(--color-skin)"
-        ></ellipse>
-        <ellipse
-          cx="98"
-          cy="60"
-          rx="52"
-          ry="24"
-          fill="var(--color-hair)"
-        ></ellipse>
-        <ellipse
-          cx="112"
-          cy="45"
-          rx="42"
-          ry="20"
-          fill="var(--color-hair)"
-          transform="rotate(8 112 45)"
-        ></ellipse>
-        <path
-          d="M56 116 Q58 168 100 174 Q142 168 144 116 Q138 138 100 132 Q62 138 56 116 Z"
-          fill="var(--color-hair)"
-        ></path>
-        <circle
-          cx="79"
-          cy="110"
-          r="17"
-          fill="none"
-          stroke="oklch(0.45 0.02 60)"
-          stroke-width="7"
-        ></circle>
-        <circle
-          cx="121"
-          cy="110"
-          r="17"
-          fill="none"
-          stroke="oklch(0.45 0.02 60)"
-          stroke-width="7"
-        ></circle>
-      </svg>
+      />
       Daniel McGrath
     </a>
     <div class="hidden nav:flex gap-0.5">
