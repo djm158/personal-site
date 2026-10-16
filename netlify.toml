@@ -1,0 +1,4 @@
+# Node comes from .nvmrc; Netlify picks pnpm from pnpm-lock.yaml
+[build]
+  command = "pnpm build"
+  publish = "dist"

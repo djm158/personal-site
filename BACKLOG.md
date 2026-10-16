@@ -14,7 +14,7 @@ skips comes back afterwards, starting with section 3 (Projects), then the picker
 - [x] Home hero: hard-coded status badge, heading, intro, static avatar SVG, buttons (no per-letter hover, no avatar behaviour); point "See the work" at `/resume` and "Say hello" at a `mailto:` link
 - [x] Home about section: label and the two paragraphs, with `id="about"` for the nav link (the three cards wait until their content is refined)
 - [x] Home experience list from the résumé data, each row linking to `/resume#<role id>`
-- [ ] Add `netlify.toml`
+- [x] Add `netlify.toml`
 - [ ] Point danielmcgrath.xyz at this repo
 
 ## 0. Repo and deploy
@@ -23,7 +23,7 @@ skips comes back afterwards, starting with section 3 (Projects), then the picker
 - [x] First commit, add the GitHub remote, push
 - [x] Replace the template `README.md`; decide whether to keep `AGENTS.md` / `CLAUDE.md`
 - [x] Pin Node 22 with `.nvmrc`
-- [ ] Add `netlify.toml` (build `pnpm build`, publish `dist`) so the build settings live in the repo, not only in the Netlify UI
+- [x] Add `netlify.toml` (build `pnpm build`, publish `dist`) so the build settings live in the repo, not only in the Netlify UI
 - [x] Create a Netlify site for this repo so every push gets a preview URL (leave the live domain alone for now)
 
 ## 1. Foundation
