@@ -271,6 +271,7 @@ skills:
       - Supabase
       - Elasticsearch
       - Better Auth
+      - Sanity CMS
   - name: Cloud & DevOps
     items:
       - AWS

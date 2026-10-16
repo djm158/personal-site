@@ -15,7 +15,7 @@ skips comes back afterwards, starting with section 3 (Projects), then the picker
 - [x] Home about section: label and the two paragraphs, with `id="about"` for the nav link (the three cards wait until their content is refined)
 - [x] Home experience list from the résumé data, each row linking to `/resume#<role id>`
 - [x] Add `netlify.toml`
-- [ ] Point danielmcgrath.xyz at this repo
+- [x] Point danielmcgrath.xyz at this repo
 
 ## 0. Repo and deploy
 

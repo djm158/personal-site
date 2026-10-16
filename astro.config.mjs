@@ -6,6 +6,9 @@ import tailwindcss from "@tailwindcss/vite";
 
 // https://astro.build/config
 export default defineConfig({
+  site: "https://danielmcgrath.xyz",
+  // Netlify serves each page as a directory index and redirects /page to /page/
+  trailingSlash: "always",
   integrations: [react()],
   fonts: [
     {
