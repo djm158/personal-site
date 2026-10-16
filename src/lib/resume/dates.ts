@@ -39,7 +39,7 @@ export const resumeSpan = (
   return { start, end, isCurrent };
 };
 
-export const toYearMonth =(d: Date): YearMonth => {
+export const toYearMonth = (d: Date): YearMonth => {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}` as YearMonth;
 };
 
@@ -81,7 +81,7 @@ export const formatYearSpan = (start: YearMonth, end?: YearMonth): string => {
     : `${startYear}–${String(endYear).slice(2)}`;
 };
 
-export const formatDuration =(numMonths: number): string => {
+export const formatDuration = (numMonths: number): string => {
   const years = Math.floor(numMonths / 12);
   const months = numMonths % 12;
 

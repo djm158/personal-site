@@ -17,7 +17,9 @@ const resume = loadResume();
 const todayYearMonth = toYearMonth(new Date());
 const span = resumeSpan(resume.roles, todayYearMonth);
 const [firstYear] = getYearAndMonth(span.start);
-const yearsOfExperience = Math.floor(inclusiveMonths(span.start, span.end) / 12);
+const yearsOfExperience = Math.floor(
+  inclusiveMonths(span.start, span.end) / 12,
+);
 
 const nonPortfolioLinks = resume.links.filter(
   (link) => new URL(link.url).hostname !== Astro.site?.hostname,

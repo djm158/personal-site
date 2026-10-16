@@ -74,7 +74,11 @@ describe("roleMonths", () => {
 
   test.each<[string, Pick<Role, "start" | "end">, number]>([
     ["an ended role ignores today", { start: "2025-01", end: "2025-06" }, 6],
-    ["a current role runs until today", { start: "2026-01", end: undefined }, 10],
+    [
+      "a current role runs until today",
+      { start: "2026-01", end: undefined },
+      10,
+    ],
     ["a role within one month", { start: "2023-01", end: "2023-01" }, 1],
   ])("%s", (_name, role, expected) => {
     expect(roleMonths(role, today)).toBe(expected);

@@ -96,7 +96,8 @@ LaTeX (then the PDF) is generated from it. Nothing parses LaTeX in the build.
 
 ## 6. Polish and launch
 
-- [ ] Per-page titles and descriptions, Open Graph tags, favicon from the avatar
+- [x] Per-page titles and descriptions; favicon from the nav avatar (`favicon.svg`, 32px `favicon.ico`, `apple-touch-icon.png`)
+- [ ] Open Graph tags
 - [ ] Sitemap and RSS feed
 - [ ] 404 page
 - [ ] Page transitions: old page fades up and blurs out (220ms), new page rises in from 22px below (520ms); header stays put; `/#about` and `/#contact` still land on their section when coming from another page
