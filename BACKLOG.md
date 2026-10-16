@@ -9,8 +9,8 @@ v0 ships fast so work can move on to projects: the résumé as it stands (no ski
 landing page with the hero, about and a brief résumé. Everything below this section that v0
 skips comes back afterwards, starting with section 3 (Projects), then the picker.
 
-- [ ] Hide Work and Writing from the header and mobile menu; remove the `/projects` stub page
-- [ ] Layout: `description` prop and meta tag; per-page titles for home and résumé
+- [x] Hide Work and Writing from the header and mobile menu; remove the `/projects` stub page
+- [x] Layout: `description` prop and meta tag; per-page titles for home and résumé
 - [ ] Home hero: status badge, heading, intro, buttons (static: no per-letter hover, no avatar behaviour); point "see my work" at `/resume`
 - [ ] Home about section with the three cards
 - [ ] Home experience list from the résumé data, each row linking to `/resume#<role id>`
@@ -29,7 +29,7 @@ skips comes back afterwards, starting with section 3 (Projects), then the picker
 ## 1. Foundation
 
 - [x] `Header.astro` with nav links, used from `Layout.astro`
-- [ ] Layout basics: `<!doctype html>`, import `global.css`, `title` and `description` props
+- [x] Layout basics: `<!doctype html>`, import `global.css`, `title` and `description` props
 - [x] Fonts: Instrument Serif, Geist, Geist Mono
 - [x] Theme tokens in `@theme`: colours, font families, 760px breakpoint, 1240px page width, gutter `clamp(20px, 4vw, 48px)`
 - [x] Night theme: same tokens overridden under `[data-theme="night"]`
@@ -82,6 +82,7 @@ LaTeX (then the PDF) is generated from it. Nothing parses LaTeX in the build.
 ## 5. Home
 
 - [ ] Move page copy into one data file: status badge, hero text, about text, the three cards, marquee items, links
+- [ ] Status badge driven by data: an optional `openTo` string shows "Open to {openTo}" (green pulse dot); without it, show "Building X at Y" instead. Decide whether the field lives in `resume.yaml` (add it to the schema) or the home copy file
 - [ ] Hero: status badge, heading with per-letter hover, intro, two buttons
 - [ ] Avatar SVG from the updated design (drop the duplicated ears and face shapes)
 - [ ] Avatar behaviour: eyes follow the cursor, blink and mouth change on click, cursor glow in the hero
@@ -105,3 +106,4 @@ LaTeX (then the PDF) is generated from it. Nothing parses LaTeX in the build.
 - [ ] Update the small nav avatar to match the new hero face
 - [ ] Decide on the hero line "Most recently at Wizard AI"
 - [ ] Verify the contact form on the live domain
+- [ ] Heartbeat rebuild every month so date-derived content stays current (years of experience in the résumé description, "Present" durations): a scheduled GitHub Action calling a Netlify build hook

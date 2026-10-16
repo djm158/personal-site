@@ -3,7 +3,15 @@ import "../styles/global.css";
 import { Font } from "astro:assets";
 import Header from "../components/Header.astro";
 import Footer from "../components/Footer.astro";
-const { title } = Astro.props;
+
+interface Props {
+  title?: string;
+  description: string;
+}
+
+const { title, description } = Astro.props;
+const siteName = "Daniel McGrath";
+const fullTitle = title ? `${title} · ${siteName}` : siteName;
 ---
 
 <!doctype html>
@@ -11,7 +19,8 @@ const { title } = Astro.props;
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>{title}</title>
+    <meta name="description" content={description} />
+    <title>{fullTitle}</title>
     <Font cssVariable="--font-geist" preload />
     <Font cssVariable="--font-geist-mono" />
     <Font cssVariable="--font-instrument-serif" preload />

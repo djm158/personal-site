@@ -9,6 +9,7 @@ import {
   toYearMonth,
   formatRange,
   formatDuration,
+  inclusiveMonths,
 } from "../lib/resume/dates";
 import { loadResume } from "../lib/resume/load";
 const resume = loadResume();
@@ -16,6 +17,7 @@ const resume = loadResume();
 const todayYearMonth = toYearMonth(new Date());
 const span = resumeSpan(resume.roles, todayYearMonth);
 const [firstYear] = getYearAndMonth(span.start);
+const yearsOfExperience = Math.floor(inclusiveMonths(span.start, span.end) / 12);
 
 const nonPortfolioLinks = resume.links.filter(
   // TODO: use Astro.site.hostname instead of hard coding
@@ -23,7 +25,10 @@ const nonPortfolioLinks = resume.links.filter(
 );
 ---
 
-<Layout title="Résumé">
+<Layout
+  title="Résumé"
+  description={`Résumé of Daniel McGrath, a software engineer with ${yearsOfExperience}+ years of React, TypeScript and full-stack product work: roles, dates and skills.`}
+>
   <Container as="section" class="py-[clamp(56px,8vw,104px)]">
     <Eyebrow as="p" size="md" class="mb-4">
       Résumé · {firstYear} —{" "}

@@ -4,12 +4,7 @@ import Container from "./Container.astro";
 import MobileMenu from "./MobileMenu.astro";
 
 const { pathname } = Astro.url;
-const links = [
-  { label: "Work", href: "/projects" },
-  { label: "Writing", href: "/blog" },
-  { label: "About", href: "/#about" },
-  { label: "Contact", href: "/#contact" },
-].map((link) => ({
+const links = [{ label: "About", href: "/#about" }].map((link) => ({
   ...link,
   current: pathname.startsWith(link.href),
 }));
