@@ -30,7 +30,11 @@ const nonPortfolioLinks = resume.links.filter(
   title="Résumé"
   description={`Résumé of Daniel McGrath, a software engineer with ${yearsOfExperience}+ years of React, TypeScript and full-stack product work: roles, dates and skills.`}
 >
-  <Container as="section" class="py-[clamp(56px,8vw,104px)]">
+  <Container
+    as="section"
+    class="group py-[clamp(56px,8vw,104px)]"
+    data-skill-scope
+  >
     <Eyebrow as="p" size="md" class="mb-4">
       Résumé · {firstYear} —{" "}
       {span.isCurrent ? "Present" : getYearAndMonth(span.end)[0]}
@@ -56,23 +60,24 @@ const nonPortfolioLinks = resume.links.filter(
       </Eyebrow>
       <div class="flex gap-1 font-mono text-[11px] font-medium">
         {resume.roles.toReversed().map((role) => (
-          <div
+          <a
+            href={`#${role.id}`}
             style={{
               flex: `${roleMonths(role, todayYearMonth)} 1 0`,
             }}
-            class="min-w-0"
+            class="group/segment min-w-0 no-underline hover:text-ink"
           >
-            <div class="h-3.5 bg-ink/18 rounded-full"></div>
+            <div class="h-3.5 bg-ink/18 rounded-full in-data-hit:bg-accent in-data-hit:scale-y-150 group-hover/segment:scale-y-150 group-hover/segment:bg-accent group-focus-visible/segment:scale-y-150 group-focus-visible/segment:bg-accent motion-safe:[transition:background-color_0.3s,scale_0.35s_var(--ease-spring)]"></div>
             <div class="truncate mt-2.5">{role.short ?? role.company}</div>
             <div class="truncate mt-0.5 text-muted">
               {getYearAndMonth(role.start)[0]}
             </div>
-          </div>
+          </a>
         ))}
       </div>
     </div>
 
-    <div class="flex flex-wrap mt-[clamp(40px,5vw,64px)]">
+    <div class="flex flex-wrap mt-[clamp(40px,5vw,64px)] gap-x-[clamp(32px,5vw,72px)] gap-y-10 items-start">
       <!-- Roles List -->
       <div class="flex-[3_1_560px] min-w-0 border-b border-line">
         {resume.roles.map((role) => (
@@ -81,10 +86,12 @@ const nonPortfolioLinks = resume.links.filter(
             data-role={role.id}
             data-tags={role.tags?.join(",")}
             data-short={role.short ?? role.company}
-            class="flex flex-wrap gap-y-3 gap-x-10 py-9 border-t-line border-t scroll-mt-20"
+            class="flex flex-wrap gap-y-3 gap-x-10 py-9 border-t-line border-t scroll-mt-20 group-data-picked:opacity-30 data-hit:opacity-100 motion-safe:transition-opacity motion-safe:duration-400"
           >
             <div class="flex-[0_0_160px] flex flex-col font-mono font-medium text-muted text-xs gap-1.5">
-              <p>{formatRange(role.start, role.end)}</p>
+              <p class="in-data-hit:text-accent motion-safe:transition-colors motion-safe:duration-300">
+                {formatRange(role.start, role.end)}
+              </p>
               <p>{formatDuration(roleMonths(role, todayYearMonth))}</p>
               <p>{role.location}</p>
             </div>
@@ -104,7 +111,10 @@ const nonPortfolioLinks = resume.links.filter(
               </ul>
               <div class="flex flex-wrap gap-1.5 mt-5">
                 {role.tags?.map((tag) => (
-                  <span class="font-mono font-medium text-[11px] py-1.25 px-2.5 rounded-full text-ink bg-surface">
+                  <span
+                    class="font-mono font-medium text-[11px] py-1.25 px-2.5 rounded-full text-ink bg-surface data-hit:bg-accent data-hit:text-onink motion-safe:transition-colors motion-safe:duration-300"
+                    data-tag={tag}
+                  >
                     {tag}
                   </span>
                 ))}
@@ -113,6 +123,92 @@ const nonPortfolioLinks = resume.links.filter(
           </article>
         ))}
       </div>
+      <!-- Picker -->
+      <aside
+        class="flex-[1_1_300px] min-w-0 sticky top-24 flex flex-col"
+        data-picker
+      >
+        <div class="bg-surface rounded-[22px] px-6 pt-6.5 pb-7">
+          <Eyebrow size="sm" as="div" class="mb-2">
+            Technical skills
+          </Eyebrow>
+          <div class="italic mb-5 font-serif text-[22px]/[1.2] min-h-[2.4em]">
+            Pick a skill to see where I used it.
+          </div>
+          <div class="flex flex-col gap-4.5">
+            {resume.skills.map((skill) => (
+              <div>
+                <Eyebrow size="sm" class="mb-2" as="div">
+                  {skill.name}
+                </Eyebrow>
+                <div class="flex flex-wrap gap-1.5">
+                  {skill.items.map((skillName) => (
+                    <button
+                      type="button"
+                      data-skill={skillName}
+                      aria-pressed="false"
+                      class="rounded-full font-medium text-xs py-1.5 px-3 cursor-pointer bg-bg border border-line aria-pressed:bg-ink aria-pressed:text-onink aria-pressed:border-ink motion-safe:transition-colors motion-safe:duration-200"
+                    >
+                      {skillName}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </aside>
     </div>
   </Container>
 </Layout>
+
+<script>
+  const scope = document.querySelector<HTMLElement>("[data-skill-scope]");
+  const picker = scope?.querySelector<HTMLElement>("[data-picker]");
+
+  const reset = () => {
+    scope
+      ?.querySelectorAll('[aria-pressed="true"]')
+      .forEach((elem) => elem.setAttribute("aria-pressed", "false"));
+    document
+      .querySelectorAll('[data-hit="true"]')
+      .forEach((tag) => tag.removeAttribute("data-hit"));
+
+    scope?.removeAttribute("data-picked");
+  };
+
+  const pick = (button: HTMLButtonElement, skill: string) => {
+    button.setAttribute("aria-pressed", "true");
+
+    document
+      .querySelectorAll(`[data-tag="${CSS.escape(skill)}"]`)
+      .forEach((tag) => tag.setAttribute("data-hit", "true"));
+
+    const articles = document.querySelectorAll("article");
+
+    [...articles].forEach((article) => {
+      const isMatch = article.dataset?.tags?.split(",").includes(skill);
+      if (isMatch) {
+        article.setAttribute("data-hit", "true");
+        scope
+          ?.querySelector(`a[href="#${article.id}"]`)
+          ?.setAttribute("data-hit", "true");
+      }
+    });
+
+    scope?.toggleAttribute("data-picked", true);
+  };
+
+  picker?.addEventListener("click", (e) => {
+    if (!(e.target instanceof Element)) return;
+    const button = e.target?.closest<HTMLButtonElement>("button[data-skill]");
+    if (!button) return;
+    const skill = button.getAttribute("data-skill");
+    if (!skill) return;
+    const wasPressed = button.getAttribute("aria-pressed") === "true";
+    reset();
+    if (!wasPressed) {
+      pick(button, skill);
+    }
+  });
+</script>

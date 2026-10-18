@@ -7,7 +7,8 @@ Ordered top to bottom. Each section leaves the site deployable. Design reference
 
 v0 ships fast so work can move on to projects: the résumé as it stands (no skill picker) and a
 landing page with the hero, about and a brief résumé. Everything below this section that v0
-skips comes back afterwards, starting with section 3 (Projects), then the picker.
+skips comes back afterwards. Blog and Projects wait until there's new content for them, so the
+skill picker (section 4) and landing page polish (section 5) come first.
 
 - [x] Hide Work and Writing from the header and mobile menu; remove the `/projects` stub page
 - [x] Layout: `description` prop and meta tag; per-page titles for home and résumé
@@ -45,7 +46,7 @@ skips comes back afterwards, starting with section 3 (Projects), then the picker
 ## 2. Blog
 
 - [ ] Content collection with Zod schema: `title`, `date`, `tags`, `excerpt`
-- [ ] Migrate the four posts and their three images from `djm158/portfolio-v2` `_posts/`; write excerpts (the design has one per post)
+- [ ] Write posts as they come; the old repo's four posts are skipped as low signal
 - [ ] `/blog`: post list, post count, tag filter chips
 - [ ] `/blog/[slug]`: title, date, tag, read time (computed), rendered markdown, next-post link
 - [ ] Typography styles for rendered markdown: headings, code blocks, images, lists, links
@@ -53,7 +54,7 @@ skips comes back afterwards, starting with section 3 (Projects), then the picker
 ## 3. Projects
 
 - [ ] Content collection with Zod schema: `title`, `kind`, `description`, `tags`, `url`, `image`, `order`, `featured`
-- [ ] Add the six projects (no Wizard) with images from the old repo; find an image for this site's own entry
+- [ ] Add projects as they're built, starting with this site's own entry (the old repo's projects are skipped as low signal; no Wizard)
 - [ ] `/projects`: numbered rows, filter chips by kind
 - [ ] Floating image preview that follows the cursor, on hover-capable devices only
 
@@ -69,10 +70,11 @@ LaTeX (then the PDF) is generated from it. Nothing parses LaTeX in the build.
 - [x] Loader `src/lib/resume/load.ts`: read the YAML, validate with the schema, return typed data; invalid data fails the build
 - [x] Set up Vitest
 - [x] Helpers, test-first: format a date range, months in a role, format a duration (total duration is `inclusiveMonths` from the earliest start to the latest end, done on the page)
-- [ ] `/resume`: summary and links, role list with dates, duration and tags, education card, Download PDF button
+- [ ] `/resume`: summary and links, role list with dates, duration and tags, education card, Download PDF button. Education and Download go in the sticky aside under the picker (`gap-4`); check the aside still fits below the sticky offset on laptop-height viewports, and if not, gate `sticky` behind a min-height query
 - [x] Add `tags` and `short` to each role in `resume.yaml`; check every role tag appears in a skill group
-- [ ] Timeline bar with segment widths proportional to months in each role; segments link to `#role-n`
-- [ ] Skill picker: toggle-button pills and a small `<script>` that marks matching roles, timeline segments and tags with `data-hit`; styling stays in static classes; clicking the selected pill clears it
+- [x] Timeline bar with segment widths proportional to months in each role; segments link to `#role-n`
+- [x] Skill picker: toggle-button pills and a small `<script>` that marks matching roles, timeline segments and tags with `data-hit`; styling stays in static classes; clicking the selected pill clears it
+- [ ] Skill picker "clear" button: small accent button at the right of the "Technical skills" eyebrow, hidden until a skill is picked (`group-data-picked:`), calls the same reset
 - [ ] Skill note under the picker heading: "Pick a skill to see where I used it." by default, "React at X & Y." when picked, a fallback when no role uses the skill; set by the same script, in an `aria-live` region
 - [ ] Hover link: hovering or focusing a timeline segment highlights that role's dates, and hovering a role highlights its segment
 - [ ] LaTeX generator, test-first: an escape function (`&`, `#`, `%`, `$`, `_`, `{`, `}`, `~`, `^`, `\`), then a template that renders the full `.tex` from the data
