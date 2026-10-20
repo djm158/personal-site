@@ -77,9 +77,10 @@ LaTeX (then the PDF) is generated from it. Nothing parses LaTeX in the build.
 - [ ] Skill picker "clear" button: small accent button at the right of the "Technical skills" eyebrow, hidden until a skill is picked (`group-data-picked:`), calls the same reset
 - [ ] Skill note under the picker heading: "Pick a skill to see where I used it." by default, "React at X & Y." when picked, a fallback when no role uses the skill; set by the same script, in an `aria-live` region
 - [ ] Hover link: hovering or focusing a timeline segment highlights that role's dates, and hovering a role highlights its segment
-- [ ] LaTeX generator, test-first: an escape function (`&`, `#`, `%`, `$`, `_`, `{`, `}`, `~`, `^`, `\`), then a template that renders the full `.tex` from the data
-- [ ] Golden test: the generated `.tex` matches the current hand-written `resume.tex`; then delete the hand-written file and stop committing generated output
-- [ ] Build `/resume.pdf` from the generated `.tex` with tectonic in the Netlify build; fall back to a GitHub Action if tectonic won't run there
+- [x] PDF layout in Typst: `resume/resume.typ` reads `resume.yaml` directly and matches the old hand-written LaTeX résumé closely (replaced a LaTeX generator, which needed escaping and kept the layout inside TypeScript strings); the hand-written `resume.tex` is deleted
+- [x] Build `/resume.pdf` with Typst in an `astro:build:done` integration; the build fails if the PDF runs past two pages
+- [ ] Confirm Typst runs in the Netlify build (the build command fetches the pinned static binary); fall back to a GitHub Action if it won't
+- [ ] Wire the Download PDF button on `/resume` to `/resume.pdf` (part of the `/resume` item above)
 
 ## 5. Home
 

@@ -54,7 +54,13 @@ Planned; check `BACKLOG.md` for what exists.
 
 - Blog posts and projects are markdown content collections with Zod schemas.
 - Résumé data lives in `resume/resume.yaml`, the single source of truth. The site reads it
-  directly, and the LaTeX for `resume.pdf` is generated from it. Nothing parses LaTeX.
+  directly, and `resume/resume.typ` reads it to lay out `resume.pdf`. Content changes go in
+  the YAML; the `.typ` file is layout only. Why Typst and not LaTeX:
+  [docs/adr/0001](docs/adr/0001-typst-for-resume-pdf.md).
+- `pnpm build` makes `dist/resume.pdf` with [Typst](https://typst.app), so it must be
+  installed locally (`brew install typst`, same version as `TYPST_VERSION` in `netlify.toml`).
+  The build fails if the PDF runs past two pages. To work on the layout alone:
+  `typst watch --ignore-system-fonts resume/resume.typ`.
 
 ## Design reference
 

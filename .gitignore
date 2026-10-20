@@ -22,3 +22,8 @@ pnpm-debug.log*
 
 # jetbrains setting folder
 .idea/
+
+# typst binary fetched by the Netlify build
+.bin/
+# PDFs from compiling resume.typ by hand; the build writes its own to dist/
+resume/*.pdf

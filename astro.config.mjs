@@ -3,13 +3,14 @@ import { defineConfig, fontProviders } from "astro/config";
 
 import react from "@astrojs/react";
 import tailwindcss from "@tailwindcss/vite";
+import { resumePdf } from "./src/integrations/resume-pdf";
 
 // https://astro.build/config
 export default defineConfig({
   site: "https://danielmcgrath.xyz",
   // Netlify serves each page as a directory index and redirects /page to /page/
   trailingSlash: "always",
-  integrations: [react()],
+  integrations: [react(), resumePdf()],
   fonts: [
     {
       provider: fontProviders.fontsource(),

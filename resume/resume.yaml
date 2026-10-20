@@ -11,10 +11,10 @@ links:
     url: https://www.linkedin.com/in/djmcg/
 
 summary: >-
-  Senior and Staff-level software engineer with 8+ years of experience building
-  React, TypeScript, and Node.js applications. Proven track record of end-to-end
-  product ownership across frontend architecture, design systems, web performance,
-  accessibility, and distributed backend workflows.
+  Full-Stack Software Engineer with 8+ years shipping production web
+  applications in TypeScript, React, Next.js, Node.js, and Python. Strong across
+  API design, data pipelines, and relational and search databases, with a focus
+  on UI craft, web performance, and accessibility.
 
 roles:
   - id: wizard
@@ -40,29 +40,34 @@ roles:
         GCP,
         GitHub Actions,
         Git,
+        WCAG Accessibility (axe),
       ]
     bullets:
       - >-
-        Cut First Contentful Paint by ~50% (down to ~2.6s) on a client-rendered
-        React SPA by eliminating component-library barrel imports, replacing
-        CSS-only loading states with paint-eligible SVGs, and enabling static
+        Shipped a social voting feature end to end: designed the MySQL schema,
+        built the TypeGraphQL API with scoped authorization, and delivered a
+        React client supporting shareable polls and guest voting for
+        unauthenticated users.
+      - >-
+        Reduced First Contentful Paint by ~50% on a client-rendered React SPA by
+        removing component-library barrel imports application-wide, replacing
+        CSS-only loading states with paint-eligible SVG, and enabling static
         asset compression.
       - >-
-        Architected and shipped a social voting feature end-to-end, spanning the
-        MySQL schema, TypeGraphQL API with scoped authorization, and a React
-        client supporting shareable polls and low-friction guest voting.
+        Led a mobile-to-desktop responsive redesign of the customer app,
+        introducing a breakpoint system, MobX-backed navigation, and a reusable
+        drawer pattern that replaced legacy modals.
       - >-
-        Led the customer application's mobile-to-desktop redesign, introducing a
-        responsive breakpoint system, MobX-backed navigation state, and a
-        reusable drawer pattern that replaced legacy modals.
+        Audited accessibility across a 25+ package monorepo, added JSX
+        accessibility linting and axe checks, and fixed WCAG issues across
+        checkout, chat, product detail, gallery, and reviews.
       - >-
-        Audited accessibility across a 25+ package monorepo, enforcing automated
-        JSX a11y linting and axe checks while resolving critical WCAG issues
-        across checkout, chat, product detail, gallery, and review flows.
+        Built partner signup and dashboard on a new multi-tenant organization
+        data model, shipped as routes in the existing app.
 
   - id: commsor
     company: Commsor
-    title: Senior Full-stack Engineer
+    title: Senior Full-Stack Engineer
     location: Remote
     start: "2025-04"
     end: "2025-12"
@@ -74,7 +79,6 @@ roles:
         Next.js,
         Tailwind CSS,
         shadcn/ui,
-        Zustand,
         react-hook-form,
         Zod,
         Better Auth,
@@ -90,26 +94,25 @@ roles:
       ]
     bullets:
       - >-
-        Joined as the founding full-time engineer, owning end-to-end product
-        architecture across the Next.js frontend, Node.js/Supabase backend, and
-        distributed data pipelines for a B2B warm-introduction platform.
+        Founding engineer who owned the product platform end to end: auth,
+        multi-tenant workspaces with RBAC, the core introduction workflow, data
+        pipelines and search, and CRM integrations.
       - >-
-        Re-architected contact discovery and network-graph ingestion using
-        Inngest, Elasticsearch, and Supabase, introducing chunked processing and
-        concurrency controls that reduced large crawls from hours to minutes.
+        Rebuilt contact discovery and network crawling with Inngest,
+        Elasticsearch, and Supabase, adding chunked processing and concurrency
+        controls and cutting large crawls from hours to minutes.
       - >-
-        Built multi-step introduction workflows in Next.js and TypeScript using
-        react-hook-form and Zod, supporting connection graph traversal, rich-text
-        email templating, status tracking, and automated delivery via OAuth
-        Google accounts.
+        Migrated authentication from NextAuth to Better Auth and added workspace
+        role-based permissions, Zod-validated Server Actions, and PostgreSQL
+        row-level security for tenant isolation.
       - >-
-        Migrated authentication from NextAuth to Better Auth, implementing
-        workspace RBAC, Zod-validated Server Actions, and PostgreSQL row-level
-        security (RLS) for strict multi-tenant isolation.
+        Shipped the end-to-end introduction flow in Next.js and TypeScript,
+        including connection selection, rich-text email templates, status
+        tracking, and delivery through connected Google accounts.
       - >-
-        Engineered a bidirectional HubSpot integration for CRM list
-        synchronization, account-owner mapping, and authenticated APIs that
-        surfaced actionable introduction paths directly inside HubSpot.
+        Built the HubSpot integration for CRM list synchronization, account-owner
+        mapping, and authenticated APIs that surfaced relevant introduction paths
+        inside HubSpot.
 
   - id: nearform
     company: Nearform
@@ -131,8 +134,7 @@ roles:
         Storybook,
         Sanity CMS,
         Module Federation,
-        Micro Frontends,
-        Webpack,
+        Victory,
         Jest,
         React Testing Library,
         HTML,
@@ -142,18 +144,20 @@ roles:
       ]
     bullets:
       - >-
-        Spearheaded the frontend integration for a Webpack Module Federation
-        migration at a Fortune 500 e-commerce client, decoupling independently
-        deployed storefront micro-frontends from shared navigation and monolithic
-        release cycles.
+        Built the frontend integration for a Module Federation migration at a
+        Fortune 500 e-commerce client, decoupling independently owned storefront
+        apps from shared navigation and package releases.
       - >-
-        Owned frontend architecture for an internal application-health monitoring
-        platform at a major telecommunications client, building high-density
-        React, TypeScript, and React Query dashboards for real-time telemetry.
+        Owned frontend development for an internal application-health monitoring
+        tool at a major telecommunications client, building a data-heavy
+        React/TypeScript interface with React Query.
       - >-
-        Contributed features and bug fixes to open-source data visualization
-        libraries Victory and victory-native-xl, and rebuilt Nearform's public
-        marketing site using Next.js, Tailwind CSS, and Sanity CMS.
+        Rebuilt Nearform's marketing site and Storybook component library on
+        Next.js, Tailwind CSS, and Sanity CMS, creating reusable page-builder
+        blocks and structured content schemas.
+      - >-
+        Contributed features, bug fixes, and documentation to the open-source
+        Victory and victory-native-xl data visualization libraries.
 
   - id: wizehive
     company: WizeHive
@@ -177,13 +181,12 @@ roles:
       ]
     bullets:
       - >-
-        Built a drag-and-drop visual workflow editor using React Flow, enabling
-        administrators to dynamically configure complex, multi-stage grant
-        review pipelines.
+        Implemented core features for a GraphQL/Apollo rewrite of a legacy
+        grant-management platform, helping replace its configurable workflow
+        system.
       - >-
-        Developed core frontend features for a GraphQL and Apollo Client rewrite
-        of a legacy grant-management platform, modernizing the configurable form
-        and workflow engine.
+        Created a visual workflow editor with React Flow that let administrators
+        drag, drop, and configure stages in grant-management workflows.
 
   - id: vistar-media
     company: Vistar Media
@@ -196,12 +199,14 @@ roles:
       [
         TypeScript,
         React,
-        Redux,
         Python,
         Flask,
+        REST APIs,
         AWS,
         Docker,
+        Bazel,
         Datadog,
+        CloudWatch,
         HTML,
         CSS/Sass,
         Linux,
@@ -209,13 +214,12 @@ roles:
       ]
     bullets:
       - >-
-        Built campaign-management and inventory features in React, TypeScript,
-        and Redux for the demand-side platform (DSP) of a programmatic
-        digital-out-of-home advertising exchange within a large Bazel monorepo.
+        Developed React/TypeScript features for the buy side of a
+        digital-out-of-home advertising platform, working in a large Bazel-based
+        codebase with an internal design system.
       - >-
-        Maintained Python/Flask backend APIs, executed Redshift data migrations,
-        and participated in primary AWS on-call rotations using Datadog for
-        production observability.
+        Built REST microservices with Python and Flask, and served on AWS
+        on-call rotation with Datadog and CloudWatch monitoring.
 
   - id: computer-enterprises
     company: Computer Enterprises Inc.
@@ -224,64 +228,65 @@ roles:
     start: "2018-01"
     end: "2018-09"
     short: CEI
-    tags: [JavaScript, R, C#/.NET, Web Components, Azure, HTML, CSS/Sass, Git]
+    tags: [JavaScript, Azure, HTML, CSS/Sass, Git]
     bullets:
       - >-
-        Partnered with a national self-storage client's data science team to
-        productionize parallel R pricing models on Azure Batch with automated
-        deployment and monitoring.
-      - >-
-        Prototyped a modular insurance-policy portal using native Web Components
-        integrated into an enterprise C#/.NET backend.
+        Worked with a national self-storage client's data science team to
+        productionize parallel R workloads on Azure Batch, including repeatable
+        deployment and production monitoring.
+      - Prototyped an insurance-policy app with Web Components.
 
 skills:
+  - name: AI-assisted development
+    items: [Claude Code, spec-driven development]
   - name: Languages
-    items: [TypeScript, JavaScript, Python, SQL, HTML, CSS/Sass, R, C#/.NET]
-  - name: Frontend
-    items:
-      - React
-      - Next.js
-      - React Query
-      - SWR
-      - MobX
-      - Redux
-      - Zustand
-      - react-hook-form
-      - Zod
-      - Tailwind CSS
-      - shadcn/ui
-      - Storybook
-      - React Flow
-      - Jest
-      - React Testing Library
-      - Module Federation
-      - Micro Frontends
-      - Webpack
-      - Web Components
+    items: [TypeScript, JavaScript, Python, SQL, HTML, CSS/Sass]
   - name: Backend & Data
     items:
       - Node.js
       - GraphQL
       - Apollo
       - TypeGraphQL
+      - REST APIs
       - Flask
+      - Better Auth
       - PostgreSQL
       - MySQL
       - MongoDB
       - Supabase
       - Elasticsearch
-      - Better Auth
+      - Inngest
+  - name: Frontend
+    items:
+      - React
+      - Next.js
+      - Vite
+      - Tailwind CSS
       - Sanity CMS
+      - shadcn/ui
+      - React Query
+      - SWR
+      - Zod
+      - react-hook-form
+      - Storybook
+      - MobX
+      - Module Federation
+      - WCAG Accessibility (axe)
+      - React Flow
+      - Victory
+  - name: Testing
+    items: [Vitest, Jest, React Testing Library, Playwright, Cypress]
   - name: Cloud & DevOps
     items:
       - AWS
       - GCP
       - Azure
       - Vercel
-      - Inngest
+      - Bazel
       - GitHub Actions
       - Docker
       - Datadog
+      - CloudWatch
       - Git
       - Linux
 

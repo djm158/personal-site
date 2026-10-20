@@ -1,4 +1,13 @@
 # Node comes from .nvmrc; Netlify picks pnpm from pnpm-lock.yaml
 [build]
-  command = "pnpm build"
+  # The build image has no Typst; fetch the static binary so the build can make resume.pdf.
+  # Keep TYPST_VERSION in step with the version used locally.
+  command = """
+    mkdir -p .bin && \
+    curl -fsSL "https://github.com/typst/typst/releases/download/v${TYPST_VERSION}/typst-x86_64-unknown-linux-musl.tar.xz" | tar -xJ -C .bin --strip-components=1 && \
+    PATH="$PWD/.bin:$PATH" pnpm build
+  """
   publish = "dist"
+
+[build.environment]
+  TYPST_VERSION = "0.15.1"
