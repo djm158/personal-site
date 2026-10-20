@@ -1,6 +1,8 @@
 ---
+import Button from "../components/Button.astro";
 import Container from "../components/Container.astro";
 import Eyebrow from "../components/Eyebrow.astro";
+import SkillSheet from "../components/SkillSheet.astro";
 import Layout from "../layouts/Layout.astro";
 import {
   getYearAndMonth,
@@ -20,6 +22,11 @@ const [firstYear] = getYearAndMonth(span.start);
 const yearsOfExperience = Math.floor(
   inclusiveMonths(span.start, span.end) / 12,
 );
+
+const VISIBLE_SKILLS = 4;
+
+const hiddenCount = (items: string[]) =>
+  items.length - VISIBLE_SKILLS >= 2 ? items.length - VISIBLE_SKILLS : 0;
 
 const nonPortfolioLinks = resume.links.filter(
   (link) => new URL(link.url).hostname !== Astro.site?.hostname,
@@ -52,6 +59,12 @@ const nonPortfolioLinks = resume.links.filter(
           {label} <span aria-hidden="true">↗</span>
         </a>
       ))}
+      <Button href="/resume.pdf" target="_blank" size="sm" class="font-sans">
+        Download PDF{" "}
+        <span aria-hidden="true" class="font-mono">
+          ↓
+        </span>
+      </Button>
     </div>
 
     <div class="mt-[clamp(48px,6vw,72px)]">
@@ -77,6 +90,8 @@ const nonPortfolioLinks = resume.links.filter(
       </div>
     </div>
 
+    <SkillSheet skills={resume.skills} roles={resume.roles} />
+
     <div class="flex flex-wrap mt-[clamp(40px,5vw,64px)] gap-x-[clamp(32px,5vw,72px)] gap-y-10 items-start">
       <!-- Roles List -->
       <div class="flex-[3_1_560px] min-w-0 border-b border-line">
@@ -86,7 +101,7 @@ const nonPortfolioLinks = resume.links.filter(
             data-role={role.id}
             data-tags={role.tags?.join(",")}
             data-short={role.short ?? role.company}
-            class="flex flex-wrap gap-y-3 gap-x-10 py-9 border-t-line border-t scroll-mt-20 group-data-picked:opacity-30 data-hit:opacity-100 motion-safe:transition-opacity motion-safe:duration-400"
+            class="flex flex-wrap gap-y-3 gap-x-10 py-9 border-t-line border-t scroll-mt-20 max-[999px]:scroll-mt-36 group-data-picked:opacity-30 data-hit:opacity-100 motion-safe:transition-opacity motion-safe:duration-400"
           >
             <div class="flex-[0_0_160px] flex flex-col font-mono font-medium text-muted text-xs gap-1.5">
               <p class="in-data-hit:text-accent motion-safe:transition-colors motion-safe:duration-300">
@@ -123,12 +138,14 @@ const nonPortfolioLinks = resume.links.filter(
           </article>
         ))}
       </div>
-      <!-- Picker -->
+      <!-- Picker. Always sticky; the card is capped to the window and scrolls inside, so its
+           bottom is always reachable. The roles and picker columns wrap just above 1000px wide;
+           below that this sidebar is hidden and SkillSheet takes over. -->
       <aside
-        class="flex-[1_1_300px] min-w-0 sticky top-24 flex flex-col"
+        class="flex-[1_1_300px] min-w-0 sticky top-24 hidden min-[1000px]:flex flex-col"
         data-picker
       >
-        <div class="bg-surface rounded-[22px] px-6 pt-6.5 pb-7">
+        <div class="bg-surface rounded-[22px] px-6 pt-6.5 pb-7 min-[1000px]:max-h-[calc(100svh-7rem)] min-[1000px]:overflow-y-auto scrollbar-thin">
           <Eyebrow size="sm" as="div" class="mb-2">
             Technical skills
           </Eyebrow>
@@ -141,17 +158,37 @@ const nonPortfolioLinks = resume.links.filter(
                 <Eyebrow size="sm" class="mb-2" as="div">
                   {skill.name}
                 </Eyebrow>
-                <div class="flex flex-wrap gap-1.5">
-                  {skill.items.map((skillName) => (
+                <!-- Collapsed, pills past the first few are hidden, except a picked one -->
+                <div class="flex flex-wrap gap-1.5 not-data-expanded:[&>[data-extra]:not([aria-pressed=true])]:hidden">
+                  {skill.items.map((skillName, i) => (
                     <button
                       type="button"
                       data-skill={skillName}
+                      data-extra={
+                        (hiddenCount(skill.items) > 0 && i >= VISIBLE_SKILLS) ||
+                        undefined
+                      }
                       aria-pressed="false"
-                      class="rounded-full font-medium text-xs py-1.5 px-3 cursor-pointer bg-bg border border-line aria-pressed:bg-ink aria-pressed:text-onink aria-pressed:border-ink motion-safe:transition-colors motion-safe:duration-200"
+                      class="rounded-full font-medium text-xs py-1.5 px-3 cursor-pointer bg-bg border border-line aria-pressed:bg-ink aria-pressed:text-onink aria-pressed:border-ink motion-safe:transition-[color,background-color,border-color,opacity] motion-safe:duration-200 motion-safe:in-data-expanded:starting:opacity-0"
                     >
                       {skillName}
                     </button>
                   ))}
+                  {hiddenCount(skill.items) > 0 && (
+                    <button
+                      type="button"
+                      data-skill-toggle
+                      aria-expanded="false"
+                      class="px-1.5 py-1.5 font-mono font-medium text-[11px] text-accent cursor-pointer"
+                    >
+                      <span class="in-data-expanded:hidden">
+                        +{hiddenCount(skill.items)} more
+                      </span>
+                      <span class="hidden in-data-expanded:inline">
+                        Show fewer
+                      </span>
+                    </button>
+                  )}
                 </div>
               </div>
             ))}
@@ -177,8 +214,11 @@ const nonPortfolioLinks = resume.links.filter(
     scope?.removeAttribute("data-picked");
   };
 
-  const pick = (button: HTMLButtonElement, skill: string) => {
-    button.setAttribute("aria-pressed", "true");
+  // The same skill has a pill in the sidebar and in SkillSheet; press both
+  const pick = (skill: string) => {
+    scope
+      ?.querySelectorAll(`button[data-skill="${CSS.escape(skill)}"]`)
+      .forEach((button) => button.setAttribute("aria-pressed", "true"));
 
     document
       .querySelectorAll(`[data-tag="${CSS.escape(skill)}"]`)
@@ -199,8 +239,37 @@ const nonPortfolioLinks = resume.links.filter(
     scope?.toggleAttribute("data-picked", true);
   };
 
-  picker?.addEventListener("click", (e) => {
+  // One group expanded at a time, so the picker stays short and rarely needs to scroll inside
+  const toggleGroup = (toggle: HTMLButtonElement) => {
+    const expand = toggle.getAttribute("aria-expanded") !== "true";
+    picker
+      ?.querySelectorAll<HTMLButtonElement>("button[data-skill-toggle]")
+      .forEach((other) => {
+        const isThis = other === toggle;
+        other.setAttribute("aria-expanded", String(isThis && expand));
+        other.parentElement?.toggleAttribute("data-expanded", isThis && expand);
+      });
+  };
+
+  // SkillSheet listens for this to update its bar
+  const announce = (skill: string | null) =>
+    scope?.dispatchEvent(new CustomEvent("skillchange", { detail: { skill } }));
+
+  // Handles pills and clear buttons in both the sidebar and SkillSheet
+  scope?.addEventListener("click", (e) => {
     if (!(e.target instanceof Element)) return;
+    const toggle = e.target.closest<HTMLButtonElement>(
+      "button[data-skill-toggle]",
+    );
+    if (toggle) {
+      toggleGroup(toggle);
+      return;
+    }
+    if (e.target.closest("button[data-skill-clear]")) {
+      reset();
+      announce(null);
+      return;
+    }
     const button = e.target?.closest<HTMLButtonElement>("button[data-skill]");
     if (!button) return;
     const skill = button.getAttribute("data-skill");
@@ -208,7 +277,8 @@ const nonPortfolioLinks = resume.links.filter(
     const wasPressed = button.getAttribute("aria-pressed") === "true";
     reset();
     if (!wasPressed) {
-      pick(button, skill);
+      pick(skill);
     }
+    announce(wasPressed ? null : skill);
   });
 </script>

@@ -24,6 +24,9 @@ roles:
     start: "2026-01"
     end: "2026-09"
     short: Wizard
+    blurb: >-
+      Shipped social voting from database to UI, rebuilt responsive layouts,
+      and cut First Contentful Paint by roughly half.
     tags:
       [
         TypeScript,
@@ -41,6 +44,7 @@ roles:
         GitHub Actions,
         Git,
         WCAG Accessibility (axe),
+        Jest,
       ]
     bullets:
       - >-
@@ -72,6 +76,9 @@ roles:
     start: "2025-04"
     end: "2025-12"
     short: Commsor
+    blurb: >-
+      Founding engineer who owned the product stack, built the core
+      introduction workflow, and cut network crawls from hours to minutes.
     tags:
       [
         TypeScript,
@@ -121,6 +128,9 @@ roles:
     start: "2022-06"
     end: "2025-04"
     short: Nearform
+    blurb: >-
+      Built the frontend for a Fortune 500 retailer's Module Federation
+      migration and data-heavy monitoring tools for a telecom client.
     tags:
       [
         React,
@@ -166,6 +176,9 @@ roles:
     start: "2020-09"
     end: "2022-06"
     short: WizeHive
+    blurb: >-
+      Built the visual workflow editor for a React and GraphQL rewrite of a
+      grant-management platform.
     tags:
       [
         React,
@@ -195,6 +208,9 @@ roles:
     start: "2018-09"
     end: "2020-09"
     short: Vistar
+    blurb: >-
+      Built React features for a digital out-of-home ad platform, wrote
+      Python microservices, and served on AWS on-call.
     tags:
       [
         TypeScript,
@@ -228,6 +244,9 @@ roles:
     start: "2018-01"
     end: "2018-09"
     short: CEI
+    blurb: >-
+      Turned data science workloads into production systems on Azure and
+      prototyped an insurance app with Web Components.
     tags: [JavaScript, Azure, HTML, CSS/Sass, Git]
     bullets:
       - >-

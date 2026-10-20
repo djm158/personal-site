@@ -26,6 +26,8 @@ export const roleSchema = z
     bullets: z.array(z.string()).min(1),
     tags: z.array(z.string()).optional(),
     short: z.string().optional(),
+    // One-line summary for the home page's experience list; not used in the PDF
+    blurb: z.string().optional(),
   })
   // YYYY-MM strings sort chronologically, so a string comparison is enough
   .refine((role) => !role.end || role.end >= role.start, {

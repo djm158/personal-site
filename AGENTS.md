@@ -44,7 +44,9 @@ with `astro dev stop`, `astro dev status` and `astro dev logs`.
   `src/styles/global.css` under `@theme`. Components use the resulting utilities. Night mode
   works by overriding the same tokens under `[data-theme="night"]`.
 - **Fluid layout.** Follow the design: `clamp()` sizes, wrapping flex rows and auto-fit grids.
-  The only breakpoint is 760px, where the header collapses to a menu.
+  The only breakpoint is 760px, where the header collapses to a menu. The one exception is
+  `/resume` at 1000px, the width where the roles and picker columns stop wrapping: below it
+  the picker is a sticky bar and bottom sheet (`SkillSheet`), above it a sticky sidebar.
 - **Native elements first.** For example `<dialog>` for the mobile menu. Respect
   `prefers-reduced-motion`.
 

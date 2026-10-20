@@ -70,17 +70,19 @@ LaTeX (then the PDF) is generated from it. Nothing parses LaTeX in the build.
 - [x] Loader `src/lib/resume/load.ts`: read the YAML, validate with the schema, return typed data; invalid data fails the build
 - [x] Set up Vitest
 - [x] Helpers, test-first: format a date range, months in a role, format a duration (total duration is `inclusiveMonths` from the earliest start to the latest end, done on the page)
-- [ ] `/resume`: summary and links, role list with dates, duration and tags, education card, Download PDF button. Education and Download go in the sticky aside under the picker (`gap-4`); check the aside still fits below the sticky offset on laptop-height viewports, and if not, gate `sticky` behind a min-height query
+- [ ] `/resume`: summary and links, role list with dates, duration and tags, education card, Download PDF button. The Download button sits in the links row under the summary, not the aside. The picker aside is always sticky; skill groups collapse to their first 4 pills (one group expanded at a time), and from 1000px wide the card is capped to the window and scrolls inside; the education card still needs a home that doesn't make the aside taller
 - [x] Add `tags` and `short` to each role in `resume.yaml`; check every role tag appears in a skill group
 - [x] Timeline bar with segment widths proportional to months in each role; segments link to `#role-n`
 - [x] Skill picker: toggle-button pills and a small `<script>` that marks matching roles, timeline segments and tags with `data-hit`; styling stays in static classes; clicking the selected pill clears it
+- [x] Skill picker below 1000px: `SkillSheet`, a sticky bar above the roles ("Filter by skill", then "React · 5 of 6 roles" with a clear button) that opens the full picker in a bottom-sheet `<dialog>` with role counts on each pill; picking closes the sheet and scrolls to the first match
+- [ ] Skill picker state refactor, before the items below: replace the attribute-driven `reset()`/`pick()` and the `skillchange` event with a nanostores `atom<string[]>` of selected skills (zero or one for now, so multi-select later is a UI change); the page script and `SkillSheet` each subscribe and set `aria-pressed`, `data-hit` and the bar from the value; matching moves to pure, tested functions in `src/lib/resume/` (`matchingRoles(roles, skills)`, later `countsIfAdded`); decide AND vs OR before any multi-select UI (AND is the likely pick)
 - [ ] Skill picker "clear" button: small accent button at the right of the "Technical skills" eyebrow, hidden until a skill is picked (`group-data-picked:`), calls the same reset
 - [ ] Skill note under the picker heading: "Pick a skill to see where I used it." by default, "React at X & Y." when picked, a fallback when no role uses the skill; set by the same script, in an `aria-live` region
 - [ ] Hover link: hovering or focusing a timeline segment highlights that role's dates, and hovering a role highlights its segment
 - [x] PDF layout in Typst: `resume/resume.typ` reads `resume.yaml` directly and matches the old hand-written LaTeX résumé closely (replaced a LaTeX generator, which needed escaping and kept the layout inside TypeScript strings); the hand-written `resume.tex` is deleted
 - [x] Build `/resume.pdf` with Typst in an `astro:build:done` integration; the build fails if the PDF runs past two pages
-- [ ] Confirm Typst runs in the Netlify build (the build command fetches the pinned static binary); fall back to a GitHub Action if it won't
-- [ ] Wire the Download PDF button on `/resume` to `/resume.pdf` (part of the `/resume` item above)
+- [x] Confirm Typst runs in the Netlify build (the build command fetches the pinned static binary); fall back to a GitHub Action if it won't
+- [x] Wire the Download PDF button on `/resume` to `/resume.pdf` (part of the `/resume` item above)
 
 ## 5. Home
 

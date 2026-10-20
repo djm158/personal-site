@@ -13,6 +13,8 @@
   --color-accent: oklch(0.52 0.12 42);
   --color-moss: oklch(0.55 0.08 130);
   --color-onink: oklch(0.965 0.012 80);
+  /* dims the page behind a sheet; stays dark in both themes */
+  --color-scrim: oklch(0.25 0.025 50 / 0.38);
 
   /* avatar */
   --color-hair: oklch(0.6 0.145 42);
@@ -43,6 +45,7 @@
     --color-accent: oklch(0.74 0.12 42);
     --color-moss: oklch(0.68 0.08 130);
     --color-onink: oklch(0.2 0.015 55);
+    --color-scrim: oklch(0.1 0.01 55 / 0.6);
   }
 
   a {

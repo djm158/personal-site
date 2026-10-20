@@ -88,17 +88,24 @@ const { email, roles } = loadResume();
         <li>
           <a
             href={`/resume/#${role.id}`}
-            class="flex flex-wrap items-baseline gap-x-6 gap-y-2 py-5.5 border-t border-line text-ink no-underline motion-safe:transition-[padding] motion-safe:duration-350 motion-safe:ease-[cubic-bezier(.2,.8,.2,1)] hover:pl-4 focus-visible:pl-4"
+            class="flex flex-wrap items-baseline gap-x-6 gap-y-2 py-5.5 border-t border-line text-ink no-underline motion-safe:transition-[padding] motion-safe:duration-350 motion-safe:ease-soft hover:pl-4 focus-visible:pl-4"
           >
             <span class="flex-[0_0_96px] font-mono font-medium text-xs text-muted">
               {formatYearSpan(role.start, role.end)}
             </span>
-            <span class="flex-[1_1_220px] font-serif text-[clamp(24px,2.3vw,30px)]/[1.15]">
-              {role.company}
-            </span>
-            <span class="flex-[0_1_240px] text-[15px] text-muted">
-              {role.title}
-            </span>
+            <div class="flex-[1_1_280px] min-w-0">
+              <div class="flex flex-wrap items-baseline gap-x-6 gap-y-1.5">
+                <span class="grow font-serif text-[clamp(24px,2.3vw,30px)]/[1.15]">
+                  {role.company}
+                </span>
+                <span class="text-[15px] text-muted">{role.title}</span>
+              </div>
+              {role.blurb && (
+                <p class="mt-3 max-w-[62ch] font-light text-[15px]/[1.65] text-muted text-pretty">
+                  {role.blurb}
+                </p>
+              )}
+            </div>
           </a>
         </li>
       ))}

@@ -1,0 +1,246 @@
+---
+import type { Role, Skill } from "../lib/resume/schema";
+import Button from "./Button.astro";
+import Eyebrow from "./Eyebrow.astro";
+
+// The skill picker on narrow screens: a sticky bar above the roles that opens the full picker
+// in a bottom sheet. Picking and clearing are handled by the page's picker script, which
+// announces each change with a `skillchange` event on [data-skill-scope]; this component only
+// opens and closes the sheet and keeps the bar in step.
+interface Props {
+  skills: Skill[];
+  roles: Role[];
+}
+const { skills, roles } = Astro.props;
+
+const roleCount = (skill: string) =>
+  roles.filter((role) => role.tags?.includes(skill)).length;
+const skillTotal = skills.reduce((n, group) => n + group.items.length, 0);
+// The bar sticks under the header, which is 69px tall with the Menu button and 63px from the
+// nav breakpoint. Re-measure if the header changes.
+---
+
+<div class="sticky top-[69px] nav:top-[63px] z-30 -mx-gutter px-gutter py-2.5 mt-7 bg-bg/92 backdrop-blur-[14px] border-b border-line min-[1000px]:hidden">
+  <div class="flex items-center gap-2.5">
+    <button
+      type="button"
+      data-skill-sheet-open
+      aria-haspopup="dialog"
+      class="flex-1 min-w-0 flex items-center gap-2.5 bg-surface rounded-full py-2.25 pl-4 pr-2.25 text-left cursor-pointer"
+    >
+      <span class="flex-1 min-w-0 truncate text-sm font-medium">
+        <span data-skill-bar-idle>
+          Filter by skill{" "}
+          <span class="text-muted font-normal">· {skillTotal} skills</span>
+        </span>
+        <span data-skill-bar-picked hidden>
+          <span
+            data-skill-bar-name
+            class="inline-flex rounded-full bg-ink text-onink text-xs py-1 px-2.5 mr-1.5"
+          ></span>
+          <span data-skill-bar-count class="text-muted font-normal"></span>
+        </span>
+      </span>
+      <span
+        aria-hidden="true"
+        class="font-mono font-medium text-[11px] text-accent pr-1.5"
+      >
+        Skills ↑
+      </span>
+    </button>
+    <button
+      type="button"
+      data-skill-clear
+      aria-label="Clear skill"
+      hidden
+      class="grid place-items-center shrink-0 size-10 rounded-full border border-line bg-bg cursor-pointer text-sm"
+    >
+      ✕
+    </button>
+  </div>
+  <p class="sr-only" aria-live="polite" data-skill-status></p>
+</div>
+
+<dialog
+  data-skill-sheet
+  aria-labelledby="skill-sheet-title"
+  class="skill-sheet mx-auto mt-auto mb-0 w-full max-w-none max-h-[min(82dvh,760px)] p-0 bg-bg text-ink rounded-t-[22px] open:flex flex-col backdrop:bg-scrim"
+>
+  <div class="px-gutter pt-2.5 pb-3.5 border-b border-line">
+    <div
+      aria-hidden="true"
+      class="w-10 h-1 rounded-full bg-line mx-auto mb-3.5"
+    ></div>
+    <div class="flex items-center justify-between gap-3">
+      <h2 id="skill-sheet-title" class="font-serif italic text-[26px]/[1.1]">
+        Pick a skill
+      </h2>
+      <div class="flex items-center gap-2">
+        <button
+          type="button"
+          data-skill-clear
+          hidden
+          class="py-2 px-1 font-mono font-medium text-xs text-accent cursor-pointer"
+        >
+          Clear
+        </button>
+        <Button variant="soft" size="sm" data-skill-sheet-done>
+          Done
+        </Button>
+      </div>
+    </div>
+    <p class="mt-1.5 text-sm text-muted">
+      See which roles used it. Numbers are roles per skill.
+    </p>
+  </div>
+  <!-- Groups flow into as many 20rem columns as fit: one on a phone, two on a tablet.
+       Columns rather than a grid, so a long group doesn't leave gaps beside short ones. The
+       columns sit inside the scrolling box, not on it: a column box with a fixed height fills
+       each column to that height and adds more columns sideways. -->
+  <div class="overflow-y-auto overscroll-contain px-gutter pt-4.5 pb-[calc(4px+env(safe-area-inset-bottom,0px))]">
+    <div class="columns-[20rem] gap-x-8">
+      {skills.map((group) => (
+        <div class="break-inside-avoid pb-5">
+          <Eyebrow size="sm" as="div" class="mb-2">
+            {group.name}
+          </Eyebrow>
+          <div class="flex flex-wrap gap-1.5">
+            {group.items.map((skill) => {
+              const count = roleCount(skill);
+              return (
+                <button
+                  type="button"
+                  data-skill={skill}
+                  aria-pressed="false"
+                  aria-label={
+                    count
+                      ? `${skill}, ${count} role${count > 1 ? "s" : ""}`
+                      : `${skill}, not tagged on a role yet`
+                  }
+                  class:list={[
+                    "rounded-full border font-medium text-[13px] py-2 px-3.25 cursor-pointer aria-pressed:bg-ink aria-pressed:text-onink aria-pressed:border-ink aria-pressed:border-solid motion-safe:transition-colors motion-safe:duration-200",
+                    count
+                      ? "bg-surface border-line"
+                      : "border-dashed border-line text-muted",
+                  ]}
+                >
+                  {skill}
+                  <span class="ml-1.5 font-mono text-[10.5px] text-muted in-aria-pressed:text-onink/70">
+                    {count || "–"}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      ))}
+    </div>
+  </div>
+</dialog>
+
+<script>
+  const scope = document.querySelector<HTMLElement>("[data-skill-scope]");
+  const sheet = document.querySelector<HTMLDialogElement>("[data-skill-sheet]");
+  const openBtn = document.querySelector("[data-skill-sheet-open]");
+  const doneBtn = document.querySelector("[data-skill-sheet-done]");
+  const idle = document.querySelector<HTMLElement>("[data-skill-bar-idle]");
+  const picked = document.querySelector<HTMLElement>("[data-skill-bar-picked]");
+  const nameEl = document.querySelector("[data-skill-bar-name]");
+  const countEl = document.querySelector("[data-skill-bar-count]");
+  const status = document.querySelector("[data-skill-status]");
+  const clears = document.querySelectorAll<HTMLElement>("[data-skill-clear]");
+
+  if (scope && sheet && openBtn && doneBtn && idle && picked) {
+    const reduceMotion = matchMedia("(prefers-reduced-motion: reduce)");
+
+    const closeSheet = async () => {
+      if (!sheet.open) return;
+      sheet.setAttribute("data-closing", "");
+      await Promise.allSettled(
+        sheet.getAnimations({ subtree: true }).map(({ finished }) => finished),
+      );
+      sheet.removeAttribute("data-closing");
+      sheet.close();
+    };
+
+    openBtn.addEventListener("click", () => {
+      sheet.showModal();
+      sheet
+        .querySelector<HTMLElement>('[data-skill][aria-pressed="true"]')
+        ?.focus();
+    });
+    doneBtn.addEventListener("click", closeSheet);
+    // A click on the dialog itself, not its contents, is a click on the backdrop
+    sheet.addEventListener("click", (e) => {
+      if (e.target === sheet) closeSheet();
+    });
+    sheet.addEventListener("cancel", (e) => {
+      e.preventDefault();
+      closeSheet();
+    });
+
+    scope.addEventListener("skillchange", async (e) => {
+      const { skill } = (e as CustomEvent<{ skill: string | null }>).detail;
+      const articles =
+        scope.querySelectorAll<HTMLElement>("article[data-role]");
+      const hits = [...articles].filter((a) => a.hasAttribute("data-hit"));
+
+      idle.hidden = Boolean(skill);
+      picked.hidden = !skill;
+      clears.forEach((button) => (button.hidden = !skill));
+      if (nameEl) nameEl.textContent = skill ?? "";
+      if (countEl) {
+        countEl.textContent = hits.length
+          ? `${hits.length} of ${articles.length} roles`
+          : "no roles yet";
+      }
+      if (status) {
+        status.textContent = !skill
+          ? ""
+          : hits.length
+            ? `${skill}: used at ${hits.map((a) => a.dataset.short).join(", ")}.`
+            : `${skill} isn't tagged on a role yet.`;
+      }
+
+      // Picking from the sheet closes it and brings the first match into view
+      if (skill && sheet.open) {
+        await closeSheet();
+        hits[0]?.scrollIntoView({
+          behavior: reduceMotion.matches ? "auto" : "smooth",
+          block: "start",
+        });
+      }
+    });
+  }
+</script>
+
+<style>
+  @media (prefers-reduced-motion: no-preference) {
+    .skill-sheet {
+      translate: 0 100%;
+      transition: translate 0.38s var(--ease-soft);
+    }
+    .skill-sheet::backdrop {
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+    .skill-sheet[open]:not([data-closing]) {
+      translate: 0 0;
+    }
+    .skill-sheet[open]:not([data-closing])::backdrop {
+      opacity: 1;
+    }
+    .skill-sheet[data-closing] {
+      transition-duration: 0.24s;
+      transition-timing-function: ease-in;
+    }
+    @starting-style {
+      .skill-sheet[open]:not([data-closing]) {
+        translate: 0 100%;
+      }
+      .skill-sheet[open]:not([data-closing])::backdrop {
+        opacity: 0;
+      }
+    }
+  }
+</style>
