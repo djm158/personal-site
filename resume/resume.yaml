@@ -11,10 +11,12 @@ links:
     url: https://www.linkedin.com/in/djmcg/
 
 summary: >-
-  Full-Stack Software Engineer with 8+ years shipping production web
-  applications in TypeScript, React, Next.js, Node.js, and Python. Strong across
-  API design, data pipelines, and relational and search databases, with a focus
-  on UI craft, web performance, and accessibility.
+  Senior Full-Stack Engineer with 8+ years shipping production web applications
+  in TypeScript, React, Next.js, Node.js, and Python. Most recently led the
+  responsive redesign, accessibility, and social voting work for an AI-native
+  shopping agent; before that, founding engineer owning the data pipeline,
+  search, and auth behind an early-stage go-to-market product. Builds daily with
+  Claude Code and other agentic tools.
 
 roles:
   - id: wizard
@@ -25,8 +27,8 @@ roles:
     end: "2026-09"
     short: Wizard
     blurb: >-
-      Shipped social voting from database to UI, rebuilt responsive layouts,
-      and cut First Contentful Paint by roughly half.
+      Shipped social voting from database to UI, led the responsive redesign,
+      and drove accessibility fixes across the customer app.
     tags:
       [
         TypeScript,
@@ -39,35 +41,44 @@ roles:
         MongoDB,
         HTML,
         CSS/Sass,
+        WCAG,
+        screen reader testing,
+        axe,
+        eslint-plugin-jsx-a11y,
+        Lighthouse,
+        Jest,
         Datadog,
         GCP,
         GitHub Actions,
         Git,
-        WCAG Accessibility (axe),
-        Jest,
+        Claude Code,
+        agent instruction files,
       ]
     bullets:
       - >-
-        Shipped a social voting feature end to end: designed the MySQL schema,
-        built the TypeGraphQL API with scoped authorization, and delivered a
-        React client supporting shareable polls and guest voting for
-        unauthenticated users.
+        Designed and shipped social voting end to end: a MySQL schema that
+        enforces vote integrity at the database level, a TypeGraphQL API with
+        scoped authorization and scheduled poll lifecycle jobs, and a React
+        client with shareable polls viewable by guests.
       - >-
-        Reduced First Contentful Paint by ~50% on a client-rendered React SPA by
-        removing component-library barrel imports application-wide, replacing
-        CSS-only loading states with paint-eligible SVG, and enabling static
+        Led the mobile-to-desktop responsive redesign of the customer app with
+        design, introducing a breakpoint system, MobX-backed navigation, and a
+        reusable drawer pattern that replaced legacy modals.
+      - >-
+        Initiated Lighthouse and screen reader audits during the redesign; fixed
+        WCAG issues (blocked zoom, off-screen content read by screen readers,
+        keyboard focus) across checkout, chat, product, gallery, and reviews;
+        added accessibility linting to the shared ESLint config; shipped static
         asset compression.
       - >-
-        Led a mobile-to-desktop responsive redesign of the customer app,
-        introducing a breakpoint system, MobX-backed navigation, and a reusable
-        drawer pattern that replaced legacy modals.
+        Delivered partner signup and dashboard for a new partner program: React
+        flows on a multi-tenant organization model and a GraphQL signup backend
+        creating the organization, membership, and retailer claim in one
+        transaction.
       - >-
-        Audited accessibility across a 25+ package monorepo, added JSX
-        accessibility linting and axe checks, and fixed WCAG issues across
-        checkout, chat, product detail, gallery, and reviews.
-      - >-
-        Built partner signup and dashboard on a new multi-tenant organization
-        data model, shipped as routes in the existing app.
+        Wrote the repository's AI assistant instructions (service map,
+        data-layer and auth conventions) used for automated Copilot PR review,
+        and took part in the team's move to an enterprise Claude Code rollout.
 
   - id: commsor
     company: Commsor
@@ -86,6 +97,7 @@ roles:
         Next.js,
         Tailwind CSS,
         shadcn/ui,
+        SWR,
         react-hook-form,
         Zod,
         Better Auth,
@@ -105,19 +117,23 @@ roles:
         multi-tenant workspaces with RBAC, the core introduction workflow, data
         pipelines and search, and CRM integrations.
       - >-
-        Rebuilt contact discovery and network crawling with Inngest,
-        Elasticsearch, and Supabase, adding chunked processing and concurrency
-        controls and cutting large crawls from hours to minutes.
+        Re-architected network discovery after benchmarking graph databases
+        (Neo4j, TigerGraph) against search: Elasticsearch over 700M+ profiles
+        with an Inngest pipeline of chunked, retryable jobs and per-workspace
+        concurrency limits, scaling networks from ~100 to tens of thousands of
+        connections in under a minute and enabling live sales demos.
       - >-
-        Migrated authentication from NextAuth to Better Auth and added workspace
-        role-based permissions, Zod-validated Server Actions, and PostgreSQL
-        row-level security for tenant isolation.
+        Led the migration from NextAuth to Better Auth after library workarounds
+        caused silent sign-in failures, mapping it onto the existing schema and
+        consolidating user tables; added workspace role-based permissions,
+        Zod-validated Server Actions, and PostgreSQL row-level security for
+        tenant isolation.
       - >-
         Shipped the end-to-end introduction flow in Next.js and TypeScript,
         including connection selection, rich-text email templates, status
         tracking, and delivery through connected Google accounts.
       - >-
-        Built the HubSpot integration for CRM list synchronization, account-owner
+        Developed the HubSpot integration for CRM list synchronization, account-owner
         mapping, and authenticated APIs that surfaced relevant introduction paths
         inside HubSpot.
 
@@ -155,8 +171,10 @@ roles:
     bullets:
       - >-
         Built the frontend integration for a Module Federation migration at a
-        Fortune 500 e-commerce client, decoupling independently owned storefront
-        apps from shared navigation and package releases.
+        Fortune 500 e-commerce client, decoupling storefront apps from shared
+        navigation releases; after an all-at-once migration strained downstream
+        teams, pushed for team-by-team rollouts with upfront planning and
+        rollback plans.
       - >-
         Owned frontend development for an internal application-health monitoring
         tool at a major telecommunications client, building a data-heavy
@@ -230,12 +248,11 @@ roles:
       ]
     bullets:
       - >-
-        Developed React/TypeScript features for the buy side of a
-        digital-out-of-home advertising platform, working in a large Bazel-based
-        codebase with an internal design system.
+        Developed React/TypeScript features for a digital-out-of-home ad buying
+        platform in a large Bazel codebase with an internal design system.
       - >-
-        Built REST microservices with Python and Flask, and served on AWS
-        on-call rotation with Datadog and CloudWatch monitoring.
+        Built Python/Flask REST microservices and served on the AWS on-call
+        rotation (Datadog, CloudWatch).
 
   - id: computer-enterprises
     company: Computer Enterprises Inc.
@@ -250,16 +267,31 @@ roles:
     tags: [JavaScript, Azure, HTML, CSS/Sass, Git]
     bullets:
       - >-
-        Worked with a national self-storage client's data science team to
-        productionize parallel R workloads on Azure Batch, including repeatable
-        deployment and production monitoring.
+        Productionized a national self-storage client's parallel R data science
+        workloads on Azure Batch, with repeatable deployment and monitoring.
       - Prototyped an insurance-policy app with Web Components.
 
 skills:
-  - name: AI-assisted development
-    items: [Claude Code, spec-driven development]
   - name: Languages
     items: [TypeScript, JavaScript, Python, SQL, HTML, CSS/Sass]
+  - name: Frontend
+    items:
+      - React
+      - Next.js
+      - Vite
+      - Tailwind CSS
+      - shadcn/ui
+      - React Query
+      - SWR
+      - Zod
+      - react-hook-form
+      - MobX
+      - Storybook
+      - Module Federation
+      - React Flow
+      - Victory
+      - Sanity CMS
+      - Figma
   - name: Backend & Data
     items:
       - Node.js
@@ -268,50 +300,43 @@ skills:
       - TypeGraphQL
       - REST APIs
       - Flask
-      - Better Auth
       - PostgreSQL
       - MySQL
       - MongoDB
       - Supabase
       - Elasticsearch
       - Inngest
-  - name: Frontend
+      - Better Auth
+  - name: Accessibility & Performance
     items:
-      - React
-      - Next.js
-      - Vite
-      - Tailwind CSS
-      - Sanity CMS
-      - shadcn/ui
-      - React Query
-      - SWR
-      - Zod
-      - react-hook-form
-      - Storybook
-      - MobX
-      - Module Federation
-      - WCAG Accessibility (axe)
-      - React Flow
-      - Victory
-  - name: Testing
-    items: [Vitest, Jest, React Testing Library, Playwright, Cypress]
-  - name: Cloud & DevOps
+      - WCAG
+      - screen reader testing
+      - axe
+      - eslint-plugin-jsx-a11y
+      - Lighthouse
+  - name: Testing & DevOps
     items:
+      - Vitest
+      - Jest
+      - React Testing Library
+      - Playwright
+      - Cypress
       - AWS
       - GCP
-      - Azure
       - Vercel
-      - Bazel
-      - GitHub Actions
       - Docker
+      - GitHub Actions
       - Datadog
       - CloudWatch
+      - Azure
+      - Bazel
       - Git
       - Linux
+  - name: AI-assisted development
+    items: [Claude Code, spec-driven development, agent instruction files]
 
 education:
   - school: University of Pittsburgh
     degree: B.S. Computer Engineering
     graduated: "2017-12"
-    gpa: "3.8"
     honors: Summa Cum Laude
