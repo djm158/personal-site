@@ -95,7 +95,8 @@ roles:
     short: Commsor
     blurb: >-
       Founding engineer who owned the product stack, built the core
-      introduction workflow, and cut network crawls from hours to minutes.
+      introduction workflow, and scaled network discovery to tens of thousands
+      of connections in under a minute.
     tags:
       [
         TypeScript,
