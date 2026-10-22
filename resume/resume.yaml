@@ -56,20 +56,26 @@ roles:
       ]
     bullets:
       - >-
-        Designed and shipped social voting end to end: a MySQL schema that
-        enforces vote integrity at the database level, a TypeGraphQL API with
-        scoped authorization and scheduled poll lifecycle jobs, and a React
-        client with shareable polls viewable by guests.
+        Shipped shareable product polls so shoppers could put recommendations to
+        a vote among friends, designed end to end: a MySQL schema that enforces
+        vote integrity at the database level, a TypeGraphQL API with scoped
+        authorization and scheduled poll lifecycle jobs, and React flows with
+        guest-viewable share links.
+      - >-
+        Built the API and sources drawer that show shoppers the reviews and
+        editorials behind each AI recommendation, saving references when chat
+        items are created and upgrading legacy items as they were read instead
+        of migrating large MongoDB collections.
       - >-
         Led the mobile-to-desktop responsive redesign of the customer app with
         design, introducing a breakpoint system, MobX-backed navigation, and a
         reusable drawer pattern that replaced legacy modals.
       - >-
-        Initiated Lighthouse and screen reader audits during the redesign; fixed
-        WCAG issues (blocked zoom, off-screen content read by screen readers,
-        keyboard focus) across checkout, chat, product, gallery, and reviews;
-        added accessibility linting to the shared ESLint config; shipped static
-        asset compression.
+        Fixed WCAG issues blocking screen reader and keyboard users across
+        checkout, chat, product, gallery, and reviews (blocked zoom, off-screen
+        content read aloud, keyboard focus) after initiating Lighthouse and
+        screen reader audits during the redesign; added accessibility linting to
+        the shared ESLint config and shipped static asset compression.
       - >-
         Delivered partner signup and dashboard for a new partner program: React
         flows on a multi-tenant organization model and a GraphQL signup backend
@@ -117,17 +123,18 @@ roles:
         multi-tenant workspaces with RBAC, the core introduction workflow, data
         pipelines and search, and CRM integrations.
       - >-
-        Re-architected network discovery after benchmarking graph databases
-        (Neo4j, TigerGraph) against search: Elasticsearch over 700M+ profiles
-        with an Inngest pipeline of chunked, retryable jobs and per-workspace
-        concurrency limits, scaling networks from ~100 to tens of thousands of
-        connections in under a minute and enabling live sales demos.
+        Scaled network discovery from ~100 to tens of thousands of connections
+        per person, with results in under a minute, enabling live sales demos:
+        benchmarked graph databases (Neo4j, TigerGraph) against search, then
+        built an Elasticsearch pipeline over 700M+ profiles with chunked,
+        retryable Inngest jobs and per-workspace concurrency limits.
       - >-
         Led the migration from NextAuth to Better Auth after library workarounds
         caused silent sign-in failures, mapping it onto the existing schema and
         consolidating user tables; added workspace role-based permissions,
         Zod-validated Server Actions, and PostgreSQL row-level security for
-        tenant isolation.
+        tenant isolation, and coached new hires on the Server Actions validation
+        pattern.
       - >-
         Shipped the end-to-end introduction flow in Next.js and TypeScript,
         including connection selection, rich-text email templates, status
@@ -213,8 +220,7 @@ roles:
     bullets:
       - >-
         Implemented core features for a GraphQL/Apollo rewrite of a legacy
-        grant-management platform, helping replace its configurable workflow
-        system.
+        grant-management platform, replacing its configurable workflow system.
       - >-
         Created a visual workflow editor with React Flow that let administrators
         drag, drop, and configure stages in grant-management workflows.
