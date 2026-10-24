@@ -52,7 +52,6 @@ roles:
         GitHub Actions,
         Git,
         Claude Code,
-        agent instruction files,
       ]
     bullets:
       - >-
@@ -60,7 +59,8 @@ roles:
         a vote among friends, designed end to end: a MySQL schema that enforces
         vote integrity at the database level, a TypeGraphQL API with scoped
         authorization and scheduled poll lifecycle jobs, and React flows with
-        guest-viewable share links.
+        guest-viewable share links; Wizard promoted the launch with LinkedIn
+        posts and targeted ads.
       - >-
         Built the API and sources drawer that show shoppers the reviews and
         editorials behind each AI recommendation, saving references when chat
@@ -110,6 +110,7 @@ roles:
         Better Auth,
         Node.js,
         Supabase,
+        Supabase Realtime (WebSockets),
         PostgreSQL,
         Elasticsearch,
         Inngest,
@@ -117,12 +118,15 @@ roles:
         HTML,
         CSS/Sass,
         Git,
+        Claude Code,
       ]
     bullets:
       - >-
         Founding engineer who owned the product platform end to end: auth,
         multi-tenant workspaces with RBAC, the core introduction workflow, data
-        pipelines and search, and CRM integrations.
+        pipelines and search, and CRM integrations; designed the technical hiring
+        process (take-home project with live review) and hired and onboarded two
+        engineers.
       - >-
         Scaled network discovery from ~100 to tens of thousands of connections
         per person, with results in under a minute, enabling live sales demos:
@@ -130,20 +134,23 @@ roles:
         built an Elasticsearch pipeline over 700M+ profiles with chunked,
         retryable Inngest jobs and per-workspace concurrency limits.
       - >-
+        Added realtime WebSocket notifications (Supabase Realtime) for
+        background-job and CRM-sync results: private per-workspace channels
+        secured with row-level security, server-only publishing, and batched
+        failure alerts.
+      - >-
         Led the migration from NextAuth to Better Auth after library workarounds
         caused silent sign-in failures, mapping it onto the existing schema and
         consolidating user tables; added workspace role-based permissions,
         Zod-validated Server Actions, and PostgreSQL row-level security for
-        tenant isolation, and coached new hires on the Server Actions validation
-        pattern.
+        tenant isolation.
       - >-
         Shipped the end-to-end introduction flow in Next.js and TypeScript,
         including connection selection, rich-text email templates, status
         tracking, and delivery through connected Google accounts.
       - >-
-        Developed the HubSpot integration for CRM list synchronization, account-owner
-        mapping, and authenticated APIs that surfaced relevant introduction paths
-        inside HubSpot.
+        Built the HubSpot integration: CRM list sync, account-owner mapping, and
+        introduction paths in HubSpot.
 
   - id: nearform
     company: Nearform
@@ -311,6 +318,7 @@ skills:
       - MySQL
       - MongoDB
       - Supabase
+      - Supabase Realtime (WebSockets)
       - Elasticsearch
       - Inngest
       - Better Auth
@@ -340,7 +348,7 @@ skills:
       - Git
       - Linux
   - name: AI-assisted development
-    items: [Claude Code, spec-driven development, agent instruction files]
+    items: [Claude Code]
 
 education:
   - school: University of Pittsburgh
