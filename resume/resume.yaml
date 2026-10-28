@@ -11,12 +11,11 @@ links:
     url: https://www.linkedin.com/in/djmcg/
 
 summary: >-
-  Senior Full-Stack Engineer with 8+ years shipping production web applications
-  in TypeScript, React, Next.js, Node.js, and Python. Most recently led the
-  responsive redesign, accessibility, and social voting work for an AI-native
-  shopping agent; before that, founding engineer owning the data pipeline,
-  search, and auth behind an early-stage go-to-market product. Builds daily with
-  Claude Code and other agentic tools.
+  Senior Full-Stack Engineer with 8+ years shipping production web apps in
+  TypeScript, React, Next.js, and Node.js. As founding engineer at Commsor, built
+  search over 700M+ profiles and grew in-house engineering from one to three; at
+  Wizard AI, shipped polls and favorites end to end, built a partner dashboard,
+  and led the desktop redesign. Uses Claude Code daily.
 
 roles:
   - id: wizard
@@ -49,42 +48,36 @@ roles:
         Jest,
         Datadog,
         GCP,
+        Terraform,
         GitHub Actions,
         Git,
         Claude Code,
       ]
     bullets:
       - >-
-        Shipped shareable product polls so shoppers could put recommendations to
-        a vote among friends, designed end to end: a MySQL schema that enforces
-        vote integrity at the database level, a TypeGraphQL API with scoped
-        authorization and scheduled poll lifecycle jobs, and React flows with
-        guest-viewable share links; Wizard promoted the launch with LinkedIn
-        posts and targeted ads.
+        Shipped shareable product polls end to end: MySQL schema enforcing vote
+        integrity, integration-tested TypeGraphQL API with scoped auth and
+        scheduled lifecycle jobs, and React guest share flows.
       - >-
-        Built the API and sources drawer that show shoppers the reviews and
-        editorials behind each AI recommendation, saving references when chat
-        items are created and upgrading legacy items as they were read instead
-        of migrating large MongoDB collections.
+        Built favorites end to end: MySQL schema, integration-tested GraphQL API,
+        MobX store, and UI.
       - >-
-        Led the mobile-to-desktop responsive redesign of the customer app with
-        design, introducing a breakpoint system, MobX-backed navigation, and a
-        reusable drawer pattern that replaced legacy modals.
+        Led the customer app's move from a fixed 430px mobile layout to desktop
+        with the design team: shared breakpoints across 3 packages, consolidated
+        6 duplicated headers into one, and replaced legacy modals with a reusable
+        drawer.
       - >-
-        Fixed WCAG issues blocking screen reader and keyboard users across
-        checkout, chat, product, gallery, and reviews (blocked zoom, off-screen
-        content read aloud, keyboard focus) after initiating Lighthouse and
-        screen reader audits during the redesign; added accessibility linting to
-        the shared ESLint config and shipped static asset compression.
+        Built the sources drawer showing shoppers the reviews behind each AI
+        recommendation, upgrading legacy data on read.
       - >-
-        Delivered partner signup and dashboard for a new partner program: React
-        flows on a multi-tenant organization model and a GraphQL signup backend
-        creating the organization, membership, and retailer claim in one
-        transaction.
+        Raised Lighthouse accessibility on core screens from 82 to 95 (average)
+        by initiating audits and fixing 38 WCAG failures across checkout, chat,
+        product, gallery, and reviews; added jsx-a11y linting to the shared
+        ESLint config.
       - >-
-        Wrote the repository's AI assistant instructions (service map,
-        data-layer and auth conventions) used for automated Copilot PR review,
-        and took part in the team's move to an enterprise Claude Code rollout.
+        Cut JavaScript downloaded on first load by 70% and first contentful
+        paint by 59% (Lighthouse mobile) after finding the customer app served
+        uncompressed assets, then enabling Cloud CDN compression in Terraform.
 
   - id: commsor
     company: Commsor
@@ -122,35 +115,24 @@ roles:
       ]
     bullets:
       - >-
-        Founding engineer who owned the product platform end to end: auth,
-        multi-tenant workspaces with RBAC, the core introduction workflow, data
-        pipelines and search, and CRM integrations; designed the technical hiring
-        process (take-home project with live review) and hired and onboarded two
-        engineers.
+        Scaled network discovery from about 100 to tens of thousands of
+        connections per person in under a minute, enabling live sales demos:
+        replaced a slow graph-database crawl with a retryable Inngest +
+        Elasticsearch pipeline over 700M+ profiles.
       - >-
-        Scaled network discovery from ~100 to tens of thousands of connections
-        per person, with results in under a minute, enabling live sales demos:
-        benchmarked graph databases (Neo4j, TigerGraph) against search, then
-        built an Elasticsearch pipeline over 700M+ profiles with chunked,
-        retryable Inngest jobs and per-workspace concurrency limits.
+        Owned the product platform end to end as founding engineer; designed the
+        technical hiring process (take-home with live review) and hired and
+        onboarded two engineers, growing in-house engineering from one to three.
       - >-
-        Added realtime WebSocket notifications (Supabase Realtime) for
-        background-job and CRM-sync results: private per-workspace channels
-        secured with row-level security, server-only publishing, and batched
-        failure alerts.
+        Led the NextAuth to Better Auth migration after library workarounds
+        caused silent sign-in failures, consolidating user tables; added
+        workspace RBAC and PostgreSQL row-level security for tenant isolation.
       - >-
-        Led the migration from NextAuth to Better Auth after library workarounds
-        caused silent sign-in failures, mapping it onto the existing schema and
-        consolidating user tables; added workspace role-based permissions,
-        Zod-validated Server Actions, and PostgreSQL row-level security for
-        tenant isolation.
+        Shipped the end-to-end introduction workflow in Next.js, with delivery
+        via connected Google accounts.
       - >-
-        Shipped the end-to-end introduction flow in Next.js and TypeScript,
-        including connection selection, rich-text email templates, status
-        tracking, and delivery through connected Google accounts.
-      - >-
-        Built the HubSpot integration: CRM list sync, account-owner mapping, and
-        introduction paths in HubSpot.
+        Added real-time job and CRM-sync notifications over Supabase Realtime
+        with RLS-secured per-workspace channels.
 
   - id: nearform
     company: Nearform
@@ -185,22 +167,19 @@ roles:
       ]
     bullets:
       - >-
-        Built the frontend integration for a Module Federation migration at a
-        Fortune 500 e-commerce client, decoupling storefront apps from shared
-        navigation releases; after an all-at-once migration strained downstream
-        teams, pushed for team-by-team rollouts with upfront planning and
-        rollback plans.
+        Built the Module Federation integration decoupling a Fortune 500
+        retailer's storefront apps from shared navigation releases; after an
+        all-at-once rollout strained downstream teams, pushed for team-by-team
+        rollouts with rollback plans.
       - >-
-        Owned frontend development for an internal application-health monitoring
-        tool at a major telecommunications client, building a data-heavy
-        React/TypeScript interface with React Query.
+        Led frontend development of a data-heavy app-health monitoring tool for a
+        major telecom client (React, React Query).
       - >-
         Rebuilt Nearform's marketing site and Storybook component library on
-        Next.js, Tailwind CSS, and Sanity CMS, creating reusable page-builder
-        blocks and structured content schemas.
+        Next.js, Tailwind CSS, and Sanity CMS.
       - >-
-        Contributed features, bug fixes, and documentation to the open-source
-        Victory and victory-native-xl data visualization libraries.
+        Contributed features, fixes, and docs to the open-source Victory and
+        victory-native-xl data visualization libraries.
 
   - id: wizehive
     company: WizeHive
@@ -227,11 +206,9 @@ roles:
       ]
     bullets:
       - >-
-        Implemented core features for a GraphQL/Apollo rewrite of a legacy
-        grant-management platform, replacing its configurable workflow system.
-      - >-
-        Created a visual workflow editor with React Flow that let administrators
-        drag, drop, and configure stages in grant-management workflows.
+        Built core features for a GraphQL/Apollo rewrite of a legacy
+        grant-management platform, including a drag-and-drop React Flow editor
+        that let administrators configure workflow stages themselves.
 
   - id: vistar-media
     company: Vistar Media
@@ -262,11 +239,8 @@ roles:
       ]
     bullets:
       - >-
-        Developed React/TypeScript features for a digital-out-of-home ad buying
-        platform in a large Bazel codebase with an internal design system.
-      - >-
-        Built Python/Flask REST microservices and served on the AWS on-call
-        rotation (Datadog, CloudWatch).
+        Built React/TypeScript features and Python/Flask microservices for an ad
+        buying platform; served on AWS on-call.
 
   - id: computer-enterprises
     company: Computer Enterprises Inc.
@@ -282,8 +256,7 @@ roles:
     bullets:
       - >-
         Productionized a national self-storage client's parallel R data science
-        workloads on Azure Batch, with repeatable deployment and monitoring.
-      - Prototyped an insurance-policy app with Web Components.
+        workloads on Azure Batch.
 
 skills:
   - name: Languages
@@ -340,6 +313,7 @@ skills:
       - GCP
       - Vercel
       - Docker
+      - Terraform
       - GitHub Actions
       - Datadog
       - CloudWatch
@@ -352,6 +326,7 @@ skills:
 
 education:
   - school: University of Pittsburgh
-    degree: B.S. Computer Engineering
+    degree: Bachelor of Science in Computer Engineering
+    start: "2013-09"
     graduated: "2017-12"
     honors: Summa Cum Laude

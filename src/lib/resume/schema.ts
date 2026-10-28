@@ -43,6 +43,7 @@ export const skillSchema = z.strictObject({
 export const educationSchema = z.strictObject({
   school: z.string(),
   degree: z.string(),
+  start: yearMonthSchema.optional(),
   graduated: yearMonthSchema,
   gpa: z.string().optional(),
   honors: z.string().optional(),

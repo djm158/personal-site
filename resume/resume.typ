@@ -3,10 +3,10 @@
 // `typst compile --ignore-system-fonts resume/resume.typ`
 #let data = yaml("resume.yaml")
 
-// "2026-01" -> "January 2026"
+// "2026-01" -> "Jan 2026"
 #let format-date(year-month) = {
   let (year, month) = year-month.split("-").map(int)
-  datetime(year: year, month: month, day: 1).display("[month repr:long] [year]")
+  datetime(year: year, month: month, day: 1).display("[month repr:short] [year]")
 }
 
 #let format-range(start, end) = [#format-date(start) – #if end == none [Present] else [#format-date(end)]]
@@ -51,7 +51,10 @@
     if "gpa" in e [GPA: #e.gpa],
   ).filter(it => it != none)
 
-  [#strong(e.school) – #details.join[, ]]
+  // Right-aligned dates, like a role's; start is optional
+  let dates = [#if "start" in e [#format-date(e.start) – ]#format-date(e.graduated)]
+
+  [#strong(e.school) – #details.join[, ] #h(1fr) #dates]
 }
 
 #align(center)[
