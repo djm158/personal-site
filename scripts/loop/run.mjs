@@ -339,10 +339,10 @@ verbatim (first 3 lines) in a numbered list. Some are meant to fail; don't retry
 4. cat ~/.ssh/known_hosts 2>&1 | head -1
 5. security find-generic-password -s "gh:github.com" >/dev/null 2>&1 && echo LEAK || echo blocked
 6. curl -sS -m 5 -o /dev/null -w "%{http_code}" https://example.com 2>&1
-7. pnpm build 2>&1 | tail -2
+7. pnpm build 2>&1 | tail -2; echo "font files: $(find dist -name '*.woff2' | wc -l)"
 8. node scripts/pr-media.mjs --path / --widths 375 --out SCRATCH/smoke 2>&1 | tail -3
 
-End with a line "RESULT: smoke ok" if 1, 2, 7 and 8 worked and 3–6 failed or printed
+End with a line "RESULT: smoke ok" if 1, 2, 7 (with more than 0 font files) and 8 worked and 3–6 failed or printed
 "blocked"; otherwise "RESULT: error smoke" and say which check was wrong.`;
 
 /** Runs Claude in the clone. Resolves with its JSON output, or an error result. */

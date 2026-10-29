@@ -41,7 +41,9 @@ has the same keys at the top level.
         "github.com",
         "api.github.com",
         "raw.githubusercontent.com",
-        "registry.npmjs.org"
+        "registry.npmjs.org",
+        "api.fontsource.org",
+        "cdn.jsdelivr.net"
       ],
       "allowLocalBinding": true
     },
@@ -59,6 +61,9 @@ has the same keys at the top level.
 - The macOS profile always allows `com.apple.SecurityServer` and `com.apple.securityd.xpc`, and
   no setting removes them. Denying reads of `~/Library/Keychains` is what blocks keychain
   items: the login keychain is a file that the client reads.
+- `api.fontsource.org` and `cdn.jsdelivr.net` are for the build: Astro downloads the site's fonts
+  from Fontsource. Without them the build still succeeds, but with no font files, so every
+  "after" screenshot shows fallback fonts.
 - `allowLocalBinding` is for `pr-media.mjs`, which serves `./dist` on a local port.
 - Set `TMPDIR` to a writable folder. Under `srt` it pointed at `/tmp/claude`, which didn't
   exist, and Playwright's `mkdtemp` failed.
