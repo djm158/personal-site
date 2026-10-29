@@ -1,0 +1,165 @@
+name: Content guard
+
+# Fails when an agent PR changes a path in .github/content-paths.txt, until Dan adds the
+# content-ok label. See .claude/prompts/backlog-iteration.md.
+#
+# pull_request_target, not pull_request: it runs this file as it is on main, so a PR can't
+# edit the guard to pass itself. That's safe here because nothing from the PR is checked out
+# or run; the script only reads the PR through the API.
+on:
+  pull_request_target:
+    # Every label change re-runs the guard. Don't skip runs for other labels: a skipped
+    # run counts as passing.
+    types: [opened, synchronize, reopened, labeled, unlabeled]
+
+concurrency:
+  group: content-guard-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  pull-requests: read
+  issues: write # read label history, and remove content-ok when content changes after it
+
+jobs:
+  guard:
+    name: Content guard
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/github-script@v9
+        env:
+          # Comma-separated logins of the loop's own GitHub identity, once it has one
+          # (Settings > Secrets and variables > Actions > Variables). Apps end in [bot].
+          LOOP_LOGINS: ${{ vars.LOOP_LOGINS }}
+        with:
+          script: |
+            const { owner, repo } = context.repo;
+            const pr = context.payload.pull_request;
+            const approver = owner; // a personal repo, so the owner is Dan
+            const LABEL = "content-ok";
+            const loopLogins = (process.env.LOOP_LOGINS ?? "")
+              .split(",")
+              .map((login) => login.trim())
+              .filter(Boolean);
+
+            // The protected paths, read from the default branch
+            const { data: listFile } = await github.rest.repos.getContent({
+              owner,
+              repo,
+              path: ".github/content-paths.txt",
+              ref: context.payload.repository.default_branch,
+            });
+            const globs = Buffer.from(listFile.content, "base64")
+              .toString("utf8")
+              .split("\n")
+              .map((line) => line.replace(/#.*/, "").trim())
+              .filter(Boolean);
+            const escape = (text) => text.replace(/[.+?^${}()|[\]\\]/g, "\\$&");
+            const patterns = globs.map(
+              (glob) =>
+                new RegExp(
+                  `^${glob
+                    .split("**")
+                    .map((part) => part.split("*").map(escape).join("[^/]*"))
+                    .join(".*")}$`,
+                ),
+            );
+            const isProtected = (file) =>
+              [file.filename, file.previous_filename].some(
+                (name) => name && patterns.some((pattern) => pattern.test(name)),
+              );
+
+            // 1. Did an agent make this PR?
+            const commits = await github.paginate(github.rest.pulls.listCommits, {
+              owner,
+              repo,
+              pull_number: pr.number,
+              per_page: 100,
+            });
+            const coAuthored = commits.find((c) =>
+              /^co-authored-by:\s*claude\b/im.test(c.commit.message),
+            );
+            const byLoop = commits.find((c) => loopLogins.includes(c.author?.login));
+            const signs = [
+              pr.head.ref.startsWith("agent/") && `branch ${pr.head.ref}`,
+              loopLogins.includes(pr.user.login) && `opened by ${pr.user.login}`,
+              coAuthored && `commit ${coAuthored.sha.slice(0, 7)} is co-authored by Claude`,
+              byLoop && `commit ${byLoop.sha.slice(0, 7)} is by ${byLoop.author.login}`,
+            ].filter(Boolean);
+            if (signs.length === 0) {
+              core.info("Not an agent PR; nothing to check.");
+              return;
+            }
+            core.info(`Agent PR: ${signs.join("; ")}`);
+
+            // 2. Does it touch protected paths?
+            const files = await github.paginate(github.rest.pulls.listFiles, {
+              owner,
+              repo,
+              pull_number: pr.number,
+              per_page: 100,
+            });
+            const touched = files.filter(isProtected).map((file) => file.filename);
+            if (touched.length === 0) {
+              core.info("No protected paths changed.");
+              return;
+            }
+            const list = touched.map((file) => `  ${file}`).join("\n");
+            const labels = pr.labels.map((label) => label.name);
+
+            // 3. An approval covers the words Dan read. If protected files change after it,
+            // take the label off so he reads them again.
+            if (context.payload.action === "synchronize" && labels.includes(LABEL)) {
+              let changedAgain = true; // if the compare fails, assume they changed
+              try {
+                const { data } = await github.rest.repos.compareCommitsWithBasehead({
+                  owner,
+                  repo,
+                  basehead: `${context.payload.before}...${context.payload.after}`,
+                });
+                changedAgain = (data.files ?? []).some(isProtected);
+              } catch (error) {
+                core.warning(`Couldn't compare the push: ${error.message}`);
+              }
+              if (changedAgain) {
+                await github.rest.issues.removeLabel({
+                  owner,
+                  repo,
+                  issue_number: pr.number,
+                  name: LABEL,
+                });
+                core.setFailed(
+                  `Protected files changed after ${LABEL} was added, so the label was removed. ` +
+                    `Read them again and re-add it:\n${list}`,
+                );
+                return;
+              }
+            }
+
+            // 4. Approved, and by Dan?
+            if (!labels.includes(LABEL)) {
+              core.setFailed(
+                `This agent PR changes protected files:\n${list}\n` +
+                  `Read their diff, and add the ${LABEL} label if the words are yours ` +
+                  `or a faithful move.`,
+              );
+              return;
+            }
+            const events = await github.paginate(github.rest.issues.listEvents, {
+              owner,
+              repo,
+              issue_number: pr.number,
+              per_page: 100,
+            });
+            const added = events
+              .filter((e) => e.event === "labeled" && e.label?.name === LABEL)
+              .at(-1);
+            if (added?.actor?.login !== approver) {
+              core.setFailed(
+                `${LABEL} was added by ${added?.actor?.login ?? "someone unknown"}; ` +
+                  `only ${approver} can approve content.`,
+              );
+              return;
+            }
+            core.info(`Approved by ${approver}:\n${list}`);
