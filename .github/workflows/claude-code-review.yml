@@ -40,6 +40,8 @@ jobs:
           # The action rejects PRs opened by bots unless they're listed. The loop's App opens
           # them, so allow the same accounts the content guard treats as agents.
           allowed_bots: ${{ vars.LOOP_LOGINS }}
+          # Claude's final report goes in the job summary, so a review that stops early says why
+          display_report: true
           plugin_marketplaces: 'https://github.com/anthropics/claude-code.git'
           plugins: 'code-review@claude-code-plugins'
           prompt: '/code-review:code-review --comment ${{ github.repository }}/pull/${{ github.event.pull_request.number }}'
