@@ -249,31 +249,110 @@ function survey(gh) {
 const isResumable = (pr) =>
   pr.isDraft && !pr.labels.some((label) => label.name === "needs-input");
 
-/** Dan's comments on a PR, oldest first. Nobody else's reach the prompt. */
-function dansComments(gh, number) {
-  const owner = REPO.split("/")[0];
-  const conversation = gh.json(
-    "api",
-    `repos/${REPO}/issues/${number}/comments?per_page=100`,
+const OWNER = REPO.split("/")[0];
+const REVIEWER = "claude[bot]";
+const CI_CHECK = "Check, test and build";
+
+/**
+ * Comments on a PR from the given logins, oldest first, quoted for a prompt. Nobody else's
+ * reach the agent: on a public repo anyone can comment.
+ */
+function prComments(gh, number, { logins, since = "" }) {
+  const get = (path) => gh.json("api", `repos/${REPO}/${path}?per_page=100`);
+  const all = [
+    ...get(`issues/${number}/comments`).map((c) => ({
+      ...c,
+      kind: "PR comment",
+    })),
+    ...get(`pulls/${number}/comments`).map((c) => ({
+      ...c,
+      kind: "inline comment",
+    })),
+    ...get(`pulls/${number}/reviews`)
+      .filter((r) => r.body?.trim())
+      .map((r) => ({ ...r, kind: "review", created_at: r.submitted_at })),
+  ];
+  return (
+    all
+      .filter((c) => logins.includes(c.user?.login) && c.created_at > since)
+      // The review's summary when it found nothing isn't a finding.
+      .filter(
+        (c) => !(c.user.login === REVIEWER && /No issues found/.test(c.body)),
+      )
+      .sort((a, b) => a.created_at.localeCompare(b.created_at))
+      .map((c) => {
+        const who = c.user.login === OWNER ? "Dan" : "Claude review";
+        const where = c.path
+          ? ` on ${c.path}${c.line ? ` line ${c.line}` : ""}`
+          : "";
+        return [
+          `${who}, ${c.created_at.slice(0, 10)}, ${c.kind} ${c.id}${where}:`,
+          ...c.body.split("\n").map((line) => `> ${line}`),
+        ].join("\n");
+      })
   );
-  const onCode = gh.json(
-    "api",
-    `repos/${REPO}/pulls/${number}/comments?per_page=100`,
+}
+
+/**
+ * Where a ready agent PR stands with its review:
+ * - "none": not ours to handle (a draft, or labelled reviewed or needs-input)
+ * - "waiting": CI or the review hasn't finished
+ * - "clean": nothing to fix, so it can go straight to Dan
+ * - "fix": findings, or a failed CI run, for a fix run
+ * Only comments since the PR became ready, or since `reviewed` was last added, count. To ask
+ * for another round, Dan comments and removes `reviewed`.
+ */
+function reviewState(gh, pr) {
+  const labels = pr.labels.map((label) => label.name);
+  if (
+    pr.isDraft ||
+    labels.includes("reviewed") ||
+    labels.includes("needs-input")
+  )
+    return { state: "none" };
+  const { statusCheckRollup } = gh.json(
+    "pr",
+    "view",
+    String(pr.number),
+    "--repo",
+    REPO,
+    "--json",
+    "statusCheckRollup",
   );
-  return [...conversation, ...onCode]
-    .filter((comment) => comment.user?.login === owner)
-    .sort((a, b) => a.created_at.localeCompare(b.created_at))
-    .map((comment) =>
-      [
-        `Dan, ${comment.created_at.slice(0, 10)}${comment.path ? ` on ${comment.path}` : ""}:`,
-        ...comment.body.split("\n").map((line) => `> ${line}`),
-      ].join("\n"),
+  // A check can have several runs (pushes cancel older ones); the latest counts.
+  const ci = statusCheckRollup
+    .filter((check) => check.name === CI_CHECK)
+    .sort((a, b) => (a.startedAt ?? "").localeCompare(b.startedAt ?? ""))
+    .at(-1);
+  if (ci?.status !== "COMPLETED") return { state: "waiting", why: "CI" };
+  const reviewed = gh
+    .json("api", `repos/${REPO}/issues/${pr.number}/comments?per_page=100`)
+    .some(
+      (c) => c.user?.login === REVIEWER && c.body.startsWith("## Code review"),
     );
+  if (!reviewed) return { state: "waiting", why: "the review" };
+
+  const since =
+    gh
+      .json("api", `repos/${REPO}/issues/${pr.number}/events?per_page=100`)
+      .filter(
+        (e) =>
+          e.event === "ready_for_review" ||
+          (e.event === "labeled" && e.label?.name === "reviewed"),
+      )
+      .at(-1)?.created_at ?? "";
+  const comments = prComments(gh, pr.number, {
+    logins: [OWNER, REVIEWER],
+    since,
+  });
+  const ciFailed = ci.conclusion === "FAILURE";
+  if (comments.length === 0 && !ciFailed) return { state: "clean" };
+  return { state: "fix", comments, ciFailed };
 }
 
 // ---------------------------------------------------------------- a run
 
-function setUp(slug, token, { resume = false } = {}) {
+function setUp(slug, token, { existing = false } = {}) {
   const runDir = join(RUNS_DIR, `${stamp()}-${slug}`);
   const repo = join(runDir, "repo");
   const assets = join(runDir, "pr-assets");
@@ -298,8 +377,8 @@ function setUp(slug, token, { resume = false } = {}) {
 
   git(runDir, [...auth, "clone", "--quiet", REMOTE, repo], env);
   configure(repo);
-  // A resumed item continues its existing branch; a new one starts from main.
-  if (resume) git(repo, ["switch", "--quiet", `agent/${slug}`]);
+  // Resume and fix runs continue the PR's branch; a new item starts from main.
+  if (existing) git(repo, ["switch", "--quiet", `agent/${slug}`]);
   else if (slug !== "smoke")
     git(repo, ["switch", "--quiet", "-c", `agent/${slug}`]);
 
@@ -344,9 +423,13 @@ function setUp(slug, token, { resume = false } = {}) {
   return { runDir, repo, assets, scratch, settingsFile };
 }
 
-function promptFor(item, dirs, resume) {
-  const branch = resume
-    ? `the existing branch from PR #${resume.number}`
+/**
+ * @param {{ kind: "resume" | "fix", number: number, comments: string[], ciFailed?: boolean } | null} mode
+ *   null for a new item
+ */
+function promptFor(item, dirs, mode) {
+  const branch = mode
+    ? `the existing branch from PR #${mode.number}`
     : "a fresh clone of `main`";
   const header = `## This run
 
@@ -363,13 +446,19 @@ function promptFor(item, dirs, resume) {
   const prompt = (name) =>
     readFileSync(join(ROOT, `.claude/prompts/${name}`), "utf8");
   let text = header + prompt("backlog-iteration.md");
-  if (resume) {
-    const comments = resume.comments.length
-      ? resume.comments.join("\n\n")
-      : "(Dan left no comment; the commits he pushed are his answer.)";
-    text += `\n${prompt("backlog-resume.md")
-      .replaceAll("{{number}}", String(resume.number))
+  if (mode) {
+    const none =
+      mode.kind === "resume"
+        ? "(Dan left no comment; the commits he pushed are his answer.)"
+        : "(No comments. Only CI needs fixing.)";
+    const comments = mode.comments.length ? mode.comments.join("\n\n") : none;
+    const ci = mode.ciFailed
+      ? "**CI failed** on this branch. Read why with `gh pr checks` and `gh run view <id> --log-failed`, and fix it."
+      : "CI passed.";
+    text += `\n${prompt(`backlog-${mode.kind}.md`)
+      .replaceAll("{{number}}", String(mode.number))
       .replaceAll("{{slug}}", item.slug)
+      .replace("{{ci}}", () => ci)
       .replace("{{comments}}", () => comments)}`;
   }
   return text;
@@ -462,20 +551,21 @@ function runClaude(prompt, dirs, token) {
   });
 }
 
-async function runItem(item, token, resume = null) {
+async function runItem(item, token, mode = null) {
+  const action = { resume: "Resuming", fix: "Fixing" }[mode?.kind];
   log(
-    `\n${resume ? `Resuming #${resume.number}` : "Running"} ${item.slug}: ${item.text.slice(0, 100)}${item.text.length > 100 ? "…" : ""}`,
+    `\n${action ? `${action} #${mode.number}` : "Running"} ${item.slug}: ${item.text.slice(0, 100)}${item.text.length > 100 ? "…" : ""}`,
   );
   const slug = opts.smoke ? "smoke" : item.slug;
   const started = Date.now();
   let dirs;
   let output;
   try {
-    dirs = setUp(slug, token, { resume: Boolean(resume) });
+    dirs = setUp(slug, token, { existing: Boolean(mode) });
     log(`  Folder: ${dirs.runDir}`);
     const prompt = opts.smoke
       ? SMOKE_PROMPT.replaceAll("SCRATCH", dirs.scratch)
-      : promptFor(item, dirs, resume);
+      : promptFor(item, dirs, mode);
     log("  Claude is working…");
     output = await runClaude(prompt, dirs, token);
   } catch (error) {
@@ -493,6 +583,7 @@ async function runItem(item, token, resume = null) {
   const entry = {
     time: new Date().toISOString(),
     slug,
+    kind: opts.smoke ? "smoke" : (mode?.kind ?? "new"),
     smoke: opts.smoke || undefined,
     result,
     costUsd: output.total_cost_usd,
@@ -570,8 +661,69 @@ async function pass() {
         log(`Next: resume #${answered.number} (${slug})`);
         return "idle";
       }
-      const comments = dansComments(gh, answered.number);
-      return await runItem(item, token, { number: answered.number, comments });
+      const comments = prComments(gh, answered.number, { logins: [OWNER] });
+      return await runItem(item, token, {
+        kind: "resume",
+        number: answered.number,
+        comments,
+      });
+    }
+
+    // Then reviewed PRs. A clean review goes straight to Dan; findings get one fix run.
+    let toFix = null;
+    for (const pr of open) {
+      const review = reviewState(gh, pr);
+      if (review.state === "waiting") {
+        log(`  #${pr.number}: waiting for ${review.why}`);
+      } else if (review.state === "clean") {
+        log(`  #${pr.number}: review found nothing; labelling it reviewed`);
+        if (!opts["dry-run"])
+          gh(
+            "api",
+            "-X",
+            "POST",
+            `repos/${REPO}/issues/${pr.number}/labels`,
+            "-f",
+            "labels[]=reviewed",
+          );
+      } else if (review.state === "fix" && !toFix) {
+        toFix = { pr, review };
+      }
+    }
+    if (toFix) {
+      const { pr, review } = toFix;
+      const slug = pr.headRefName.replace(/^agent\//, "");
+      const item = items.find((i) => i.slug === slug) ?? {
+        slug,
+        line: "?",
+        text: pr.title,
+      };
+      const what = [
+        review.comments.length && `${review.comments.length} comment(s)`,
+        review.ciFailed && "failed CI",
+      ].filter(Boolean);
+      if (opts["dry-run"]) {
+        log(`Next: fix #${pr.number} (${slug}): ${what.join(", ")}`);
+        return "idle";
+      }
+      const result = await runItem(item, token, {
+        kind: "fix",
+        number: pr.number,
+        comments: review.comments,
+        ciFailed: review.ciFailed,
+      });
+      // Make sure the round is closed even if the run forgot the label; otherwise the next
+      // pass would fix the same comments again.
+      if (result.startsWith("fixed"))
+        gh(
+          "api",
+          "-X",
+          "POST",
+          `repos/${REPO}/issues/${pr.number}/labels`,
+          "-f",
+          "labels[]=reviewed",
+        );
+      return result;
     }
     if (open.length >= PR_CAP) {
       log(`Idle: ${open.length} agent PRs are open (cap ${PR_CAP}).`);
@@ -599,6 +751,6 @@ do {
 } while (
   opts["until-idle"] &&
   !opts.smoke &&
-  /^(opened|needs-input)/.test(outcome)
+  /^(opened|needs-input|fixed)/.test(outcome)
 );
 process.exitCode = /^(error|stop)/.test(outcome) ? 1 : 0;
