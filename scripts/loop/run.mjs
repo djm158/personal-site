@@ -190,6 +190,7 @@ function survey(gh) {
     );
     const flags = [
       labels.includes("needs-input") && "needs input",
+      isResumable(pr) && "answered, will resume",
       mergeable === "CONFLICTING" && "conflicts with main",
     ].filter(Boolean);
     log(
@@ -228,7 +229,8 @@ function survey(gh) {
     "-H",
     "Accept: application/vnd.github.raw",
   );
-  const pick = pickNext(parseBacklog(backlog), { branches, prs });
+  const items = parseBacklog(backlog);
+  const pick = pickNext(items, { branches, prs });
   for (const item of pick.rejected)
     log(
       `  Rejected (PR closed without merging), retag or reword: ${item.slug}`,
@@ -239,12 +241,39 @@ function survey(gh) {
     );
   for (const { item, slug } of pick.unknownAfter)
     log(`  ${item.slug} waits on "${slug}", which no item has`);
-  return { mainCi, open, pick };
+  return { mainCi, open, pick, items };
+}
+
+// Agent PRs are drafts only while they need input. A draft without the label means Dan has
+// answered and taken the label off: carry on.
+const isResumable = (pr) =>
+  pr.isDraft && !pr.labels.some((label) => label.name === "needs-input");
+
+/** Dan's comments on a PR, oldest first. Nobody else's reach the prompt. */
+function dansComments(gh, number) {
+  const owner = REPO.split("/")[0];
+  const conversation = gh.json(
+    "api",
+    `repos/${REPO}/issues/${number}/comments?per_page=100`,
+  );
+  const onCode = gh.json(
+    "api",
+    `repos/${REPO}/pulls/${number}/comments?per_page=100`,
+  );
+  return [...conversation, ...onCode]
+    .filter((comment) => comment.user?.login === owner)
+    .sort((a, b) => a.created_at.localeCompare(b.created_at))
+    .map((comment) =>
+      [
+        `Dan, ${comment.created_at.slice(0, 10)}${comment.path ? ` on ${comment.path}` : ""}:`,
+        ...comment.body.split("\n").map((line) => `> ${line}`),
+      ].join("\n"),
+    );
 }
 
 // ---------------------------------------------------------------- a run
 
-function setUp(slug, token) {
+function setUp(slug, token, { resume = false } = {}) {
   const runDir = join(RUNS_DIR, `${stamp()}-${slug}`);
   const repo = join(runDir, "repo");
   const assets = join(runDir, "pr-assets");
@@ -269,7 +298,10 @@ function setUp(slug, token) {
 
   git(runDir, [...auth, "clone", "--quiet", REMOTE, repo], env);
   configure(repo);
-  if (slug !== "smoke") git(repo, ["switch", "--quiet", "-c", `agent/${slug}`]);
+  // A resumed item continues its existing branch; a new one starts from main.
+  if (resume) git(repo, ["switch", "--quiet", `agent/${slug}`]);
+  else if (slug !== "smoke")
+    git(repo, ["switch", "--quiet", "-c", `agent/${slug}`]);
 
   try {
     git(
@@ -303,14 +335,19 @@ function setUp(slug, token) {
     readFileSync(join(ROOT, ".claude/loop-settings.json"), "utf8"),
   );
   const pnpmStore = run("pnpm", ["store", "path"], { cwd: repo }).trim();
-  settings.sandbox.filesystem.allowWrite = [runDir, pnpmStore];
+  // pnpm 12 takes a lock in /tmp before it writes to the store, wherever the store is.
+  const pnpmLocks = `/private/tmp/pnpm-store-operation-locks-${process.getuid()}`;
+  settings.sandbox.filesystem.allowWrite = [runDir, pnpmStore, pnpmLocks];
   const settingsFile = join(runDir, "settings.json");
   writeFileSync(settingsFile, JSON.stringify(settings, null, 2));
 
   return { runDir, repo, assets, scratch, settingsFile };
 }
 
-function promptFor(item, dirs) {
+function promptFor(item, dirs, resume) {
+  const branch = resume
+    ? `the existing branch from PR #${resume.number}`
+    : "a fresh clone of `main`";
   const header = `## This run
 
 - Backlog item (BACKLOG.md line ${item.line}):
@@ -318,15 +355,24 @@ function promptFor(item, dirs) {
   > ${item.text}
 
 - Slug \`${item.slug}\`. Branch \`agent/${item.slug}\` is checked out in your working directory,
-  a fresh clone of \`main\` with dependencies installed.
+  ${branch}, with dependencies installed.
 - The \`pr-assets\` branch is cloned at \`${dirs.assets}\`.
 - Scratch folder for setup modules and media: \`${dirs.scratch}\`. Use it instead of \`$TMPDIR\`.
 
 `;
-  return (
-    header +
-    readFileSync(join(ROOT, ".claude/prompts/backlog-iteration.md"), "utf8")
-  );
+  const prompt = (name) =>
+    readFileSync(join(ROOT, `.claude/prompts/${name}`), "utf8");
+  let text = header + prompt("backlog-iteration.md");
+  if (resume) {
+    const comments = resume.comments.length
+      ? resume.comments.join("\n\n")
+      : "(Dan left no comment; the commits he pushed are his answer.)";
+    text += `\n${prompt("backlog-resume.md")
+      .replaceAll("{{number}}", String(resume.number))
+      .replaceAll("{{slug}}", item.slug)
+      .replace("{{comments}}", () => comments)}`;
+  }
+  return text;
 }
 
 const SMOKE_PROMPT = `This is a setup check, not a backlog run. Don't change files, commit or push.
@@ -341,8 +387,9 @@ verbatim (first 3 lines) in a numbered list. Some are meant to fail; don't retry
 6. curl -sS -m 5 -o /dev/null -w "%{http_code}" https://example.com 2>&1
 7. pnpm build 2>&1 | tail -2; echo "font files: $(find dist -name '*.woff2' | wc -l)"
 8. node scripts/pr-media.mjs --path / --widths 375 --out SCRATCH/smoke 2>&1 | tail -3
+9. pnpm add is-number 2>&1 | tail -1; git checkout -- package.json pnpm-lock.yaml
 
-End with a line "RESULT: smoke ok" if 1, 2, 7 (with more than 0 font files) and 8 worked and 3–6 failed or printed
+End with a line "RESULT: smoke ok" if 1, 2, 7 (with more than 0 font files), 8 and 9 worked and 3–6 failed or printed
 "blocked"; otherwise "RESULT: error smoke" and say which check was wrong.`;
 
 /** Runs Claude in the clone. Resolves with its JSON output, or an error result. */
@@ -415,20 +462,20 @@ function runClaude(prompt, dirs, token) {
   });
 }
 
-async function runItem(item, token) {
+async function runItem(item, token, resume = null) {
   log(
-    `\nRunning ${item.slug}: ${item.text.slice(0, 100)}${item.text.length > 100 ? "…" : ""}`,
+    `\n${resume ? `Resuming #${resume.number}` : "Running"} ${item.slug}: ${item.text.slice(0, 100)}${item.text.length > 100 ? "…" : ""}`,
   );
   const slug = opts.smoke ? "smoke" : item.slug;
   const started = Date.now();
   let dirs;
   let output;
   try {
-    dirs = setUp(slug, token);
+    dirs = setUp(slug, token, { resume: Boolean(resume) });
     log(`  Folder: ${dirs.runDir}`);
     const prompt = opts.smoke
       ? SMOKE_PROMPT.replaceAll("SCRATCH", dirs.scratch)
-      : promptFor(item, dirs);
+      : promptFor(item, dirs, resume);
     log("  Claude is working…");
     output = await runClaude(prompt, dirs, token);
   } catch (error) {
@@ -500,13 +547,31 @@ async function pass() {
       return await runItem({ slug: "smoke", text: "setup check" }, token);
 
     log("Open agent PRs:");
-    const { mainCi, open, pick } = survey(gh);
+    const { mainCi, open, pick, items } = survey(gh);
     if (open.length === 0) log("  none");
     if (mainCi?.conclusion === "failure" && !opts.force) {
       log(
         `Stopping: CI is failing on main (${mainCi.url}). Fix it first, or rerun with --force.`,
       );
       return "stop";
+    }
+
+    // Finish answered PRs before starting anything new. They're already open, so the cap
+    // doesn't apply.
+    const answered = open.find(isResumable);
+    if (answered) {
+      const slug = answered.headRefName.replace(/^agent\//, "");
+      const item = items.find((i) => i.slug === slug) ?? {
+        slug,
+        line: "?",
+        text: answered.title,
+      };
+      if (opts["dry-run"]) {
+        log(`Next: resume #${answered.number} (${slug})`);
+        return "idle";
+      }
+      const comments = dansComments(gh, answered.number);
+      return await runItem(item, token, { number: answered.number, comments });
     }
     if (open.length >= PR_CAP) {
       log(`Idle: ${open.length} agent PRs are open (cap ${PR_CAP}).`);
