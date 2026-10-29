@@ -17,6 +17,11 @@ const backlog = `# Backlog
 
 const none = { branches: new Set(), prs: new Map() };
 const slugOf = (result) => result.item?.slug ?? null;
+const pr = (state, { number = 7, retry = false } = {}) => ({
+  number,
+  state,
+  retry,
+});
 
 describe("parseBacklog", () => {
   it("reads checkbox items with their tags and skips everything else", () => {
@@ -44,7 +49,7 @@ describe("pickNext", () => {
   it("skips an item with an open PR or a branch", () => {
     const github = {
       branches: new Set(["agent/second"]),
-      prs: new Map([["agent/second", "OPEN"]]),
+      prs: new Map([["agent/second", pr("OPEN")]]),
     };
     expect(slugOf(pickNext(items, github))).toBe(null);
   });
@@ -52,9 +57,11 @@ describe("pickNext", () => {
   it("reports a closed, unmerged PR as rejected and moves on", () => {
     const result = pickNext(items, {
       branches: new Set(),
-      prs: new Map([["agent/second", "CLOSED"]]),
+      prs: new Map([["agent/second", pr("CLOSED")]]),
     });
-    expect(result.rejected.map((i) => i.slug)).toEqual(["second"]);
+    expect(result.rejected).toEqual([
+      { item: expect.objectContaining({ slug: "second" }), pr: 7 },
+    ]);
     expect(slugOf(result)).toBe(null);
   });
 
@@ -69,10 +76,29 @@ describe("pickNext", () => {
   it("treats a merged PR whose item is still unticked as taken", () => {
     const result = pickNext(items, {
       branches: new Set(),
-      prs: new Map([["agent/second", "MERGED"]]),
+      prs: new Map([["agent/second", pr("MERGED")]]),
     });
     expect(slugOf(result)).toBe(null);
     expect(result.rejected).toEqual([]);
+  });
+
+  it("retries an item whose PR was closed with the retry label", () => {
+    const result = pickNext(items, {
+      branches: new Set(["agent/second"]),
+      prs: new Map([["agent/second", pr("CLOSED", { retry: true })]]),
+    });
+    expect(slugOf(result)).toBe("second");
+    expect(result.retryOf).toBe(7);
+    expect(result.rejected).toEqual([]);
+  });
+
+  it("doesn't retry before the item's after: items are ticked", () => {
+    const result = pickNext(items, {
+      branches: new Set(),
+      prs: new Map([["agent/third", pr("CLOSED", { retry: true })]]),
+    });
+    expect(slugOf(result)).toBe("second");
+    expect(result.retryOf).toBe(null);
   });
 
   it("unlocks an item once its after: item is ticked", () => {

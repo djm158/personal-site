@@ -28,15 +28,22 @@ export function parseBacklog(markdown) {
 }
 
 /**
+ * @typedef {{ number: number, state: "OPEN" | "CLOSED" | "MERGED", retry: boolean }} Pr
+ *   The newest PR from a head branch; `retry` when it carries the `retry` label
+ */
+
+/**
  * The first agent item, top to bottom, that is unticked, has every `after:` item ticked, and
- * hasn't been claimed: no `agent/<slug>` branch and no PR from it, open or closed.
+ * hasn't been claimed: no `agent/<slug>` branch and no PR from it. The exception is a PR Dan
+ * closed with the `retry` label: then the item starts again from scratch.
  *
  * @param {Item[]} items
- * @param {{ branches: Set<string>, prs: Map<string, "OPEN" | "CLOSED" | "MERGED"> }} github
- *   Branch names on origin, and the state of the PR from each head branch
+ * @param {{ branches: Set<string>, prs: Map<string, Pr> }} github
+ *   Branch names on origin, and the newest PR from each head branch
  * @returns {{
  *   item: Item | null,
- *   rejected: Item[],     closed without merging: Dan turned it down, so retag or reword it
+ *   retryOf: number | null,   the closed PR the picked item replaces, if it's a retry
+ *   rejected: { item: Item, pr: number }[],   closed without `retry`: Dan turned it down
  *   stranded: Item[],     a branch but no PR: a run died before opening one
  *   unknownAfter: { item: Item, slug: string }[],   an `after:` slug no item has
  * }}
@@ -46,7 +53,13 @@ export function pickNext(items, { branches, prs }) {
     items.filter((i) => i.done && i.slug).map((i) => i.slug),
   );
   const known = new Set(items.filter((i) => i.slug).map((i) => i.slug));
-  const result = { item: null, rejected: [], stranded: [], unknownAfter: [] };
+  const result = {
+    item: null,
+    retryOf: null,
+    rejected: [],
+    stranded: [],
+    unknownAfter: [],
+  };
 
   for (const item of items) {
     if (item.done || !item.slug) continue;
@@ -55,17 +68,22 @@ export function pickNext(items, { branches, prs }) {
     }
     const branch = `agent/${item.slug}`;
     const pr = prs.get(branch);
-    if (pr === "CLOSED") {
-      result.rejected.push(item);
+    const retrying = pr?.state === "CLOSED" && pr.retry;
+    if (pr?.state === "CLOSED" && !retrying) {
+      result.rejected.push({ item, pr: pr.number });
       continue;
     }
     if (branches.has(branch) && !pr) {
       result.stranded.push(item);
       continue;
     }
-    if (pr || branches.has(branch)) continue;
+    // Open or merged: taken. A retry's old branch is fine; the driver deletes it.
+    if (pr && !retrying) continue;
     if (!item.after.every((slug) => done.has(slug))) continue;
-    result.item ??= item;
+    if (!result.item) {
+      result.item = item;
+      result.retryOf = retrying ? pr.number : null;
+    }
   }
   return result;
 }

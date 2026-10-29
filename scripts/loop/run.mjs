@@ -179,7 +179,8 @@ function survey(gh) {
   );
   for (const pr of open) {
     const labels = pr.labels.map((l) => l.name);
-    const { mergeable } = gh.json(
+    // MERGEABLE, CONFLICTING or UNKNOWN (GitHub works it out lazily; a later pass sees it).
+    pr.mergeable = gh.json(
       "pr",
       "view",
       String(pr.number),
@@ -187,11 +188,11 @@ function survey(gh) {
       REPO,
       "--json",
       "mergeable",
-    );
+    ).mergeable;
     const flags = [
       labels.includes("needs-input") && "needs input",
       isResumable(pr) && "answered, will resume",
-      mergeable === "CONFLICTING" && "conflicts with main",
+      pr.mergeable === "CONFLICTING" && "conflicts with main",
     ].filter(Boolean);
     log(
       `  #${pr.number} ${pr.title}${flags.length ? `  [${flags.join(", ")}]` : ""}`,
@@ -203,8 +204,7 @@ function survey(gh) {
       .json("api", `repos/${REPO}/git/matching-refs/heads/agent/`)
       .map((ref) => ref.ref.replace("refs/heads/", "")),
   );
-  // If a branch has had several PRs, the open one wins, then a merged one.
-  const rank = { CLOSED: 1, MERGED: 2, OPEN: 3 };
+  // If a branch has had several PRs (retries), the newest decides.
   const prs = new Map();
   for (const pr of gh.json(
     "pr",
@@ -216,11 +216,15 @@ function survey(gh) {
     "--limit",
     "500",
     "--json",
-    "headRefName,state",
+    "number,headRefName,state,labels",
   )) {
     if (!pr.headRefName.startsWith("agent/")) continue;
-    if ((rank[pr.state] ?? 0) > (rank[prs.get(pr.headRefName)] ?? 0))
-      prs.set(pr.headRefName, pr.state);
+    if (pr.number < (prs.get(pr.headRefName)?.number ?? 0)) continue;
+    prs.set(pr.headRefName, {
+      number: pr.number,
+      state: pr.state,
+      retry: pr.labels.some((label) => label.name === "retry"),
+    });
   }
 
   const backlog = gh(
@@ -231,9 +235,9 @@ function survey(gh) {
   );
   const items = parseBacklog(backlog);
   const pick = pickNext(items, { branches, prs });
-  for (const item of pick.rejected)
+  for (const { item, pr } of pick.rejected)
     log(
-      `  Rejected (PR closed without merging), retag or reword: ${item.slug}`,
+      `  Rejected: #${pr} (${item.slug}) was closed. Add the retry label to it to start over, or reword or retag the item.`,
     );
   for (const item of pick.stranded)
     log(
@@ -423,12 +427,15 @@ function setUp(slug, token, { existing = false } = {}) {
   return { runDir, repo, assets, scratch, settingsFile };
 }
 
+// Resume, fix and rebase runs carry on the PR's branch; new items and retries start from main.
+const continuesBranch = (mode) => Boolean(mode) && mode.kind !== "retry";
+
 /**
- * @param {{ kind: "resume" | "fix", number: number, comments: string[], ciFailed?: boolean } | null} mode
- *   null for a new item
+ * @param {{ kind: "resume" | "fix" | "rebase" | "retry", number: number, comments: string[], ciFailed?: boolean } | null} mode
+ *   null for a new item. For a retry, `number` is the closed PR it replaces.
  */
 function promptFor(item, dirs, mode) {
-  const branch = mode
+  const branch = continuesBranch(mode)
     ? `the existing branch from PR #${mode.number}`
     : "a fresh clone of `main`";
   const header = `## This run
@@ -447,10 +454,12 @@ function promptFor(item, dirs, mode) {
     readFileSync(join(ROOT, `.claude/prompts/${name}`), "utf8");
   let text = header + prompt("backlog-iteration.md");
   if (mode) {
-    const none =
-      mode.kind === "resume"
-        ? "(Dan left no comment; the commits he pushed are his answer.)"
-        : "(No comments. Only CI needs fixing.)";
+    const none = {
+      resume: "(Dan left no comment; the commits he pushed are his answer.)",
+      fix: "(No comments. Only CI needs fixing.)",
+      retry:
+        "(Dan left no notes. Work out from the old PR and the item why it might have been turned down.)",
+    }[mode.kind];
     const comments = mode.comments.length ? mode.comments.join("\n\n") : none;
     const ci = mode.ciFailed
       ? "**CI failed** on this branch. Read why with `gh pr checks` and `gh run view <id> --log-failed`, and fix it."
@@ -552,7 +561,12 @@ function runClaude(prompt, dirs, token) {
 }
 
 async function runItem(item, token, mode = null) {
-  const action = { resume: "Resuming", fix: "Fixing" }[mode?.kind];
+  const action = {
+    resume: "Resuming",
+    fix: "Fixing",
+    rebase: "Merging main into",
+    retry: "Retrying, replacing",
+  }[mode?.kind];
   log(
     `\n${action ? `${action} #${mode.number}` : "Running"} ${item.slug}: ${item.text.slice(0, 100)}${item.text.length > 100 ? "…" : ""}`,
   );
@@ -561,7 +575,7 @@ async function runItem(item, token, mode = null) {
   let dirs;
   let output;
   try {
-    dirs = setUp(slug, token, { existing: Boolean(mode) });
+    dirs = setUp(slug, token, { existing: continuesBranch(mode) });
     log(`  Folder: ${dirs.runDir}`);
     const prompt = opts.smoke
       ? SMOKE_PROMPT.replaceAll("SCRATCH", dirs.scratch)
@@ -649,16 +663,23 @@ async function pass() {
 
     // Finish answered PRs before starting anything new. They're already open, so the cap
     // doesn't apply.
+    // The backlog item behind an open PR, or a stand-in if its line has gone.
+    const itemFor = (pr) => {
+      const slug = pr.headRefName.replace(/^agent\//, "");
+      return (
+        items.find((i) => i.slug === slug) ?? {
+          slug,
+          line: "?",
+          text: pr.title,
+        }
+      );
+    };
+
     const answered = open.find(isResumable);
     if (answered) {
-      const slug = answered.headRefName.replace(/^agent\//, "");
-      const item = items.find((i) => i.slug === slug) ?? {
-        slug,
-        line: "?",
-        text: answered.title,
-      };
+      const item = itemFor(answered);
       if (opts["dry-run"]) {
-        log(`Next: resume #${answered.number} (${slug})`);
+        log(`Next: resume #${answered.number} (${item.slug})`);
         return "idle";
       }
       const comments = prComments(gh, answered.number, { logins: [OWNER] });
@@ -666,6 +687,26 @@ async function pass() {
         kind: "resume",
         number: answered.number,
         comments,
+      });
+    }
+
+    // Then PRs that conflict with main: they can't merge, and CI doesn't run on them, so
+    // they come before fix passes. One waiting on Dan keeps waiting.
+    const conflicting = open.find(
+      (pr) =>
+        pr.mergeable === "CONFLICTING" &&
+        !pr.labels.some((label) => label.name === "needs-input"),
+    );
+    if (conflicting) {
+      const item = itemFor(conflicting);
+      if (opts["dry-run"]) {
+        log(`Next: merge main into #${conflicting.number} (${item.slug})`);
+        return "idle";
+      }
+      return await runItem(item, token, {
+        kind: "rebase",
+        number: conflicting.number,
+        comments: [],
       });
     }
 
@@ -692,18 +733,13 @@ async function pass() {
     }
     if (toFix) {
       const { pr, review } = toFix;
-      const slug = pr.headRefName.replace(/^agent\//, "");
-      const item = items.find((i) => i.slug === slug) ?? {
-        slug,
-        line: "?",
-        text: pr.title,
-      };
+      const item = itemFor(pr);
       const what = [
         review.comments.length && `${review.comments.length} comment(s)`,
         review.ciFailed && "failed CI",
       ].filter(Boolean);
       if (opts["dry-run"]) {
-        log(`Next: fix #${pr.number} (${slug}): ${what.join(", ")}`);
+        log(`Next: fix #${pr.number} (${item.slug}): ${what.join(", ")}`);
         return "idle";
       }
       const result = await runItem(item, token, {
@@ -733,13 +769,32 @@ async function pass() {
       log("Idle: nothing eligible.");
       return "idle";
     }
+    const retryOf = pick.retryOf;
     if (opts["dry-run"]) {
       log(
-        `Next: ${pick.item.slug} (BACKLOG.md line ${pick.item.line})\n  ${pick.item.text}`,
+        `Next: ${pick.item.slug}${retryOf ? `, from scratch, replacing #${retryOf}` : ""} (BACKLOG.md line ${pick.item.line})\n  ${pick.item.text}`,
       );
       return "idle";
     }
-    return await runItem(pick.item, token);
+    if (!retryOf) return await runItem(pick.item, token);
+
+    // A retry: the old branch has to go, since the new one can't be force-pushed over it.
+    // The closed PR keeps its diff, so nothing is lost.
+    try {
+      gh(
+        "api",
+        "-X",
+        "DELETE",
+        `repos/${REPO}/git/refs/heads/agent/${pick.item.slug}`,
+      );
+    } catch {
+      // Already gone (GitHub may have deleted it when the PR closed).
+    }
+    return await runItem(pick.item, token, {
+      kind: "retry",
+      number: retryOf,
+      comments: prComments(gh, retryOf, { logins: [OWNER] }),
+    });
   } finally {
     if (token) await revokeToken(token);
   }
@@ -751,6 +806,6 @@ do {
 } while (
   opts["until-idle"] &&
   !opts.smoke &&
-  /^(opened|needs-input|fixed)/.test(outcome)
+  /^(opened|needs-input|fixed|rebased)/.test(outcome)
 );
 process.exitCode = /^(error|stop)/.test(outcome) ? 1 : 0;
