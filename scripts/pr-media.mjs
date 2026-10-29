@@ -22,6 +22,8 @@ Shoots each path at each width, before (production) and after (local build).
                      Use it to click, hover, scroll or open dialogs. If it fails on
                      the before side (the feature isn't live yet), that shot is skipped.
   --clip <selector>  Capture only this element instead of the viewport.
+  --name <label>     Add a label to the file names, e.g. --name sheet-open gives
+                     resume-sheet-open-after-375.png. Use one per captured state.
   --full-page        Capture the whole page instead of the viewport.
   --theme night      Set data-theme="night" before the page loads.
   --widths <list>    Comma-separated widths. Default: 375,1280.
@@ -44,6 +46,7 @@ const { values: opts } = parseArgs({
     path: { type: "string", multiple: true },
     setup: { type: "string" },
     clip: { type: "string" },
+    name: { type: "string" },
     "full-page": { type: "boolean", default: false },
     theme: { type: "string" },
     widths: { type: "string", default: "375,1280" },
@@ -71,9 +74,14 @@ const setup = opts.setup
   ? (await import(pathToFileURL(resolve(opts.setup)).href)).default
   : null;
 
-/** "/" -> "home", "/resume" -> "resume", "/#about" -> "about" */
+/** "/" -> "home", "/resume" -> "resume", "/#about" -> "about"; then the --name label */
 const slugOf = (path) =>
-  path.replace(/[^a-z0-9]+/gi, "-").replace(/^-+|-+$/g, "") || "home";
+  [
+    path.replace(/[^a-z0-9]+/gi, "-").replace(/^-+|-+$/g, "") || "home",
+    opts.name,
+  ]
+    .filter(Boolean)
+    .join("-");
 
 // Phones get a phone-shaped viewport, everything else a laptop one.
 const viewportFor = (width) => ({ width, height: width < 760 ? 812 : 900 });
@@ -167,7 +175,11 @@ async function shoot(browser, side, base, path, width) {
       animations: opts.motion ? "allow" : "disabled",
     };
     if (opts.clip)
-      await page.locator(opts.clip).first().screenshot(shotOptions);
+      await page
+        .locator(opts.clip)
+        .filter({ visible: true })
+        .first()
+        .screenshot(shotOptions);
     else await page.screenshot({ ...shotOptions, fullPage: opts["full-page"] });
     return file;
   } catch (error) {
@@ -201,7 +213,11 @@ async function record(browser, afterUrl, path, width) {
   if (setup) await setup(page, { side: "after", width });
   await page.waitForTimeout(recordSecs * 1000);
   const box = opts.clip
-    ? await page.locator(opts.clip).first().boundingBox()
+    ? await page
+        .locator(opts.clip)
+        .filter({ visible: true })
+        .first()
+        .boundingBox()
     : null;
   await context.close();
   const webm = await page.video().path();

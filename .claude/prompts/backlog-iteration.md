@@ -103,7 +103,12 @@ needs a follow-up: then add a new unticked item, untagged, directly below it.
 
 ## 8. Screenshots and recordings
 
-Skip this for changes with no visible effect (CI, config, pure logic), and say so in the PR.
+Shoot media whenever the diff touches anything that renders: `src/pages`, `src/components`,
+`src/layouts`, `src/styles`, `public`, or data a page displays. That includes refactors meant
+to change nothing: the before/after pairs are how Dan checks that, so write "No visible change
+expected" above the table and capture the states the change touches (pressed, open, hovered),
+not just the page at rest. Skip media only when nothing that renders changed (CI, config,
+tests, logic no page uses yet), and say so in the PR.
 
 Use `scripts/pr-media.mjs`; `node scripts/pr-media.mjs --help` lists every option. It serves
 `./dist` on a port of its own and shoots production as "before" and the build as "after", at
@@ -130,8 +135,10 @@ Use `scripts/pr-media.mjs`; `node scripts/pr-media.mjs --help` lists every optio
    ```sh
    if git fetch origin pr-assets; then
      git worktree add --detach ../pr-assets-<slug> origin/pr-assets
-   else
-     git worktree add --orphan -b pr-assets ../pr-assets-<slug>   # first run ever
+   else   # first run ever; `worktree add --orphan` needs git 2.42+, so don't use it
+     git worktree add --detach ../pr-assets-<slug>
+     git -C ../pr-assets-<slug> checkout --orphan pr-assets
+     git -C ../pr-assets-<slug> rm -rfq .
    fi
    ```
 
