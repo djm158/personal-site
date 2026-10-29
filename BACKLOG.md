@@ -49,7 +49,7 @@ skill picker (section 4) and landing page polish (section 5) come first.
 - [x] Mobile menu motion: overlay fades in and out (350ms), links rise 16px and fade in staggered by 50ms, Résumé button follows; hover and pressed states on the Menu, Close, link and Résumé controls
 - [x] Footer
 - [x] Extract shared pieces: `Container`, `Eyebrow`, `Button` (filled, outlined, soft)
-- [ ] Extract the shared pieces now in use: `TextLink` (the underlined "Full résumé →" link on the home page) and `Chip` (the skill pills on `/resume` and in `SkillSheet`, which differ in size). The larger hero `Button` size is done (`xl`) (agent: shared-pieces)
+- [x] Extract the shared pieces now in use: `TextLink` (the underlined "Full résumé →" link on the home page) and `Chip` (the skill pills on `/resume` and in `SkillSheet`, which differ in size). The larger hero `Button` size is done (`xl`) (agent: shared-pieces)
 - [ ] Type scale tokens in `@theme` (display, page title, lede, body, label) with their line-heights, once sizes start repeating; replace the inline `text-[clamp(...)]` classes (deferred: no size repeats yet)
 
 ## 2. Blog

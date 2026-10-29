@@ -1,6 +1,7 @@
 ---
 import type { Role, Skill } from "../lib/resume/schema";
 import Button from "./Button.astro";
+import Chip from "./Chip.astro";
 import Eyebrow from "./Eyebrow.astro";
 
 // The skill picker on narrow screens: a sticky bar above the roles that opens the full picker
@@ -108,27 +109,21 @@ const skillTotal = skills.reduce((n, group) => n + group.items.length, 0);
             {group.items.map((skill) => {
               const count = roleCount(skill);
               return (
-                <button
-                  type="button"
+                <Chip
                   data-skill={skill}
-                  aria-pressed="false"
                   aria-label={
                     count
                       ? `${skill}, ${count} role${count > 1 ? "s" : ""}`
                       : `${skill}, not tagged on a role yet`
                   }
-                  class:list={[
-                    "rounded-full border font-medium text-[13px] py-2 px-3.25 cursor-pointer aria-pressed:bg-ink aria-pressed:text-onink aria-pressed:border-ink aria-pressed:border-solid motion-safe:transition-colors motion-safe:duration-200",
-                    count
-                      ? "bg-surface border-line"
-                      : "border-dashed border-line text-muted",
-                  ]}
+                  variant={count ? "soft" : "dashed"}
+                  size="md"
                 >
                   {skill}
                   <span class="ml-1.5 font-mono text-[10.5px] text-muted in-aria-pressed:text-onink/70">
                     {count || "–"}
                   </span>
-                </button>
+                </Chip>
               );
             })}
           </div>
