@@ -194,6 +194,46 @@ async function shoot(browser, side, base, path, width) {
   }
 }
 
+// Inside the Claude Code sandbox (the backlog loop), traffic has to go through the sandbox's
+// proxy, which it announces in HTTPS_PROXY. Chromium ignores that variable, and it can't start
+// in its usual multi-process mode there. See docs/research/loop-sandbox.md.
+const sandboxProxy = process.env.HTTPS_PROXY
+  ? new URL(process.env.HTTPS_PROXY)
+  : null;
+
+async function launchBrowser() {
+  if (!sandboxProxy) return chromium.launch();
+  const launched = [];
+  const launch = async () => {
+    const browser = await chromium.launch({
+      args: ["--no-sandbox", "--single-process", "--no-zygote"],
+      proxy: {
+        server: `${sandboxProxy.protocol}//${sandboxProxy.host}`,
+        username: decodeURIComponent(sandboxProxy.username),
+        password: decodeURIComponent(sandboxProxy.password),
+        bypass: "localhost,127.0.0.1",
+      },
+    });
+    launched.push(browser);
+    return browser;
+  };
+  // Single-process Chromium crashes when a second context opens, so each context gets a
+  // browser of its own, closed with it.
+  return {
+    newContext: async (options) => {
+      const browser = await launch();
+      const context = await browser.newContext(options);
+      const close = context.close.bind(context);
+      context.close = async () => {
+        await close();
+        await browser.close();
+      };
+      return context;
+    },
+    close: () => Promise.all(launched.map((browser) => browser.close())),
+  };
+}
+
 const hasFfmpeg = spawnSync("ffmpeg", ["-version"]).status === 0;
 
 // Records the after side, trimmed to start when the setup does. Returns the file name.
@@ -304,7 +344,7 @@ const sides = opts["skip-before"]
     ];
 let browser;
 try {
-  browser = await chromium.launch();
+  browser = await launchBrowser();
   const results = [];
   for (const path of opts.path) {
     const shots = {};

@@ -1,79 +1,52 @@
 # Backlog iteration
 
 You are one run of an automated loop that works through `BACKLOG.md`. You start with no memory
-of earlier runs; everything you need is in git, GitHub and this prompt. Each run does **one
-backlog item or nothing**, opens a draft PR, and exits. A separate review run picks the PR up
-after you.
+of earlier runs; everything you need is in git, GitHub and this prompt. The loop's driver
+(`scripts/loop/run.mjs`) has already picked your item, cloned the repo and checked out its
+branch: see **This run** above. You build that one item, open a PR, and exit. A review runs on
+the PR after you.
 
 `CLAUDE.md` says Dan builds this site himself and agents shouldn't write features. For this
-run, that is lifted for the one item you select, and only that item. Everything else in
-`CLAUDE.md` (conventions, checks, "mention, don't fix") still applies.
+run, that is lifted for your item, and only that item. Everything else in `CLAUDE.md`
+(conventions, checks, "mention, don't fix") still applies.
 
 ## Settings
 
-- Open agent PR cap: **3**
-- Base branch: `main`
 - Production URL (for "before" screenshots): https://danielmcgrath.xyz
-- Content paths you must never edit: `src/content/**`, `resume/resume.yaml`, and any data file
-  whose job is to hold page copy. One exception: an item that says to move existing copy word
-  for word. Then move it exactly, change no wording, and say in the PR that Dan needs to
-  check it and add the `content-ok` label
+- Content paths you must never edit: `src/content/**`, `resume/resume.yaml`,
+  `content/site-content.yaml`, and any other file whose job is to hold page copy. One
+  exception: an item that says to move existing copy word for word. Then move it exactly,
+  change no wording, and say in the PR that Dan needs to check it and add the `content-ok`
+  label. CI's content guard enforces this, together with `CLAUDE.md`, `.claude/**` and
+  `.github/**`.
 
-## Backlog tags
+## Where you are running
 
-Items are opted in by tags at the end of the line:
+- You act as `djm158-site-loop[bot]`, a GitHub App. `gh` and `git push` over HTTPS are set up
+  for it in both clones; don't change remotes or git credential settings.
+- Bash runs in a sandbox. It can reach GitHub, npm and the production site, and nothing else.
+  It can write only inside this run's folder. If a command fails with "Operation not
+  permitted" or a blocked connection, that's the sandbox: find another way within it, or go
+  to **Needs input**. Don't try to get around it.
+- Your working directory is a throwaway clone. The driver deletes it after a successful run.
 
-- `(agent: <slug>)`: eligible for this loop; `<slug>` names the branch and dependencies
-- `(after: <slug>)`: wait until the item with that slug is ticked on `main`; can repeat
-- `(me)`, `(deferred)`, `(deferred: <reason>)` or no tag: never pick it
+## 1. Understand before building
 
-The legend at the top of `BACKLOG.md` explains the same tags for Dan.
-
-## 1. Preflight
-
-1. `git fetch origin` and confirm `gh auth status` works. If either fails, stop with
-   `RESULT: error <reason>`.
-2. Count open PRs labelled `agent`, drafts included:
-   `gh pr list --label agent --state open --json number --jq length`.
-   If the count is at or over the cap, stop with `RESULT: idle (cap)`.
-
-## 2. Select an item
-
-Read `BACKLOG.md` from `origin/main`, not the working tree. Going top to bottom, pick the first
-item that meets all of these:
-
-- unticked (`- [ ]`) and tagged `(agent: <slug>)`
-- every `(after: …)` slug belongs to an item that is ticked
-- no branch `agent/<slug>` on origin and no PR, open or closed, with head `agent/<slug>`.
-  A closed, unmerged PR means Dan rejected it: skip the item and list it in your final output
-  so he can retag it
-
-If nothing qualifies, stop with `RESULT: idle (nothing eligible)`.
-
-## 3. Set up
-
-Work in a new worktree so Dan's checkout is untouched:
-
-```sh
-git worktree add ../personal-site-agent-<slug> -b agent/<slug> origin/main
-cd ../personal-site-agent-<slug> && pnpm install --frozen-lockfile
-```
-
-Remove the worktree when you finish, whatever the outcome.
-
-## 4. Understand before building
-
-- Read `CLAUDE.md`, the whole backlog section the item sits in (neighbouring items are
+- Read `CLAUDE.md`, the whole backlog section your item sits in (neighbouring items are
   context and future scope, not things to do now), and the files you'll touch.
 - For anything visual, find the matching part of the design in `design/` and follow it as the
   visual spec. Don't port its runtime, inline styles or state handling.
 - Look at how existing components solve the same problem and reuse them (`Container`,
-  `Eyebrow`, `Button`, theme tokens in `src/styles/global.css`).
+  `Eyebrow`, `Button`, `TextLink`, `Chip`, theme tokens in `src/styles/global.css`).
+
+Before building, write down a short **Done when** list: 2–5 checks that would show the item is
+finished, taken from the item's own words (for example "the clear button is hidden until a
+skill is picked", "matchingRoles has tests for zero and one skills"). You'll tick it in the PR.
 
 If the item is ambiguous, needs a decision the backlog doesn't make, or would mean writing or
 changing content in the content paths, don't guess. Go to **Needs input** below.
 
-## 5. Build
+## 2. Build
 
 - Do exactly what the item says. If you notice other problems, write them down for the PR's
   "Noticed, not changed" section and leave them alone.
@@ -85,7 +58,7 @@ changing content in the content paths, don't guess. Go to **Needs input** below.
   out of the production build. Never write anything that reads like a real post, project or
   bio.
 
-## 6. Verify
+## 3. Verify
 
 Run all three, and fix anything they report:
 
@@ -94,14 +67,14 @@ pnpm check && pnpm test --run && pnpm build
 ```
 
 If they still fail after a reasonable effort, go to **Needs input** and include the failing
-output.
+output. CI runs the same three on the PR.
 
-## 7. Update the backlog
+## 4. Update the backlog
 
-Tick the selected item in `BACKLOG.md`. Change no other line, unless the work showed the item
-needs a follow-up: then add a new unticked item, untagged, directly below it.
+Tick your item in `BACKLOG.md`. Change no other line, unless the work showed the item needs a
+follow-up: then add a new unticked item, untagged, directly below it.
 
-## 8. Screenshots and recordings
+## 5. Screenshots and recordings
 
 Shoot media whenever the diff touches anything that renders: `src/pages`, `src/components`,
 `src/layouts`, `src/styles`, `public`, or data a page displays. That includes refactors meant
@@ -112,10 +85,11 @@ tests, logic no page uses yet), and say so in the PR.
 
 Use `scripts/pr-media.mjs`; `node scripts/pr-media.mjs --help` lists every option. It serves
 `./dist` on a port of its own and shoots production as "before" and the build as "after", at
-375px and 1280px. The build from step 6 is current; rebuild if you changed anything since.
+375px and 1280px. It already handles the sandbox. The build from step 3 is current; rebuild if
+you changed anything since.
 
 1. Choose the pages the change affects. If the change only shows after a click, hover, scroll
-   or open dialog, write a setup module in `$TMPDIR`, not in the repo:
+   or open dialog, write a setup module in the scratch folder, not in the repo:
 
    ```js
    export default async (page, { side, width }) => {
@@ -123,38 +97,31 @@ Use `scripts/pr-media.mjs`; `node scripts/pr-media.mjs --help` lists every optio
    };
    ```
 
-2. Add `--clip <selector>` when the change is small, `--skip-before` for a new page, and
-   `--theme night` when night mode is part of the change.
+2. Add `--clip <selector>` when the change is small, `--name <state>` when you capture several
+   states of one page, `--skip-before` for a new page, and `--theme night` when night mode is
+   part of the change.
 3. For motion, add `--record <secs>` for a GIF of the after side, limited with `--widths` to
    the width that shows it best. Keep it short; the script warns past 3 MB.
-4. Run it with `--out $TMPDIR/pr-media/<slug>` and
-   `--url-base https://raw.githubusercontent.com/<owner>/<repo>/pr-assets/agent/<slug>`. It
-   prints the markdown for the PR's Screenshots section.
-5. Publish the files on the `pr-assets` branch, in a worktree of its own:
+4. Run it with `--out <scratch folder>/media` and
+   `--url-base https://raw.githubusercontent.com/djm158/personal-site/pr-assets/agent/<slug>`.
+   It prints the markdown for the PR's Screenshots section.
+5. Copy the files into `agent/<slug>/` in the `pr-assets` clone, commit there, and
+   `git push origin HEAD:pr-assets`. If the push is rejected because another run pushed first,
+   `git pull --rebase origin pr-assets` and push again.
+6. Look at your own after shots next to the design in `design/`. If something doesn't match
+   the spec, fix it now, or explain the difference in the PR.
 
-   ```sh
-   if git fetch origin pr-assets; then
-     git worktree add --detach ../pr-assets-<slug> origin/pr-assets
-   else   # first run ever; `worktree add --orphan` needs git 2.42+, so don't use it
-     git worktree add --detach ../pr-assets-<slug>
-     git -C ../pr-assets-<slug> checkout --orphan pr-assets
-     git -C ../pr-assets-<slug> rm -rfq .
-   fi
-   ```
-
-   Copy the files into `agent/<slug>/` there, commit, `git push origin HEAD:pr-assets`
-   (fetch and rebase, then push again, if another run pushed first), and remove the worktree.
-
-## 9. Commit and open the PR
+## 6. Commit and open the PR
 
 - Commit in Conventional Commits style (`feat:`, `fix:`, `chore:`…). Every commit ends with
   the `Co-Authored-By: Claude …` trailer; CI relies on it to spot agent commits that touch
   content.
-- Push `agent/<slug>` and open the PR as a **draft**, labelled `agent`:
+- `git push -u origin agent/<slug>`, then open the PR, ready for review (not a draft) and
+  labelled `agent`:
 
 ```sh
-gh pr create --draft --base main --head agent/<slug> --label agent \
-  --title "<type>: <short summary>" --body-file <file>
+gh pr create --base main --head agent/<slug> --label agent \
+  --title "<type>: <short summary>" --body-file <scratch folder>/pr-body.md
 ```
 
 Body template:
@@ -163,6 +130,11 @@ Body template:
 ## Backlog item
 
 > <the item's text, verbatim>
+
+## Done when
+
+- [x] <each check from step 1, ticked, with a few words of evidence: a test name, a screenshot,
+      what you clicked>
 
 ## What changed
 
@@ -181,25 +153,20 @@ reduced-motion and night mode when they apply>
 
 <things outside this item's scope, or "Nothing.">
 
-## Checks
-
-- [x] `pnpm check`
-- [x] `pnpm test --run`
-- [x] `pnpm build`
-
 🤖 Generated with [Claude Code](https://claude.com/claude-code)
 ```
 
-Don't wait for the review or deploy preview; other runs handle those.
+Leave a "Done when" box unticked, and say why, if you couldn't confirm it. Don't wait for CI,
+the review or the deploy preview; other runs handle those.
 
 ## Needs input
 
 When you can't go ahead (ambiguous, needs a decision, touches content, checks won't pass),
 still claim the item so later runs don't retry it:
 
-1. Push `agent/<slug>` with whatever useful work exists, or with a single empty commit
-   (`git commit --allow-empty`) if there is none.
-2. Open a draft PR labelled `agent` and `needs-input`. The body quotes the item, states the
+1. Commit whatever useful work exists, or make a single empty commit
+   (`git commit --allow-empty`) if there is none, and push `agent/<slug>`.
+2. Open a **draft** PR labelled `agent` and `needs-input`. The body quotes the item, states the
    question or blocker in one or two sentences, and gives the options you see with the one
    you'd pick.
 3. Stop with `RESULT: needs-input #<number>`.
@@ -209,19 +176,19 @@ still claim the item so later runs don't retry it:
 - Never push to `main`, merge a PR, force-push, or touch a branch other than `agent/<slug>`
   and `pr-assets`.
 - Never edit the content paths (apart from the word-for-word exception above), `CLAUDE.md`,
-  or this prompt.
-- One item per run. Don't start a second, even when the first was quick.
+  `.claude/**` or `.github/**`.
+- One item per run.
 
 ## Final output
 
-Your last line is exactly one of these, so the loop script can parse it:
+End your reply with up to three lines starting `NOTE: ` for anything a future run or Dan
+should know: a gotcha you hit, an instruction that was missing or wrong, a check that was
+slow. Skip them if there's nothing. The driver saves them to a file Dan reads.
+
+Your last line is exactly one of these:
 
 ```
 RESULT: opened #<number> agent/<slug>
 RESULT: needs-input #<number> agent/<slug>
-RESULT: idle (cap)
-RESULT: idle (nothing eligible)
 RESULT: error <reason>
 ```
-
-Above it, list any items you skipped because of a closed, unmerged PR.

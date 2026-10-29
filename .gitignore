@@ -30,3 +30,6 @@ resume/*.pdf
 
 # local Claude Code settings
 .claude/settings.local.json
+
+# backlog loop logs and notes
+.loop/

@@ -12,7 +12,8 @@
     "astro": "astro",
     "format": "prettier --write .",
     "test": "vitest",
-    "check": "astro check"
+    "check": "astro check",
+    "loop": "node scripts/loop/run.mjs"
   },
   "dependencies": {
     "@astrojs/react": "^7.0.1",

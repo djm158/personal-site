@@ -2,7 +2,8 @@
 
 Tested 2026-10-29 with `@anthropic-ai/sandbox-runtime` 0.0.81 (`srt`), the open-source runtime
 Claude Code's sandbox is built on, on macOS with Playwright's Chromium (headless shell 1248).
-Not yet confirmed through a real `claude -p` run; do that when the loop driver is built.
+Confirmed the same day through a real headless `claude -p` run with `.claude/loop-settings.json`.
+Inside Claude Code's sandbox `$TMPDIR` is `/tmp/claude-<uid>`, so runs get an explicit scratch folder.
 
 ## Result
 
