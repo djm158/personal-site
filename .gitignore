@@ -27,3 +27,6 @@ pnpm-debug.log*
 .bin/
 # PDFs from compiling resume.typ by hand; the build writes its own to dist/
 resume/*.pdf
+
+# local Claude Code settings
+.claude/settings.local.json
