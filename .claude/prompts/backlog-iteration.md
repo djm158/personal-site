@@ -28,6 +28,9 @@ run, that is lifted for your item, and only that item. Everything else in `CLAUD
   It can write only inside this run's folder. If a command fails with "Operation not
   permitted" or a blocked connection, that's the sandbox: find another way within it, or go
   to **Needs input**. Don't try to get around it.
+- Nothing can approve a permission prompt during a run, so anything that would ask is denied.
+  That includes commands that start with an environment variable (`VAR=value command`): use
+  the command's flags instead. `pnpm add` works for a dependency the item needs.
 - Your working directory is a throwaway clone. The driver deletes it after a successful run.
 
 ## 1. Understand before building
