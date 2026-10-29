@@ -1,0 +1,31 @@
+# Home page copy. Wrap words in *asterisks* to set them in the accent italic.
+description: >-
+  Daniel McGrath is a software engineer in Philadelphia building React and
+  TypeScript products, with full-stack ownership from backend to accessibility.
+
+hero:
+  status: Open to senior frontend and full stack roles
+  heading: Hi, I'm *Dan.*
+  intro: >-
+    A senior product engineer building end-to-end in TypeScript—where clean
+    architecture meets obsessive UI polish. Most recently Staff Engineer at
+    Wizard AI.
+  resumeLink: View résumé
+  emailLink: Say hello
+
+about:
+  eyebrow: 01 — About
+  lead: >-
+    I got into software by soldering bike power meters and flying quadcopters
+    with hand gestures. These days I build *whole products* — APIs and data
+    models, component systems, and the quiet details that make software feel
+    effortless.
+  body: >-
+    I work across the stack in TypeScript — React on the client, Node on the
+    server — with a soft spot for polished UI. I still think like an embedded
+    engineer about every byte and frame.
+
+experience:
+  eyebrow: 02 — Experience
+  heading: Eight years, *whole stack*
+  resumeLink: Full résumé

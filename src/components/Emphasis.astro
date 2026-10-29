@@ -1,0 +1,15 @@
+---
+import { splitEmphasis } from "../lib/site-content/emphasis";
+
+type Props = {
+  text: string;
+};
+
+const { text } = Astro.props;
+---
+
+{
+  splitEmphasis(text).map((segment) =>
+    segment.em ? <em class="text-accent">{segment.text}</em> : segment.text,
+  )
+}
