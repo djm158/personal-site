@@ -30,7 +30,12 @@ run, that is lifted for your item, and only that item. Everything else in `CLAUD
   to **Needs input**. Don't try to get around it.
 - Nothing can approve a permission prompt during a run, so anything that would ask is denied.
   That includes commands that start with an environment variable (`VAR=value command`): use
-  the command's flags instead. `pnpm add` works for a dependency the item needs.
+  the command's flags instead. `sed -i` and commands with `${...}` expansions are also denied:
+  edit files with the Edit and Write tools, and write paths out in full. `pnpm add` works for a
+  dependency the item needs.
+- Don't `cd` into the `pr-assets` clone. Bash calls that run at the same time can share a
+  working directory, so another command may end up running there. Use `git -C <path>` and
+  absolute paths instead.
 - Your working directory is a throwaway clone. The driver deletes it after a successful run.
 
 ## 1. Understand before building
@@ -108,9 +113,9 @@ you changed anything since.
 4. Run it with `--out <scratch folder>/media` and
    `--url-base https://raw.githubusercontent.com/djm158/personal-site/pr-assets/agent/<slug>`.
    It prints the markdown for the PR's Screenshots section.
-5. Copy the files into `agent/<slug>/` in the `pr-assets` clone, commit there, and
-   `git push origin HEAD:pr-assets`. If the push is rejected because another run pushed first,
-   `git pull --rebase origin pr-assets` and push again.
+5. Copy the files into `agent/<slug>/` in the `pr-assets` clone, then commit and push with
+   `git -C <pr-assets clone>`: `add`, `commit`, `push origin HEAD:pr-assets`. If the push is
+   rejected because another run pushed first, pull with `--rebase` the same way and push again.
 6. Look at your own after shots next to the design in `design/`. If something doesn't match
    the spec, fix it now, or explain the difference in the PR.
 
