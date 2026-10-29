@@ -6,12 +6,12 @@ type TaggedRole = Pick<Role, "id" | "tags">;
 // matches.
 export const matchingRoles = <R extends TaggedRole>(
   roles: R[],
-  skills: string[],
+  skills: readonly string[],
 ): R[] =>
   skills.length
     ? roles.filter((role) => skills.every((skill) => role.tags?.includes(skill)))
     : [];
 
 // Single select for now: picking the selected skill clears it, any other replaces it
-export const toggleSkill = (selected: string[], skill: string): string[] =>
+export const toggleSkill = (selected: readonly string[], skill: string): string[] =>
   selected.includes(skill) ? [] : [skill];

@@ -5,9 +5,9 @@ import Chip from "./Chip.astro";
 import Eyebrow from "./Eyebrow.astro";
 
 // The skill picker on narrow screens: a sticky bar above the roles that opens the full picker
-// in a bottom sheet. Picking and clearing are handled by the page's picker script, which
-// announces each change with a `skillchange` event on [data-skill-scope]; this component only
-// opens and closes the sheet and keeps the bar in step.
+// in a bottom sheet. The selection lives in the `$selectedSkills` store, shared with the page's
+// sidebar picker; this component sets it from its own pills and clear buttons, and keeps its
+// pills and bar in step with it. The page script marks the matching roles.
 interface Props {
   skills: Skill[];
   roles: Role[];
@@ -134,7 +134,9 @@ const skillTotal = skills.reduce((n, group) => n + group.items.length, 0);
 </dialog>
 
 <script>
-  const scope = document.querySelector<HTMLElement>("[data-skill-scope]");
+  import { $selectedSkills } from "../lib/resume/skill-store";
+  import { matchingRoles, toggleSkill } from "../lib/resume/skills";
+
   const sheet = document.querySelector<HTMLDialogElement>("[data-skill-sheet]");
   const openBtn = document.querySelector("[data-skill-sheet-open]");
   const doneBtn = document.querySelector("[data-skill-sheet-done]");
@@ -145,8 +147,16 @@ const skillTotal = skills.reduce((n, group) => n + group.items.length, 0);
   const status = document.querySelector("[data-skill-status]");
   const clears = document.querySelectorAll<HTMLElement>("[data-skill-clear]");
 
-  if (scope && sheet && openBtn && doneBtn && idle && picked) {
+  if (sheet && openBtn && doneBtn && idle && picked) {
     const reduceMotion = matchMedia("(prefers-reduced-motion: reduce)");
+    const articles = [
+      ...document.querySelectorAll<HTMLElement>("article[data-role]"),
+    ];
+    const roles = articles.map((article) => ({
+      id: article.id,
+      short: article.dataset.short,
+      tags: article.dataset.tags?.split(","),
+    }));
 
     const closeSheet = async () => {
       if (!sheet.open) return;
@@ -167,18 +177,36 @@ const skillTotal = skills.reduce((n, group) => n + group.items.length, 0);
     doneBtn.addEventListener("click", closeSheet);
     // A click on the dialog itself, not its contents, is a click on the backdrop
     sheet.addEventListener("click", (e) => {
-      if (e.target === sheet) closeSheet();
+      if (e.target === sheet) {
+        closeSheet();
+        return;
+      }
+      if (!(e.target instanceof Element)) return;
+      const skill = e.target.closest<HTMLElement>("button[data-skill]")?.dataset
+        .skill;
+      if (skill) $selectedSkills.set(toggleSkill($selectedSkills.get(), skill));
     });
     sheet.addEventListener("cancel", (e) => {
       e.preventDefault();
       closeSheet();
     });
+    clears.forEach((button) =>
+      button.addEventListener("click", () => $selectedSkills.set([])),
+    );
 
-    scope.addEventListener("skillchange", async (e) => {
-      const { skill } = (e as CustomEvent<{ skill: string | null }>).detail;
-      const articles =
-        scope.querySelectorAll<HTMLElement>("article[data-role]");
-      const hits = [...articles].filter((a) => a.hasAttribute("data-hit"));
+    $selectedSkills.subscribe(async (skills) => {
+      // One skill for now; the bar shows the first
+      const [skill] = skills;
+      const hits = matchingRoles(roles, skills);
+
+      sheet
+        .querySelectorAll<HTMLElement>("button[data-skill]")
+        .forEach((button) =>
+          button.setAttribute(
+            "aria-pressed",
+            String(skills.includes(button.dataset.skill ?? "")),
+          ),
+        );
 
       idle.hidden = Boolean(skill);
       picked.hidden = !skill;
@@ -186,21 +214,21 @@ const skillTotal = skills.reduce((n, group) => n + group.items.length, 0);
       if (nameEl) nameEl.textContent = skill ?? "";
       if (countEl) {
         countEl.textContent = hits.length
-          ? `${hits.length} of ${articles.length} roles`
+          ? `${hits.length} of ${roles.length} roles`
           : "no roles yet";
       }
       if (status) {
         status.textContent = !skill
           ? ""
           : hits.length
-            ? `${skill}: used at ${hits.map((a) => a.dataset.short).join(", ")}.`
+            ? `${skill}: used at ${hits.map((role) => role.short).join(", ")}.`
             : `${skill} isn't tagged on a role yet.`;
       }
 
       // Picking from the sheet closes it and brings the first match into view
       if (skill && sheet.open) {
         await closeSheet();
-        hits[0]?.scrollIntoView({
+        document.getElementById(hits[0]?.id ?? "")?.scrollIntoView({
           behavior: reduceMotion.matches ? "auto" : "smooth",
           block: "start",
         });

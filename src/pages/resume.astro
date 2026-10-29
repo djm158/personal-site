@@ -199,44 +199,47 @@ const nonPortfolioLinks = resume.links.filter(
 </Layout>
 
 <script>
+  import { $selectedSkills } from "../lib/resume/skill-store";
+  import { matchingRoles, toggleSkill } from "../lib/resume/skills";
+
   const scope = document.querySelector<HTMLElement>("[data-skill-scope]");
   const picker = scope?.querySelector<HTMLElement>("[data-picker]");
+  const articles = [
+    ...document.querySelectorAll<HTMLElement>("article[data-role]"),
+  ];
+  const roles = articles.map((article) => ({
+    id: article.id,
+    tags: article.dataset.tags?.split(","),
+  }));
 
-  const reset = () => {
-    scope
-      ?.querySelectorAll('[aria-pressed="true"]')
-      .forEach((elem) => elem.setAttribute("aria-pressed", "false"));
+  // Everything the selection changes on the page; SkillSheet keeps its own pills and bar
+  $selectedSkills.subscribe((skills) => {
+    picker
+      ?.querySelectorAll<HTMLElement>("button[data-skill]")
+      .forEach((button) =>
+        button.setAttribute(
+          "aria-pressed",
+          String(skills.includes(button.dataset.skill ?? "")),
+        ),
+      );
+
     document
-      .querySelectorAll('[data-hit="true"]')
-      .forEach((tag) => tag.removeAttribute("data-hit"));
+      .querySelectorAll<HTMLElement>("[data-tag]")
+      .forEach((tag) =>
+        tag.toggleAttribute("data-hit", skills.includes(tag.dataset.tag ?? "")),
+      );
 
-    scope?.removeAttribute("data-picked");
-  };
-
-  // The same skill has a pill in the sidebar and in SkillSheet; press both
-  const pick = (skill: string) => {
-    scope
-      ?.querySelectorAll(`button[data-skill="${CSS.escape(skill)}"]`)
-      .forEach((button) => button.setAttribute("aria-pressed", "true"));
-
-    document
-      .querySelectorAll(`[data-tag="${CSS.escape(skill)}"]`)
-      .forEach((tag) => tag.setAttribute("data-hit", "true"));
-
-    const articles = document.querySelectorAll("article");
-
-    [...articles].forEach((article) => {
-      const isMatch = article.dataset?.tags?.split(",").includes(skill);
-      if (isMatch) {
-        article.setAttribute("data-hit", "true");
-        scope
-          ?.querySelector(`a[href="#${article.id}"]`)
-          ?.setAttribute("data-hit", "true");
-      }
+    const hits = new Set(matchingRoles(roles, skills).map((role) => role.id));
+    articles.forEach((article) => {
+      const isHit = hits.has(article.id);
+      article.toggleAttribute("data-hit", isHit);
+      scope
+        ?.querySelector(`a[href="#${CSS.escape(article.id)}"]`)
+        ?.toggleAttribute("data-hit", isHit);
     });
 
-    scope?.toggleAttribute("data-picked", true);
-  };
+    scope?.toggleAttribute("data-picked", skills.length > 0);
+  });
 
   // One group expanded at a time, so the picker stays short and rarely needs to scroll inside
   const toggleGroup = (toggle: HTMLButtonElement) => {
@@ -250,12 +253,7 @@ const nonPortfolioLinks = resume.links.filter(
       });
   };
 
-  // SkillSheet listens for this to update its bar
-  const announce = (skill: string | null) =>
-    scope?.dispatchEvent(new CustomEvent("skillchange", { detail: { skill } }));
-
-  // Handles pills and clear buttons in both the sidebar and SkillSheet
-  scope?.addEventListener("click", (e) => {
+  picker?.addEventListener("click", (e) => {
     if (!(e.target instanceof Element)) return;
     const toggle = e.target.closest<HTMLButtonElement>(
       "button[data-skill-toggle]",
@@ -264,20 +262,8 @@ const nonPortfolioLinks = resume.links.filter(
       toggleGroup(toggle);
       return;
     }
-    if (e.target.closest("button[data-skill-clear]")) {
-      reset();
-      announce(null);
-      return;
-    }
-    const button = e.target?.closest<HTMLButtonElement>("button[data-skill]");
-    if (!button) return;
-    const skill = button.getAttribute("data-skill");
-    if (!skill) return;
-    const wasPressed = button.getAttribute("aria-pressed") === "true";
-    reset();
-    if (!wasPressed) {
-      pick(skill);
-    }
-    announce(wasPressed ? null : skill);
+    const skill = e.target.closest<HTMLElement>("button[data-skill]")?.dataset
+      .skill;
+    if (skill) $selectedSkills.set(toggleSkill($selectedSkills.get(), skill));
   });
 </script>
