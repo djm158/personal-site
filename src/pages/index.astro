@@ -3,6 +3,7 @@ import Avatar from "../components/Avatar.astro";
 import Button from "../components/Button.astro";
 import Container from "../components/Container.astro";
 import Eyebrow from "../components/Eyebrow.astro";
+import TextLink from "../components/TextLink.astro";
 import Layout from "../layouts/Layout.astro";
 import { formatYearSpan } from "../lib/resume/dates";
 import { loadResume } from "../lib/resume/load";
@@ -76,12 +77,7 @@ const { email, roles } = loadResume();
       <h2 class="font-serif text-[clamp(44px,5vw,68px)]/none tracking-[-0.02em] mb-5.5">
         Eight years, <em class="text-accent">whole stack</em>
       </h2>
-      <a
-        href="/resume/"
-        class="inline-block py-1 border-b border-ink font-medium text-[15px] text-ink no-underline"
-      >
-        Full résumé <span aria-hidden="true">→</span>
-      </a>
+      <TextLink href="/resume/">Full résumé</TextLink>
     </div>
     <ul role="list" class="flex-[1_1_520px] min-w-0 border-b border-line">
       {roles.map((role) => (

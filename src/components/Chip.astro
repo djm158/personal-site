@@ -1,0 +1,44 @@
+---
+import type { HTMLAttributes } from "astro/types";
+
+// A toggle pill; scripts flip `aria-pressed` and the styles follow it
+type Props = {
+  variant?: keyof typeof variants;
+  size?: keyof typeof sizes;
+  pressed?: boolean;
+} & Omit<HTMLAttributes<"button">, "type" | "aria-pressed">;
+
+const variants = {
+  outlined: "bg-bg border-line",
+  soft: "bg-surface border-line",
+  // Nothing to filter by yet: still pickable, but reads as empty
+  dashed: "border-dashed border-line text-muted",
+};
+
+const sizes = {
+  sm: "py-1.5 px-3 text-xs",
+  md: "py-2 px-3.25 text-[13px]",
+};
+
+const {
+  variant = "outlined",
+  size = "sm",
+  pressed = false,
+  class: className,
+  ...rest
+} = Astro.props;
+---
+
+<button
+  type="button"
+  aria-pressed={pressed ? "true" : "false"}
+  class:list={[
+    "rounded-full border font-medium cursor-pointer aria-pressed:bg-ink aria-pressed:text-onink aria-pressed:border-ink aria-pressed:border-solid motion-safe:transition-[color,background-color,border-color,opacity] motion-safe:duration-200",
+    variants[variant],
+    sizes[size],
+    className,
+  ]}
+  {...rest}
+>
+  <slot />
+</button>

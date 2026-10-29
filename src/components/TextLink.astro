@@ -1,0 +1,17 @@
+---
+import type { HTMLAttributes } from "astro/types";
+
+type Props = HTMLAttributes<"a">;
+
+const { class: className, ...rest } = Astro.props;
+---
+
+<a
+  class:list={[
+    "inline-block py-1 border-b border-ink font-medium text-[15px] text-ink no-underline",
+    className,
+  ]}
+  {...rest}
+>
+  <slot /> <span aria-hidden="true">→</span>
+</a>

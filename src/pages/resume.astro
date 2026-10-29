@@ -1,5 +1,6 @@
 ---
 import Button from "../components/Button.astro";
+import Chip from "../components/Chip.astro";
 import Container from "../components/Container.astro";
 import Eyebrow from "../components/Eyebrow.astro";
 import SkillSheet from "../components/SkillSheet.astro";
@@ -161,18 +162,16 @@ const nonPortfolioLinks = resume.links.filter(
                 <!-- Collapsed, pills past the first few are hidden, except a picked one -->
                 <div class="flex flex-wrap gap-1.5 not-data-expanded:[&>[data-extra]:not([aria-pressed=true])]:hidden">
                   {skill.items.map((skillName, i) => (
-                    <button
-                      type="button"
+                    <Chip
                       data-skill={skillName}
                       data-extra={
                         (hiddenCount(skill.items) > 0 && i >= VISIBLE_SKILLS) ||
                         undefined
                       }
-                      aria-pressed="false"
-                      class="rounded-full font-medium text-xs py-1.5 px-3 cursor-pointer bg-bg border border-line aria-pressed:bg-ink aria-pressed:text-onink aria-pressed:border-ink motion-safe:transition-[color,background-color,border-color,opacity] motion-safe:duration-200 motion-safe:in-data-expanded:starting:opacity-0"
+                      class="motion-safe:in-data-expanded:starting:opacity-0"
                     >
                       {skillName}
-                    </button>
+                    </Chip>
                   ))}
                   {hiddenCount(skill.items) > 0 && (
                     <button
