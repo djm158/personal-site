@@ -35,6 +35,10 @@ jobs:
       - name: Run Claude Code Review
         id: claude-review
         uses: anthropics/claude-code-action@v1
+        env:
+          # The plugin starts subagents. Run them in the foreground: started in the background,
+          # the session ended before they finished and the review never ran.
+          CLAUDE_CODE_DISABLE_BACKGROUND_TASKS: "1"
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           # The action rejects PRs opened by bots unless they're listed. The loop's App opens
