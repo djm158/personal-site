@@ -93,7 +93,7 @@ LaTeX (then the PDF) is generated from it. Nothing parses LaTeX in the build.
 - [x] Build `/resume.pdf` with Typst in an `astro:build:done` integration; the build fails if the PDF runs past two pages
 - [x] Confirm Typst runs in the Netlify build (the build command fetches the pinned static binary); fall back to a GitHub Action if it won't
 - [x] Wire the Download PDF button on `/resume` to `/resume.pdf` (part of the `/resume` item above)
-- [ ] Download PDF button hover: lift it on hover the same way the header's Résumé button does (`transition-transform duration-200 hover:-translate-y-0.5` in `Header.astro`) (agent: pdf-button-hover)
+- [x] Download PDF button hover: lift it on hover the same way the header's Résumé button does (`transition-transform duration-200 hover:-translate-y-0.5` in `Header.astro`) (agent: pdf-button-hover)
 
 ## 5. Home
 
