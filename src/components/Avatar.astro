@@ -6,12 +6,13 @@ type Props = HTMLAttributes<"svg">;
 const { class: className, ...rest } = Astro.props;
 ---
 
-<!-- Markup ported from the design, minus its duplicated ears and face (the copy drawn under the sideburns, which the later copy covered completely); the eyes and pupils groups are kept for section 5 behaviour -->
+<!-- Markup ported from the design, minus its duplicated ears and face (the copy drawn under the sideburns, which the later copy covered completely) -->
 <svg
   viewBox="0 0 200 200"
   role="img"
   aria-label="Illustrated portrait of Dan"
-  class:list={["block", className]}
+  data-avatar
+  class:list={["block cursor-pointer", className]}
   {...rest}
 >
   <defs>
@@ -112,7 +113,10 @@ const { class: className, ...rest } = Astro.props;
       rx="2.5"
       fill="var(--color-hair2)"
     ></rect>
-    <g data-eyes style="transform-box:fill-box;transform-origin:center">
+    <g
+      data-eyes
+      class="origin-center [transform-box:fill-box] motion-safe:transition-[scale] motion-safe:duration-120 data-blink:scale-y-10"
+    >
       <g data-pupils>
         <circle cx="79" cy="110" r="5" fill="#8A6A3E"></circle>
         <circle cx="121" cy="110" r="5" fill="#8A6A3E"></circle>
@@ -156,3 +160,62 @@ const { class: className, ...rest } = Astro.props;
     ></path>
   </g>
 </svg>
+
+<script>
+  import { pupilOffset } from "../lib/avatar";
+
+  // Eyes follow the cursor; a click blinks and opens the mouth for a moment
+  const avatar = document.querySelector<SVGSVGElement>("[data-avatar]");
+  const eyes = avatar?.querySelector<SVGGElement>("[data-eyes]");
+  const pupils = avatar?.querySelector<SVGGElement>("[data-pupils]");
+  const mouth = avatar?.querySelector<SVGPathElement>("[data-mouth]");
+
+  if (avatar && eyes && pupils && mouth) {
+    let frame = 0;
+    let x = 0;
+    let y = 0;
+
+    const look = () => {
+      frame = 0;
+      const box = avatar.getBoundingClientRect();
+      // The eyes sit a little below the middle of the face
+      const offset = pupilOffset(
+        x - (box.left + box.width / 2),
+        y - (box.top + box.height * 0.57),
+      );
+      pupils.setAttribute(
+        "transform",
+        `translate(${offset.x.toFixed(2)} ${offset.y.toFixed(2)})`,
+      );
+    };
+
+    const follow = (event: PointerEvent) => {
+      x = event.clientX;
+      y = event.clientY;
+      frame ||= requestAnimationFrame(look);
+    };
+
+    // A touch tap sends pointerdown but no pointermove
+    window.addEventListener("pointermove", follow);
+    window.addEventListener("pointerdown", follow);
+
+    const smile = mouth.getAttribute("d") ?? "";
+    let blinkTimer = 0;
+    let mouthTimer = 0;
+
+    avatar.addEventListener("click", () => {
+      eyes.dataset.blink = "";
+      clearTimeout(blinkTimer);
+      blinkTimer = window.setTimeout(() => delete eyes.dataset.blink, 150);
+
+      // An open "o" mouth, filled in the line's colour
+      mouth.setAttribute("d", "M95 148 A5 5 0 1 0 105 148 A5 5 0 1 0 95 148 Z");
+      mouth.setAttribute("fill", mouth.getAttribute("stroke") ?? "none");
+      clearTimeout(mouthTimer);
+      mouthTimer = window.setTimeout(() => {
+        mouth.setAttribute("d", smile);
+        mouth.setAttribute("fill", "none");
+      }, 320);
+    });
+  }
+</script>
