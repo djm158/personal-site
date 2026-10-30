@@ -99,6 +99,46 @@
   }
 }
 
+/* page transitions: the browser's cross-document view transitions, no client-side router.
+   The old page fades up and blurs out, then the new one rises in. The header and grain have
+   their own view-transition-name, so they stay put instead of moving with the page */
+@media (prefers-reduced-motion: no-preference) {
+  @view-transition {
+    navigation: auto;
+  }
+}
+
+::view-transition-old(root) {
+  animation: page-out 220ms var(--ease-in-out) forwards;
+}
+::view-transition-new(root) {
+  animation: page-in 520ms var(--ease-soft) 220ms backwards;
+}
+/* only the new header and grain are shown, so they don't crossfade with themselves */
+::view-transition-old(site-header),
+::view-transition-old(grain) {
+  display: none;
+}
+::view-transition-new(site-header),
+::view-transition-new(grain) {
+  animation: none;
+}
+
+@keyframes page-out {
+  to {
+    opacity: 0;
+    translate: 0 -12px;
+    filter: blur(4px);
+  }
+}
+@keyframes page-in {
+  from {
+    opacity: 0;
+    translate: 0 22px;
+    filter: blur(4px);
+  }
+}
+
 @theme inline {
   --font-sans: var(--font-geist);
   --font-serif: var(--font-instrument-serif);

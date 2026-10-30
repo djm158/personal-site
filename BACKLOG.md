@@ -122,7 +122,7 @@ LaTeX (then the PDF) is generated from it. Nothing parses LaTeX in the build.
 - [ ] RSS feed (deferred: waits for the blog)
 - [ ] 404 page design session in claude.ai/design (me)
 - [ ] 404 page (deferred: waits for the design session)
-- [ ] Page transitions: old page fades up and blurs out (220ms), new page rises in from 22px below (520ms); header stays put; `/#about` and `/#contact` still land on their section when coming from another page (agent: page-transitions)
+- [x] Page transitions: old page fades up and blurs out (220ms), new page rises in from 22px below (520ms); header stays put; `/#about` and `/#contact` still land on their section when coming from another page (agent: page-transitions)
 - [ ] Respect `prefers-reduced-motion` for page transitions, the mobile menu, the marquee, spinning ring and hover motion (agent: reduced-motion) (after: page-transitions) (after: marquee) (after: avatar-behaviour)
 - [ ] Accessibility pass: keyboard navigation, focus styles, contrast in both themes, axe checks (deferred: once the pages are built)
 - [ ] Performance pass: Lighthouse, image optimisation with `astro:assets`, consider self-hosting fonts (deferred: once the pages are built)
