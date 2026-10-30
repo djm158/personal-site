@@ -1,0 +1,59 @@
+---
+import type { HTMLAttributes } from "astro/types";
+
+type Props = HTMLAttributes<"button">;
+
+const { class: className, ...rest } = Astro.props;
+---
+
+<!-- Five clicks on whatever it wraps (the hero avatar) switch between day and night -->
+<button
+  type="button"
+  data-night-toggle
+  class:list={[
+    "block cursor-pointer rounded-full focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent motion-safe:transition-[scale,rotate] motion-safe:duration-500 motion-safe:ease-spring motion-safe:active:scale-96 motion-safe:active:-rotate-3",
+    className,
+  ]}
+  {...rest}
+>
+  <slot />
+</button>
+<div
+  role="status"
+  data-night-toast
+  class="fixed left-1/2 bottom-7 z-70 -translate-x-1/2 translate-y-5 opacity-0 data-shown:translate-y-0 data-shown:opacity-100 motion-safe:transition-[translate,opacity] motion-safe:duration-500 motion-safe:ease-spring rounded-full bg-ink text-onink px-5 py-3 font-mono font-medium text-[13px] whitespace-nowrap pointer-events-none"
+>
+</div>
+
+<script>
+  import { THEME_KEY, poke, readTheme, toastFor, type Theme } from "../lib/theme";
+
+  const toggle = document.querySelector<HTMLButtonElement>("[data-night-toggle]");
+  const toast = document.querySelector<HTMLElement>("[data-night-toast]");
+
+  if (toggle && toast) {
+    let count = 0;
+    let hideTimer: ReturnType<typeof setTimeout> | undefined;
+
+    toggle.addEventListener("click", () => {
+      const next = poke(count);
+      count = next.count;
+      if (!next.toggle) return;
+
+      const root = document.documentElement;
+      const theme: Theme = readTheme(root.dataset.theme ?? null) === "night" ? "day" : "night";
+      if (theme === "night") root.dataset.theme = "night";
+      else delete root.dataset.theme;
+      try {
+        localStorage.setItem(THEME_KEY, theme);
+      } catch {
+        // storage blocked: the switch still works for this page
+      }
+
+      toast.textContent = toastFor(theme);
+      toast.dataset.shown = "";
+      clearTimeout(hideTimer);
+      hideTimer = setTimeout(() => delete toast.dataset.shown, 3200);
+    });
+  }
+</script>

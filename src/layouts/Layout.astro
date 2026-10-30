@@ -4,6 +4,7 @@ import AvatarMini from "../assets/avatar-mini.svg";
 import { Font } from "astro:assets";
 import Header from "../components/Header.astro";
 import Footer from "../components/Footer.astro";
+import { THEME_KEY } from "../lib/theme";
 
 interface Props {
   title?: string;
@@ -22,6 +23,14 @@ const fullTitle = title ? `${title} · ${siteName}` : siteName;
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="description" content={description} />
     <title>{fullTitle}</title>
+    <!-- Night mode from an earlier visit, set before first paint so the page doesn't flash day first -->
+    <script is:inline define:vars={{ key: THEME_KEY }}>
+      try {
+        if (localStorage.getItem(key) === "night") {
+          document.documentElement.dataset.theme = "night";
+        }
+      } catch {}
+    </script>
     <link rel="icon" href="/favicon.ico" sizes="32x32" />
     <link rel="icon" href={AvatarMini.src} type="image/svg+xml" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
