@@ -29,3 +29,38 @@ experience:
   eyebrow: Experience
   heading: Eight years, *whole stack*
   resumeLink: Full résumé
+
+contact:
+  eyebrow: Contact
+  heading: Let's *talk.*
+  intro: >-
+    Hiring for your team, want to collaborate, or looking for cycling/running
+    routes in Philly? Drop me a note.
+  links:
+    - label: github.com/djm158 ↗
+      href: https://github.com/djm158
+    - label: resume.pdf ↗
+      href: /resume.pdf
+  form:
+    topicLabel: What's this about?
+    topics:
+      - A role
+      - Collaboration
+      - A blog post
+      - Just saying hi
+    nameLabel: Name
+    namePlaceholder: Your name
+    emailLabel: Email
+    emailPlaceholder: you@domain.com
+    messageLabel: Message
+    messagePlaceholder: Tell me a little about it…
+    submit: Send message →
+    errors:
+      name: Who am I talking to?
+      email: That email looks off.
+      message: Add a few words?
+  # {name} and {email} are filled in from the form
+  success:
+    heading: Thanks, {name}!
+    body: Got it. I'll get back to you at {email} within a couple of days.
+    reset: Send another

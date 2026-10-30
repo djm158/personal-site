@@ -31,6 +31,33 @@ const siteContent = defineCollection({
       heading: richText,
       resumeLink: z.string(),
     }),
+    contact: z.strictObject({
+      eyebrow: z.string(),
+      heading: richText,
+      intro: richText,
+      links: z.array(z.strictObject({ label: z.string(), href: z.string() })),
+      form: z.strictObject({
+        topicLabel: z.string(),
+        topics: z.array(z.string()).min(1),
+        nameLabel: z.string(),
+        namePlaceholder: z.string(),
+        emailLabel: z.string(),
+        emailPlaceholder: z.string(),
+        messageLabel: z.string(),
+        messagePlaceholder: z.string(),
+        submit: z.string(),
+        errors: z.strictObject({
+          name: z.string(),
+          email: z.string(),
+          message: z.string(),
+        }),
+      }),
+      success: z.strictObject({
+        heading: z.string(),
+        body: z.string(),
+        reset: z.string(),
+      }),
+    }),
   }),
 });
 
