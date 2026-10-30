@@ -6,7 +6,7 @@ type Props = HTMLAttributes<"svg">;
 const { class: className, ...rest } = Astro.props;
 ---
 
-<!-- Markup ported as-is from the design; the eyes and pupils groups are kept for section 5 behaviour -->
+<!-- Markup ported from the design, minus its duplicated ears and face (the copy drawn under the sideburns, which the later copy covered completely); the eyes and pupils groups are kept for section 5 behaviour -->
 <svg
   viewBox="0 0 200 200"
   role="img"
@@ -41,15 +41,6 @@ const { class: className, ...rest } = Astro.props;
       rx="10"
       fill="var(--color-skin2)"
     ></rect>
-    <circle cx="56" cy="112" r="9" fill="var(--color-skin2)"></circle>
-    <circle cx="144" cy="112" r="9" fill="var(--color-skin2)"></circle>
-    <ellipse
-      cx="100"
-      cy="106"
-      rx="44"
-      ry="50"
-      fill="var(--color-skin)"
-    ></ellipse>
     <rect
       x="54"
       y="62"

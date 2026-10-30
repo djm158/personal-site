@@ -11,4 +11,4 @@ on a new branch from `main`; the old branch has been deleted, but the old PR kee
 {{comments}}
 
 Everything else follows the iteration prompt above. In the new PR's body, add a line under
-"Backlog item": `Replaces #{{number}}.`, followed by a sentence on what you did differently.
+the item quote: `Replaces #{{number}}.`, followed by a sentence on what you did differently.
