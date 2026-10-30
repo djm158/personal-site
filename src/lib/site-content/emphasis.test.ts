@@ -27,4 +27,23 @@ describe("splitEmphasis", () => {
   test("leaves an unpaired asterisk as text", () => {
     expect(splitEmphasis("5 * 3")).toEqual([{ text: "5 * 3", em: false }]);
   });
+
+  // Known limits: there is no escape character and no **bold**
+  describe("limits", () => {
+    test("a lone asterisk next to an emphasis pairs with the wrong one", () => {
+      expect(splitEmphasis("5 * 3 and *x*")).toEqual([
+        { text: "5 ", em: false },
+        { text: " 3 and ", em: true },
+        { text: "x*", em: false },
+      ]);
+    });
+
+    test("double asterisks leave stray asterisks", () => {
+      expect(splitEmphasis("**bold**")).toEqual([
+        { text: "*", em: false },
+        { text: "bold", em: true },
+        { text: "*", em: false },
+      ]);
+    });
+  });
 });

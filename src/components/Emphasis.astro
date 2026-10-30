@@ -1,15 +1,15 @@
 ---
-import { splitEmphasis } from "../lib/site-content/emphasis";
+import type { Segment } from "../lib/site-content/emphasis";
 
 type Props = {
-  text: string;
+  segments: Segment[];
 };
 
-const { text } = Astro.props;
+const { segments } = Astro.props;
 ---
 
 {
-  splitEmphasis(text).map((segment) =>
+  segments.map((segment) =>
     segment.em ? <em class="text-accent">{segment.text}</em> : segment.text,
   )
 }

@@ -1,4 +1,4 @@
-# Home page copy. Wrap words in *asterisks* to set them in the accent italic.
+# Home page copy. In prose fields, wrap words in *asterisks* to set them in the accent italic.
 description: >-
   Daniel McGrath is a software engineer in Philadelphia building React and
   TypeScript products, with full-stack ownership from backend to accessibility.
@@ -14,7 +14,7 @@ hero:
   emailLink: Say hello
 
 about:
-  eyebrow: 01 — About
+  eyebrow: About
   lead: >-
     I got into software by soldering bike power meters and flying quadcopters
     with hand gestures. These days I build *whole products* — APIs and data
@@ -26,6 +26,6 @@ about:
     engineer about every byte and frame.
 
 experience:
-  eyebrow: 02 — Experience
+  eyebrow: Experience
   heading: Eight years, *whole stack*
   resumeLink: Full résumé
