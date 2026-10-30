@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest";
-import { openGraphTags } from "./open-graph";
+import { OG_IMAGE, openGraphTags } from "./open-graph";
 
 const site = new URL("https://danielmcgrath.xyz");
 
@@ -19,7 +19,11 @@ describe("openGraphTags", () => {
       { property: "og:title", content: "Résumé · Daniel McGrath" },
       { property: "og:description", content: "Roles and skills." },
       { property: "og:url", content: "https://danielmcgrath.xyz/resume/" },
-      { name: "twitter:card", content: "summary" },
+      { property: "og:image", content: "https://danielmcgrath.xyz/og.png" },
+      { property: "og:image:width", content: "1200" },
+      { property: "og:image:height", content: "630" },
+      { property: "og:image:alt", content: OG_IMAGE.alt },
+      { name: "twitter:card", content: "summary_large_image" },
     ]);
   });
 
@@ -34,6 +38,20 @@ describe("openGraphTags", () => {
     expect(tags).toContainEqual({
       property: "og:url",
       content: "https://danielmcgrath.xyz/",
+    });
+  });
+
+  test("uses an absolute image URL whatever the page", () => {
+    const tags = openGraphTags({
+      title: "Daniel McGrath",
+      description: "Hi.",
+      siteName: "Daniel McGrath",
+      pathname: "/resume/",
+      site: new URL("https://deploy-preview-1--example.netlify.app"),
+    });
+    expect(tags).toContainEqual({
+      property: "og:image",
+      content: "https://deploy-preview-1--example.netlify.app/og.png",
     });
   });
 });
