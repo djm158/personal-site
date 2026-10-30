@@ -32,9 +32,12 @@
   /* motion */
   --ease-soft: cubic-bezier(0.2, 0.8, 0.2, 1);
   --ease-spring: cubic-bezier(0.3, 1.6, 0.5, 1);
+}
 
+@theme inline {
   /* one hop up and back; each element sets --hop-y, --hop-rotate, --hop-scale and --hop-delay
      (the delay goes through a property because the animation shorthand would reset animation-delay).
+     inline so var(--hop-delay) resolves on each letter, not once on :root where it would be 0s.
      backwards fill holds the rest pose during the delay and lets go at the end, so hover still works */
   --animate-hop: hop 0.7s var(--ease-soft) var(--hop-delay, 0s) backwards;
 
