@@ -106,20 +106,20 @@ LaTeX (then the PDF) is generated from it. Nothing parses LaTeX in the build.
 - [x] Hero name intro: on page load the letters of "Dan." hop in turn, once, with the same lift and tilt as the hover. CSS only: an `--animate-hop` token and `@keyframes` in `global.css` that animate `translate`, `rotate` and `scale` (not `transform`) from per-letter custom properties, staggered with `animation-delay`, fill mode `backwards` so it never blocks the hover afterwards, behind `motion-safe:`. Plays on every visit to `/`; no once-per-session logic (agent: hero-letter-intro) (after: hero-letter-hover)
 - [x] Avatar SVG from the updated design (drop the duplicated ears and face shapes) (agent: avatar-svg)
 - [x] Avatar behaviour: eyes follow the cursor, blink and mouth change on click, cursor glow in the hero (agent: avatar-behaviour) (after: avatar-svg)
-- [ ] Night mode: five clicks on the avatar toggles it, toast message, saved to `localStorage`, applied before first paint to avoid a flash (agent: night-toggle) (after: avatar-svg)
+- [x] Night mode: five clicks on the avatar toggles it, toast message, saved to `localStorage`, applied before first paint to avoid a flash (agent: night-toggle) (after: avatar-svg)
 - [x] Marquee strip (agent: marquee)
 - [ ] About section: the three cards, once their content is refined (me)
 - [x] Experience list from the résumé data, each row linking to that role on `/resume`
 - [ ] Featured project cards: description panel slides up on hover, always visible on touch devices (deferred: waits for projects)
 - [ ] Latest three posts (deferred: waits for the blog)
-- [ ] Contact section and form with Netlify Forms: topic chips, validation messages, honeypot, success state (agent: contact-form)
+- [x] Contact section and form with Netlify Forms: topic chips, validation messages, honeypot, success state (agent: contact-form)
 
 ## 6. Polish and launch
 
 - [x] Per-page titles and descriptions; favicon from the nav avatar (`src/assets/avatar-mini.svg`, also used in the header; 32px `favicon.ico` and `apple-touch-icon.png` rendered from it)
 - [x] Open Graph tags (agent: og-tags)
 - [ ] Open Graph share image: `og:image` (1200×630) and the large `twitter:card`; needs a design for the image
-- [ ] Sitemap (agent: sitemap)
+- [x] Sitemap (agent: sitemap)
 - [ ] RSS feed (deferred: waits for the blog)
 - [ ] 404 page design session in claude.ai/design (me)
 - [ ] 404 page (deferred: waits for the design session)

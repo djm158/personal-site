@@ -2,20 +2,22 @@
 import { getEntry } from "astro:content";
 import Avatar from "../components/Avatar.astro";
 import Button from "../components/Button.astro";
+import ContactSection from "../components/ContactSection.astro";
 import Container from "../components/Container.astro";
 import Emphasis from "../components/Emphasis.astro";
 import Eyebrow from "../components/Eyebrow.astro";
 import Marquee from "../components/Marquee.astro";
+import NightToggle from "../components/NightToggle.astro";
 import TextLink from "../components/TextLink.astro";
 import Layout from "../layouts/Layout.astro";
 import { formatYearSpan } from "../lib/resume/dates";
 import { loadResume } from "../lib/resume/load";
 
-const { email, roles } = loadResume();
+const { roles } = loadResume();
 // The file loader only logs when the YAML can't be read, so fail the build here instead
 const home = await getEntry("siteContent", "home");
 if (!home) throw new Error("src/content/site-content.yaml did not load");
-const { description, hero, marquee, about, experience } = home.data;
+const { description, hero, marquee, about, experience, contact } = home.data;
 
 // Each letter of the name hops and tilts on its own when hovered (static classes so Tailwind sees them).
 // On load the letters hop in turn with the same lift and tilt, via the hop custom properties.
@@ -73,12 +75,14 @@ const letterMotions = [
           >
             {hero.resumeLink}
           </Button>
-          <Button href={`mailto:${email}`} variant="outlined" size="xl">
+          <Button href="#contact" variant="outlined" size="xl">
             {hero.emailLink}
           </Button>
         </div>
       </div>
-      <Avatar class="mx-auto shrink-0 w-[min(100%,420px,40svh)]" />
+      <NightToggle class="mx-auto shrink-0 w-[min(100%,420px,40svh)]">
+        <Avatar class="w-full" />
+      </NightToggle>
     </Container>
   </section>
   {marquee && marquee.length > 0 && <Marquee items={marquee} />}
@@ -140,6 +144,7 @@ const letterMotions = [
       ))}
     </ul>
   </Container>
+  <ContactSection number="03" contact={contact} />
 </Layout>
 
 <script>
