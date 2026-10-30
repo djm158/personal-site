@@ -1,0 +1,24 @@
+---
+type Props = {
+  items: string[];
+};
+
+const { items } = Astro.props;
+---
+
+<!-- Two copies of the list scroll left by half their width, so the second lands where the first began.
+     Only the first copy is read out. -->
+<div class="overflow-hidden border-y border-line py-5">
+  <div class="flex w-max whitespace-nowrap motion-safe:animate-marquee">
+    {[0, 1].map((copy) => (
+      <ul role="list" class="flex" aria-hidden={copy === 1 ? "true" : undefined}>
+        {items.map((item, i) => (
+          <li class:list={["inline-flex items-center gap-8 pr-8 font-serif text-4xl/none", i % 2 === 1 && "italic"]}>
+            {item}
+            <span class="inline-block size-2.25 rounded-full bg-accent"></span>
+          </li>
+        ))}
+      </ul>
+    ))}
+  </div>
+</div>

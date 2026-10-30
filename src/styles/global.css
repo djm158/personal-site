@@ -32,6 +32,15 @@
   /* motion */
   --ease-soft: cubic-bezier(0.2, 0.8, 0.2, 1);
   --ease-spring: cubic-bezier(0.3, 1.6, 0.5, 1);
+
+  /* the home strip moves its doubled list left by one copy, then loops */
+  --animate-marquee: marquee 45s linear infinite;
+
+  @keyframes marquee {
+    to {
+      translate: -50% 0;
+    }
+  }
 }
 
 @theme inline {
