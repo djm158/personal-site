@@ -1,7 +1,9 @@
 ---
+import { getEntry } from "astro:content";
 import Avatar from "../components/Avatar.astro";
 import Button from "../components/Button.astro";
 import Container from "../components/Container.astro";
+import Emphasis from "../components/Emphasis.astro";
 import Eyebrow from "../components/Eyebrow.astro";
 import TextLink from "../components/TextLink.astro";
 import Layout from "../layouts/Layout.astro";
@@ -9,33 +11,39 @@ import { formatYearSpan } from "../lib/resume/dates";
 import { loadResume } from "../lib/resume/load";
 
 const { email, roles } = loadResume();
+// The file loader only logs when the YAML can't be read, so fail the build here instead
+const home = await getEntry("siteContent", "home");
+if (!home) throw new Error("src/content/site-content.yaml did not load");
+const { description, hero, about, experience } = home.data;
 
 // Each letter of the name hops and tilts on its own when hovered (static classes so Tailwind sees them)
-const nameLetters = [
-  { char: "D", hover: "motion-safe:hover:-translate-y-[0.14em] motion-safe:hover:-rotate-6" },
-  { char: "a", hover: "motion-safe:hover:-translate-y-[0.14em] motion-safe:hover:rotate-5" },
-  { char: "n", hover: "motion-safe:hover:-translate-y-[0.14em] motion-safe:hover:-rotate-4" },
-  { char: ".", hover: "motion-safe:hover:-translate-y-[0.2em] motion-safe:hover:scale-130" },
+const letterHovers = [
+  "motion-safe:hover:-translate-y-[0.14em] motion-safe:hover:-rotate-6",
+  "motion-safe:hover:-translate-y-[0.14em] motion-safe:hover:rotate-5",
+  "motion-safe:hover:-translate-y-[0.14em] motion-safe:hover:-rotate-4",
+  "motion-safe:hover:-translate-y-[0.2em] motion-safe:hover:scale-130",
 ];
 ---
 
-<Layout description="Daniel McGrath is a software engineer in Philadelphia building React and TypeScript products, with full-stack ownership from backend to accessibility.">
+<Layout description={description}>
   <section>
     <Container class="flex flex-wrap-reverse items-center gap-[clamp(40px,5vw,72px)] pt-[clamp(56px,8vw,112px)]">
       <div class="flex-[1_1_400px] min-w-0">
         <div class="inline-flex items-center gap-2.5 font-mono font-medium text-xs uppercase mb-8 text-muted rounded-full border tracking-wider border-line py-1.75 pl-2.75 pr-3.5">
           <span class="size-2 rounded-full bg-moss motion-safe:animate-pulse"></span>
-          Open to senior frontend and full stack roles
+          <Emphasis segments={hero.status} />
         </div>
         <h1 class="font-serif text-[clamp(68px,10vw,136px)]/[0.88] tracking-[-0.03em]">
-          Hi, I'm <em class="text-accent"><span class="sr-only">Dan.</span><span aria-hidden="true" class="inline-flex">{nameLetters.map(({ char, hover }) => (
-            <span class:list={["inline-block motion-safe:transition-[translate,rotate,scale] motion-safe:duration-350 motion-safe:ease-spring", hover]}>{char}</span>
-          ))}</span></em>
+          {hero.heading.map((segment) =>
+            segment.em ? (
+              <em class="text-accent"><span class="sr-only">{segment.text}</span><span aria-hidden="true" class="inline-flex">{[...segment.text].map((char, i) => (
+                <span class:list={["inline-block motion-safe:transition-[translate,rotate,scale] motion-safe:duration-350 motion-safe:ease-spring", letterHovers[i % letterHovers.length]]}>{char}</span>
+              ))}</span></em>
+            ) : segment.text,
+          )}
         </h1>
         <p class="mt-7 font-light text-[clamp(20px,2.1vw,27px)]/[1.35] tracking-[-0.01em] max-w-[30ch] text-pretty">
-          A senior product engineer building end-to-end in TypeScript—where
-          clean architecture meets obsessive UI polish. Most recently Staff
-          Engineer at Wizard AI.
+          <Emphasis segments={hero.intro} />
         </p>
         <div class="flex flex-wrap gap-3 mt-10">
           <Button
@@ -43,10 +51,10 @@ const nameLetters = [
             size="xl"
             class="transition-[translate,box-shadow] duration-200 hover:-translate-y-0.5 hover:shadow-[0_12px_24px_-12px_var(--color-ink)]"
           >
-            View résumé
+            {hero.resumeLink}
           </Button>
           <Button href={`mailto:${email}`} variant="outlined" size="xl">
-            Say hello
+            {hero.emailLink}
           </Button>
         </div>
       </div>
@@ -59,20 +67,14 @@ const nameLetters = [
     class="flex flex-wrap gap-x-[clamp(32px,5vw,80px)] gap-y-6 py-[clamp(72px,9vw,128px)]"
   >
     <Eyebrow as="h2" class="basis-50 shrink-0 grow-0 pt-3">
-      01 — About
+      01 — {about.eyebrow}
     </Eyebrow>
     <div class="flex-[1_1_520px] min-w-0">
       <p class="font-serif text-[clamp(30px,3.6vw,50px)]/[1.12] tracking-[-0.01em] text-pretty">
-        I got into software by soldering bike power meters and flying
-        quadcopters with hand gestures. These days I build{" "}
-        <em class="text-accent">whole products</em> — APIs and data models,
-        component systems, and the quiet details that make software feel
-        effortless.
+        <Emphasis segments={about.lead} />
       </p>
       <p class="mt-7 font-light text-[19px]/[1.6] text-muted max-w-[58ch] text-pretty">
-        I work across the stack in TypeScript — React on the client, Node on the
-        server — with a soft spot for polished UI. I still think like an
-        embedded engineer about every byte and frame.
+        <Emphasis segments={about.body} />
       </p>
     </div>
   </Container>
@@ -82,12 +84,12 @@ const nameLetters = [
   >
     <div class="flex-[0_1_320px]">
       <Eyebrow as="p" class="mb-3.5">
-        02 — Experience
+        02 — {experience.eyebrow}
       </Eyebrow>
       <h2 class="font-serif text-[clamp(44px,5vw,68px)]/none tracking-[-0.02em] mb-5.5">
-        Eight years, <em class="text-accent">whole stack</em>
+        <Emphasis segments={experience.heading} />
       </h2>
-      <TextLink href="/resume/">Full résumé</TextLink>
+      <TextLink href="/resume/">{experience.resumeLink}</TextLink>
     </div>
     <ul role="list" class="flex-[1_1_520px] min-w-0 border-b border-line">
       {roles.map((role) => (
