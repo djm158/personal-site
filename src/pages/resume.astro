@@ -61,7 +61,12 @@ const nonPortfolioLinks = resume.links.filter(
           {label} <span aria-hidden="true">↗</span>
         </a>
       ))}
-      <Button href="/resume.pdf" target="_blank" size="sm" class="font-sans">
+      <Button
+        href="/resume.pdf"
+        target="_blank"
+        size="sm"
+        class="font-sans transition-transform duration-200 hover:-translate-y-0.5"
+      >
         Download PDF{" "}
         <span aria-hidden="true" class="font-mono">
           ↓
