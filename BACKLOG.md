@@ -117,7 +117,8 @@ LaTeX (then the PDF) is generated from it. Nothing parses LaTeX in the build.
 ## 6. Polish and launch
 
 - [x] Per-page titles and descriptions; favicon from the nav avatar (`src/assets/avatar-mini.svg`, also used in the header; 32px `favicon.ico` and `apple-touch-icon.png` rendered from it)
-- [ ] Open Graph tags (agent: og-tags)
+- [x] Open Graph tags (agent: og-tags)
+- [ ] Open Graph share image: `og:image` (1200×630) and the large `twitter:card`; needs a design for the image
 - [x] Sitemap (agent: sitemap)
 - [ ] RSS feed (deferred: waits for the blog)
 - [ ] 404 page design session in claude.ai/design (me)
