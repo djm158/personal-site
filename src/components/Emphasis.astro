@@ -1,0 +1,15 @@
+---
+import type { Segment } from "../lib/site-content/emphasis";
+
+type Props = {
+  segments: Segment[];
+};
+
+const { segments } = Astro.props;
+---
+
+{
+  segments.map((segment) =>
+    segment.em ? <em class="text-accent">{segment.text}</em> : segment.text,
+  )
+}
