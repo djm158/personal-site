@@ -101,13 +101,8 @@
 
 /* page transitions: the browser's cross-document view transitions, no client-side router.
    The old page fades up and blurs out, then the new one rises in. The header and grain have
-   their own view-transition-name, so they stay put instead of moving with the page */
-@media (prefers-reduced-motion: no-preference) {
-  @view-transition {
-    navigation: auto;
-  }
-}
-
+   their own view-transition-name, so they stay put instead of moving with the page. The
+   @view-transition opt-in is inline in Layout's head */
 ::view-transition-old(root) {
   animation: page-out 220ms var(--ease-in-out) forwards;
 }
