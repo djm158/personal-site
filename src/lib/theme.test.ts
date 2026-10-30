@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest";
-import { POKES_TO_TOGGLE, poke, readTheme, toastFor } from "./theme";
+import { poke, readTheme, toastFor } from "./theme";
 
 describe("poke", () => {
   test("counts up without toggling before the fifth poke", () => {
@@ -8,7 +8,6 @@ describe("poke", () => {
   });
 
   test("the fifth poke toggles and starts the count again", () => {
-    expect(POKES_TO_TOGGLE).toBe(5);
     expect(poke(4)).toEqual({ count: 0, toggle: true });
   });
 
