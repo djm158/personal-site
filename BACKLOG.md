@@ -111,7 +111,7 @@ LaTeX (then the PDF) is generated from it. Nothing parses LaTeX in the build.
 - [x] Experience list from the résumé data, each row linking to that role on `/resume`
 - [ ] Featured project cards: description panel slides up on hover, always visible on touch devices (deferred: waits for projects)
 - [ ] Latest three posts (deferred: waits for the blog)
-- [ ] Contact section and form with Netlify Forms: topic chips, validation messages, honeypot, success state (agent: contact-form)
+- [x] Contact section and form with Netlify Forms: topic chips, validation messages, honeypot, success state (agent: contact-form)
 
 ## 6. Polish and launch
 

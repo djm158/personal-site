@@ -1,0 +1,218 @@
+---
+import type { CollectionEntry } from "astro:content";
+import Button from "./Button.astro";
+import Container from "./Container.astro";
+import Emphasis from "./Emphasis.astro";
+import Eyebrow from "./Eyebrow.astro";
+
+type Props = {
+  number: string;
+  contact: CollectionEntry<"siteContent">["data"]["contact"];
+};
+
+const { number, contact } = Astro.props;
+const { form, success } = contact;
+
+const labelClass =
+  "flex flex-col gap-2 font-mono font-medium text-[11px] tracking-[0.08em] uppercase text-muted";
+const fieldClass =
+  "bg-bg border border-line rounded-xl py-3.5 px-4 font-sans font-normal text-base text-ink tracking-normal normal-case outline-none placeholder:text-muted/70 focus:border-accent aria-invalid:border-accent motion-safe:transition-colors motion-safe:duration-200";
+---
+
+<Container
+  as="section"
+  id="contact"
+  class="grid grid-cols-[repeat(auto-fit,minmax(min(100%,380px),1fr))] gap-[clamp(40px,6vw,96px)] py-[clamp(80px,10vw,136px)]"
+>
+  <div>
+    <Eyebrow as="p" class="mb-4">{number} — {contact.eyebrow}</Eyebrow>
+    <h2 class="font-serif text-[clamp(60px,8vw,116px)]/[0.9] tracking-[-0.03em] mb-6">
+      <Emphasis segments={contact.heading} />
+    </h2>
+    <p class="mb-9 font-light text-xl/normal text-muted max-w-[34ch] text-pretty">
+      <Emphasis segments={contact.intro} />
+    </p>
+    <ul role="list" class="flex flex-col gap-3 font-mono font-medium text-sm">
+      {contact.links.map((link) => (
+        <li>
+          <a href={link.href} target="_blank" rel="noopener">{link.label}</a>
+        </li>
+      ))}
+    </ul>
+  </div>
+  <div class="bg-surface rounded-3xl p-[clamp(24px,3.5vw,44px)]">
+    <form
+      name="contact"
+      method="POST"
+      data-netlify="true"
+      netlify-honeypot="bot-field"
+      data-contact-form
+      class="flex flex-col gap-5.5"
+    >
+      <input type="hidden" name="form-name" value="contact" />
+      <!-- Honeypot: hidden from people, so only bots fill it in and Netlify drops those -->
+      <div hidden aria-hidden="true">
+        <input name="bot-field" tabindex="-1" autocomplete="off" />
+      </div>
+      <fieldset>
+        <Eyebrow as="legend" size="sm" class="mb-3">{form.topicLabel}</Eyebrow>
+        <div class="flex flex-wrap gap-2">
+          {form.topics.map((topic, i) => (
+            <label class="rounded-full border border-line py-2 px-4 font-medium text-[13px] cursor-pointer has-checked:bg-ink has-checked:text-onink has-checked:border-ink has-focus-visible:outline-2 has-focus-visible:outline-offset-2 has-focus-visible:outline-accent motion-safe:transition-[color,background-color,border-color] motion-safe:duration-200">
+              <input type="radio" name="topic" value={topic} checked={i === 0} class="sr-only" />
+              {topic}
+            </label>
+          ))}
+        </div>
+      </fieldset>
+      <label class={labelClass}>
+        {form.nameLabel}
+        <input
+          name="name"
+          autocomplete="name"
+          required
+          placeholder={form.namePlaceholder}
+          data-error={form.errors.name}
+          class={fieldClass}
+        />
+      </label>
+      <label class={labelClass}>
+        {form.emailLabel}
+        <input
+          name="email"
+          type="email"
+          autocomplete="email"
+          required
+          placeholder={form.emailPlaceholder}
+          data-error={form.errors.email}
+          class={fieldClass}
+        />
+      </label>
+      <label class={labelClass}>
+        {form.messageLabel}
+        <textarea
+          name="message"
+          rows="5"
+          required
+          minlength="5"
+          placeholder={form.messagePlaceholder}
+          data-error={form.errors.message}
+          class:list={[fieldClass, "leading-normal resize-y"]}></textarea>
+      </label>
+      <div class="flex flex-wrap items-center justify-between gap-4">
+        <p id="contact-error" aria-live="polite" class="text-sm text-accent" data-contact-error></p>
+        <Button
+          type="submit"
+          size="xl"
+          class="motion-safe:transition-transform motion-safe:duration-200 hover:-translate-y-0.5 disabled:opacity-60 disabled:cursor-wait"
+        >
+          {form.submit}
+        </Button>
+      </div>
+    </form>
+    <div
+      hidden
+      data-contact-success
+      data-heading={success.heading}
+      data-body={success.body}
+      class="min-h-90 flex flex-col justify-center gap-4"
+    >
+      <div
+        aria-hidden="true"
+        class="size-14 rounded-full bg-moss text-onink grid place-items-center font-medium text-2xl"
+      >
+        ✓
+      </div>
+      <h3 tabindex="-1" class="font-serif text-5xl/none outline-none" data-contact-success-heading>
+      </h3>
+      <p class="font-light text-lg/normal text-muted max-w-[34ch]" data-contact-success-body></p>
+      <button
+        type="button"
+        class="self-start border-b border-ink py-1 font-medium text-sm text-ink cursor-pointer"
+        data-contact-reset
+      >
+        {success.reset}
+      </button>
+    </div>
+  </div>
+</Container>
+
+<script>
+  import { fillTemplate, firstInvalidField } from "../lib/contact/form";
+
+  const form = document.querySelector<HTMLFormElement>("[data-contact-form]");
+  const error = document.querySelector<HTMLElement>("[data-contact-error]");
+  const success = document.querySelector<HTMLElement>("[data-contact-success]");
+  const heading = document.querySelector<HTMLElement>("[data-contact-success-heading]");
+  const body = document.querySelector<HTMLElement>("[data-contact-success-body]");
+  const reset = document.querySelector("[data-contact-reset]");
+
+  if (form && error && success && heading && body && reset) {
+    // With the script running, our messages replace the browser's own bubbles
+    form.noValidate = true;
+    const field = (name: string) =>
+      form.elements.namedItem(name) as HTMLInputElement | HTMLTextAreaElement;
+    const fields = ["name", "email", "message"].map(field);
+    const submit = form.querySelector<HTMLButtonElement>("[type=submit]");
+
+    const clearError = () => {
+      error.textContent = "";
+      for (const f of fields) {
+        f.removeAttribute("aria-invalid");
+        f.removeAttribute("aria-describedby");
+      }
+    };
+    for (const f of fields) f.addEventListener("input", clearError);
+
+    form.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      clearError();
+      const values = {
+        name: field("name").value.trim(),
+        email: field("email").value.trim(),
+        message: field("message").value,
+      };
+      const invalid = firstInvalidField(values);
+      if (invalid) {
+        const f = field(invalid);
+        error.textContent = f.dataset.error ?? "";
+        f.setAttribute("aria-invalid", "true");
+        f.setAttribute("aria-describedby", error.id);
+        f.focus();
+        return;
+      }
+
+      if (submit) submit.disabled = true;
+      try {
+        const response = await fetch("/", {
+          method: "POST",
+          headers: { "Content-Type": "application/x-www-form-urlencoded" },
+          body: new URLSearchParams(
+            [...new FormData(form)].map(([k, v]) => [k, String(v)]),
+          ).toString(),
+        });
+        if (!response.ok) throw new Error(`Form post failed: ${response.status}`);
+      } catch {
+        // Fall back to a plain post, so Netlify's own page reports what happened
+        form.submit();
+        return;
+      } finally {
+        if (submit) submit.disabled = false;
+      }
+
+      heading.textContent = fillTemplate(success.dataset.heading ?? "", values);
+      body.textContent = fillTemplate(success.dataset.body ?? "", values);
+      form.hidden = true;
+      success.hidden = false;
+      heading.focus();
+    });
+
+    // Keeps the name and email, like the design, so a second note is quick
+    reset.addEventListener("click", () => {
+      field("message").value = "";
+      success.hidden = true;
+      form.hidden = false;
+      field("message").focus();
+    });
+  }
+</script>
