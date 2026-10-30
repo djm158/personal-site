@@ -105,7 +105,7 @@ LaTeX (then the PDF) is generated from it. Nothing parses LaTeX in the build.
 - [x] Hero: status badge, heading with per-letter hover, intro, two buttons (agent: hero-letter-hover)
 - [x] Hero name intro: on page load the letters of "Dan." hop in turn, once, with the same lift and tilt as the hover. CSS only: an `--animate-hop` token and `@keyframes` in `global.css` that animate `translate`, `rotate` and `scale` (not `transform`) from per-letter custom properties, staggered with `animation-delay`, fill mode `backwards` so it never blocks the hover afterwards, behind `motion-safe:`. Plays on every visit to `/`; no once-per-session logic (agent: hero-letter-intro) (after: hero-letter-hover)
 - [x] Avatar SVG from the updated design (drop the duplicated ears and face shapes) (agent: avatar-svg)
-- [ ] Avatar behaviour: eyes follow the cursor, blink and mouth change on click, cursor glow in the hero (agent: avatar-behaviour) (after: avatar-svg)
+- [x] Avatar behaviour: eyes follow the cursor, blink and mouth change on click, cursor glow in the hero (agent: avatar-behaviour) (after: avatar-svg)
 - [ ] Night mode: five clicks on the avatar toggles it, toast message, saved to `localStorage`, applied before first paint to avoid a flash (agent: night-toggle) (after: avatar-svg)
 - [x] Marquee strip (agent: marquee)
 - [ ] About section: the three cards, once their content is refined (me)
