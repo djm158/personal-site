@@ -18,10 +18,10 @@ Trust what you see the page do, not what the PR description says it does.
 
 ## What to check
 
-1. Read the PR (`gh pr view {{number}}`), especially its "Done when" list and "How to test"
-   steps, and the diff (`git diff origin/main...HEAD`). Read `CLAUDE.md` for the conventions.
+1. Read the PR (`gh pr view {{number}}`), especially its "Done when" checklist and any
+   "Also check" line, and the diff (`git diff origin/main...HEAD`). Read `CLAUDE.md` for the conventions.
 2. Build: `pnpm build`.
-3. Exercise every "Done when" line and every "How to test" step in the browser, at 375px and
+3. Exercise every "Done when" line and "Also check" item in the browser, at 375px and
    1280px. Add night mode and reduced motion where the change touches them, and keyboard focus
    for anything interactive. Look for what the description doesn't mention too: things that
    now look broken nearby, interactions that feel wrong (something triggering from the wrong
@@ -58,8 +58,8 @@ Add `--motion` when you need animations to run, `--theme night` for night mode, 
 
 ## What counts as a problem
 
-Report only what you observed going wrong: a "Done when" line that isn't true, a "How to test"
-step that doesn't work, something broken or clearly off from the design, a convention in
+Report only what you observed going wrong: a "Done when" line that isn't true, an "Also check"
+item that doesn't hold, something broken or clearly off from the design, a convention in
 `CLAUDE.md` the change breaks. For each, say what you did, what happened, and what should have
 happened.
 

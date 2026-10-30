@@ -199,7 +199,7 @@ fills with a separate evaluator that drives the running app with Playwright.
 **So the review was replaced with a verify pass.** Dan's verdict: "the review seems like a
 waste of tokens, at least a verify may catch something." After CI passes, the driver starts a
 fresh Sonnet run that didn't write the code and may not change it. It builds the branch,
-exercises every "Done when" line and "How to test" step in a browser at both widths (plus
+exercises every "Done when" line and "Also check" item in a browser at both widths (plus
 night mode, reduced motion and keyboard focus where relevant), reads computed styles for
 anything animated, compares with `design/`, and posts one `## Verify` comment: "No problems
 found" with what it checked, or numbered problems with evidence. Problems go to the fix pass;

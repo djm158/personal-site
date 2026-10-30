@@ -28,7 +28,7 @@ Decide for each comment:
   backlog item well: a bug in the change, a `CLAUDE.md` convention the change breaks, or
   something Dan asked for.
 - **Out of scope, or wrong:** don't change code for it. Reply with the reason in a sentence or
-  two. Add out-of-scope ideas to the PR's "Noticed, not changed".
+  two. Add out-of-scope ideas to the PR's "Noticed, not changed" line.
 
 Don't fix things nobody raised. Don't add defensive code, or tests for cases that can't
 happen, just to satisfy a reviewer: a reviewer asked to find problems always finds something.
@@ -48,8 +48,12 @@ Then:
 
    Say what you changed and in which commit, or why you didn't.
 
-5. If what changed or how to test it is different now, update the PR body
-   (`gh pr edit {{number}} --body-file …`).
+5. If what changed or what to check is different now, update the PR body
+   (`gh pr edit {{number}} --body-file …`). Edit only the lines that are out of date, so the
+   body reads as if it were written fresh for the change as it is now: drop checks that no
+   longer apply rather than striking them through, and keep review history ("after review",
+   comment or review ids) out of it. That history belongs in your replies. The length rules in
+   step 6 of the iteration prompt still apply.
 
 Don't change the PR's labels or reviewers. When you finish, the driver labels it
 `claude-reviewed` and asks Dan for a review.
