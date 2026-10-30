@@ -127,7 +127,8 @@ LaTeX (then the PDF) is generated from it. Nothing parses LaTeX in the build.
 - [ ] Respect `prefers-reduced-motion` for page transitions, the mobile menu, the marquee, spinning ring and hover motion (agent: reduced-motion) (after: page-transitions) (after: marquee) (after: avatar-behaviour)
 - [ ] Accessibility pass: keyboard navigation, focus styles, contrast in both themes, axe checks (deferred: once the pages are built)
 - [ ] Performance pass: Lighthouse, image optimisation with `astro:assets`, consider self-hosting fonts (deferred: once the pages are built)
-- [ ] Update the small nav avatar to match the new hero face (agent: nav-avatar) (after: avatar-svg)
+- [x] Update the small nav avatar to match the new hero face (agent: nav-avatar) (after: avatar-svg)
+- [ ] Re-render `favicon.ico` and `apple-touch-icon.png` from the updated `src/assets/avatar-mini.svg`; they still show the old face
 - [x] Decide on the hero line "Most recently at Wizard AI" (keep it)
 - [ ] Verify the contact form on the live domain (me)
 - [ ] Heartbeat rebuild every month so date-derived content stays current (years of experience in the résumé description, "Present" durations): a scheduled GitHub Action calling a Netlify build hook (agent: heartbeat-rebuild)
