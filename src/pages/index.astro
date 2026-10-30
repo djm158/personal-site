@@ -7,6 +7,7 @@ import Container from "../components/Container.astro";
 import Emphasis from "../components/Emphasis.astro";
 import Eyebrow from "../components/Eyebrow.astro";
 import Marquee from "../components/Marquee.astro";
+import NightToggle from "../components/NightToggle.astro";
 import TextLink from "../components/TextLink.astro";
 import Layout from "../layouts/Layout.astro";
 import { formatYearSpan } from "../lib/resume/dates";
@@ -79,7 +80,9 @@ const letterMotions = [
           </Button>
         </div>
       </div>
-      <Avatar class="mx-auto shrink-0 w-[min(100%,420px,40svh)]" />
+      <NightToggle class="mx-auto shrink-0 w-[min(100%,420px,40svh)]">
+        <Avatar class="w-full" />
+      </NightToggle>
     </Container>
   </section>
   {marquee && marquee.length > 0 && <Marquee items={marquee} />}
