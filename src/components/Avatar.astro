@@ -189,11 +189,15 @@ const { class: className, ...rest } = Astro.props;
       );
     };
 
-    window.addEventListener("pointermove", (event) => {
+    const follow = (event: PointerEvent) => {
       x = event.clientX;
       y = event.clientY;
       frame ||= requestAnimationFrame(look);
-    });
+    };
+
+    // A touch tap sends pointerdown but no pointermove
+    window.addEventListener("pointermove", follow);
+    window.addEventListener("pointerdown", follow);
 
     const smile = mouth.getAttribute("d") ?? "";
     let blinkTimer = 0;
