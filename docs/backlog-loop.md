@@ -48,9 +48,10 @@ pnpm loop --watch
  ├─ pick the first thing to do, in this order:
  │    1. resume   a needs-input draft Dan has answered (label removed)
  │    2. rebase   a PR that conflicts with main
- │    3. fix      Claude's review found something, CI failed, or Dan requested changes
- │               (a clean review is handed straight to Dan, no run needed)
- │    4. new      the next backlog item, if fewer than 3 agent PRs are open;
+ │    3. fix      the verify pass found problems, CI failed, or Dan requested changes
+ │    4. verify   a fresh run checks a ready PR in a real browser and reports
+ │               (nothing found, or nothing visible changed: handed straight to Dan)
+ │    5. new      the next backlog item, if fewer than 3 agent PRs are open;
  │               a retry if its last PR was closed with the `retry` label
  │
  ├─ fresh clone in ~/.cache/personal-site-loop/runs/<time>-<slug>/
@@ -65,10 +66,11 @@ pnpm loop --watch
  └─ revoke the token, delete the run folder
           │
           ▼  on GitHub
-   CI (check, test, build) · content guard · Claude review · Netlify preview
+   CI (check, test, build) · content guard · Netlify preview
           │
           ▼
-   next pass: fix run, or hand over: `claude-reviewed` label + review request to Dan
+   next passes: verify run → fix run if it found problems → hand over:
+   `claude-reviewed` label + review request to Dan
           │
           ▼
    Dan approves and merges, or requests changes (→ fix run → review requested again)
@@ -89,7 +91,7 @@ pnpm loop --watch
 | Media hosting     | orphan `pr-assets` branch                                          | Images linked from PRs by `raw.githubusercontent.com` URL                                                                                                                                           |
 | CI                | `.github/workflows/ci.yml`                                         | `pnpm check`, `pnpm test --run`, `pnpm build` (with Typst)                                                                                                                                          |
 | Content guard     | `.github/workflows/content-guard.yml`, `.github/content-paths.txt` | Fails agent PRs that touch content until Dan adds `content-ok`                                                                                                                                      |
-| Review            | `.github/workflows/claude-code-review.yml`                         | `claude-code-action` running the `code-review` plugin                                                                                                                                               |
+| Verify pass       | `.claude/prompts/backlog-verify.md`                                | A fresh Sonnet run checks each ready PR in a real browser and posts a `## Verify` report; replaced the `claude-code-action` review                                                                  |
 | Ruleset on `main` | GitHub settings                                                    | PRs only, both checks required, no force push; only the admin role bypasses                                                                                                                         |
 | Labels            | GitHub                                                             | `agent` (made by the loop), `needs-input` (blocked, Dan's turn), `claude-reviewed` (Claude's review handled, Dan's turn), `content-ok` (Dan approved content), `retry` (on a closed PR: start over) |
 
@@ -194,6 +196,28 @@ the same thing in other words: it works "from reading the diff and the surroundi
 without building or running your code". The gap it leaves is the one Anthropic's harness post
 fills with a separate evaluator that drives the running app with Playwright.
 
+**So the review was replaced with a verify pass.** Dan's verdict: "the review seems like a
+waste of tokens, at least a verify may catch something." After CI passes, the driver starts a
+fresh Sonnet run that didn't write the code and may not change it. It builds the branch,
+exercises every "Done when" line and "How to test" step in a browser at both widths (plus
+night mode, reduced motion and keyboard focus where relevant), reads computed styles for
+anything animated, compares with `design/`, and posts one `## Verify` comment: "No problems
+found" with what it checked, or numbered problems with evidence. Problems go to the fix pass;
+a clean report hands the PR to Dan. PRs that change nothing visible skip it.
+
+- _Why a separate run:_ Anthropic's harness work found "agents reliably skew positive when
+  grading their own work", and that tuning a sceptical evaluator was easier than making the
+  builder self-critical. The prompt tells the verifier exactly that.
+- _Why locally, not in Actions:_ the loop's sandbox already runs Playwright (through
+  `pr-media.mjs` setup modules, which can run any page code and print results), and the
+  `design/` copy is local.
+- _Cost:_ it doesn't save tokens. The plugin review reported about $0.05–0.10 a PR; a verify
+  run should be more, since it builds and drives a browser. It's on Sonnet, skips invisible
+  changes, and what it buys is fewer problems reaching Dan.
+- _Order of work:_ broken CI is fixed before verifying (no point checking a page that doesn't
+  build), and if CI still fails after one fix run, the driver turns the PR into a
+  `needs-input` draft instead of trying forever.
+
 **Ready PRs, not drafts.** Agent PRs first opened as drafts, but the review skips drafts.
 Copilot's cloud agent works the same way ("cannot mark its pull requests as 'Ready for
 review'"), which is why a human has to step in there. Here PRs open ready, and only
@@ -216,8 +240,10 @@ then rewrites the PR body and marks it ready, which starts the review.
 
 **Fix: two rounds, using GitHub's review flow.**
 
-- _Claude's round._ Once CI and Claude's review have finished, the driver collects comments
-  from Dan and `claude[bot]` made since the PR became ready. If there are none and CI passed,
+- _The verify round._ Once CI has finished, a verify run checks the PR in a browser and posts
+  a `## Verify` report (see [Verification and review](#verification-and-review); this round
+  used Claude's code review until that was replaced). The driver then collects the report's
+  problems and Dan's comments made since the PR became ready. If there are none and CI passed,
   it hands the PR over without starting Claude. If there are, a fix run fixes the in-scope
   ones, replies to the rest with a reason, re-checks, re-shoots changed screenshots under the
   same names (so the PR's image links keep working), and replies on every comment.
@@ -227,8 +253,8 @@ then rewrites the PR body and marks it ready, which starts the review.
 - _Dan's round._ When Dan's latest review is "Request changes" and came after the loop last
   requested his review, the next pass runs a fix with his comments since then, and requests
   his review again: the same "re-request review" a human contributor would click. Approving,
-  or reviewing with plain comments, starts nothing. It also works when Claude's review never
-  posted.
+  or reviewing with plain comments, starts nothing. It also works before the verify pass has
+  run.
 
 The first version used a single `reviewed` label that Dan had to remove to ask for another
 round. He found that clunky ("having to remove a tag after requesting changes"), so the loop
@@ -513,10 +539,7 @@ Notes on it:
 - **Retry pass:** built, but no PR has been closed with `retry` yet.
 - **The new review flow** (`claude-reviewed`, review requests, "Request changes") and watch
   mode's pauses haven't run for real yet.
-- **A review that runs the page.** The code-review plugin found nothing in 10 PRs (see
-  [Verification and review](#verification-and-review)). Options: replace or supplement it with
-  an evaluator that builds the site, drives it with Playwright, and checks the PR's "Done when"
-  list and the design; or drop it and rely on CI plus Dan.
+- **The verify pass** is built but hasn't run on a real PR yet.
 - **Dan's review feedback as conventions**, where it's general: for example "content files hold
   copy; order and numbering come from the page".
 - **Stranded branches** (a branch with no PR, from a run that died) are reported, not retried:

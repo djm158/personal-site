@@ -36,6 +36,7 @@ Runs one backlog item: picks it, opens a PR for it as djm158-site-loop[bot], and
   --smoke             Check the setup: mint a token, clone, and have Claude run a fixed list
                       of sandbox checks. Opens no PR.
   --model <name>      Default: opus
+  --verify-model <name> Model for verify runs. Default: sonnet
   --budget <usd>      Estimated spend limit per run (Claude's --max-budget-usd). Default: 10
   --daily-budget <usd> Stop once today's runs add up to this. Default: 40
   --timeout <min>     Kill a run after this long. Default: 45 (tokens last 60)
@@ -56,6 +57,7 @@ const { values: opts } = parseArgs({
     "max-usage": { type: "string", default: "80" },
     smoke: { type: "boolean", default: false },
     model: { type: "string", default: "opus" },
+    "verify-model": { type: "string", default: "sonnet" },
     budget: { type: "string", default: "10" },
     "daily-budget": { type: "string", default: "40" },
     timeout: { type: "string", default: "45" },
@@ -329,14 +331,17 @@ const isResumable = (pr) =>
   pr.isDraft && !pr.labels.some((label) => label.name === "needs-input");
 
 const OWNER = REPO.split("/")[0];
-const REVIEWER = "claude[bot]";
 const CI_CHECK = "Check, test and build";
+// The verify pass reports in one comment that starts with this line.
+const VERIFY_HEADING = "## Verify";
+const isVerifyReport = (comment) =>
+  comment.user?.login === BOT.name && comment.body?.startsWith(VERIFY_HEADING);
 
 /**
- * Comments on a PR from the given logins, oldest first, quoted for a prompt. Nobody else's
- * reach the agent: on a public repo anyone can comment.
+ * Comments on a PR, oldest first, quoted for a prompt: Dan's, and with `verify` the verify
+ * pass's report. Nobody else's reach the agent: on a public repo anyone can comment.
  */
-function prComments(gh, number, { logins, since = "" }) {
+function prComments(gh, number, { verify = false, since = "" } = {}) {
   const get = (path) => gh.json("api", `repos/${REPO}/${path}?per_page=100`);
   const all = [
     ...get(`issues/${number}/comments`).map((c) => ({
@@ -360,14 +365,16 @@ function prComments(gh, number, { logins, since = "" }) {
   ];
   return (
     all
-      .filter((c) => logins.includes(c.user?.login) && c.created_at > since)
-      // The review's summary when it found nothing isn't a finding.
       .filter(
-        (c) => !(c.user.login === REVIEWER && /No issues found/.test(c.body)),
+        (c) =>
+          c.created_at > since &&
+          (c.user?.login === OWNER || (verify && isVerifyReport(c))),
       )
+      // A verify report that found nothing isn't a finding.
+      .filter((c) => !(isVerifyReport(c) && /No problems found/.test(c.body)))
       .sort((a, b) => a.created_at.localeCompare(b.created_at))
       .map((c) => {
-        const who = c.user.login === OWNER ? "Dan" : "Claude review";
+        const who = c.user.login === OWNER ? "Dan" : "Verify pass";
         const where = c.path
           ? ` on ${c.path}${c.line ? ` line ${c.line}` : ""}`
           : "";
@@ -384,15 +391,18 @@ const CLAUDE_REVIEWED = "claude-reviewed";
 /**
  * Where a ready agent PR stands with feedback. Two rounds:
  *
- * 1. Claude's review. Once it and CI have finished, findings (and anything Dan said since the
- *    PR became ready) get a fix run. Then the driver hands over: it adds `claude-reviewed` and
- *    requests Dan's review, so the PR shows up in his GitHub review requests.
+ * 1. The verify pass. Once CI has finished, a fresh run checks the PR in a real browser and
+ *    posts a `## Verify` report (skipped when nothing that renders changed). Its problems, and
+ *    anything Dan said since the PR became ready, get a fix run. Then the driver hands over:
+ *    it adds `claude-reviewed` and requests Dan's review, so the PR shows up in his GitHub
+ *    review requests.
  * 2. Dan's reviews. When his latest review is "Request changes" and came after the loop last
  *    requested his review, his comments since then get a fix run, and the driver requests his
  *    review again. Approving, or reviewing with plain comments, starts nothing.
  *
- * States: "none" (nothing to do: a draft, needs input, or waiting on Dan), "waiting" (CI or
- * Claude's review still running), "clean" (hand over without a run), "fix" (a fix run).
+ * States: "none" (nothing to do: a draft, needs input, or waiting on Dan), "waiting" (CI
+ * still running), "verify" (a verify run), "clean" (hand over without a run), "fix" (a fix
+ * run; `handOverAfter` is false when it only fixes CI before the verify pass).
  */
 function feedbackState(gh, pr) {
   const labels = pr.labels.map((label) => label.name);
@@ -438,33 +448,58 @@ function feedbackState(gh, pr) {
   const ciFailed = ci.conclusion === "FAILURE";
 
   // Round 2: Dan asked for changes. Only his comments since the loop last asked him count;
-  // Claude's findings were handled in round 1.
+  // the verify pass's findings were handled in round 1.
   if (handedOver) {
-    const comments = prComments(gh, pr.number, {
-      logins: [OWNER],
-      since: lastAskedDan,
-    });
-    return { state: "fix", comments, ciFailed, round: "Dan's review" };
+    const comments = prComments(gh, pr.number, { since: lastAskedDan });
+    return {
+      state: "fix",
+      comments,
+      ciFailed,
+      round: "Dan's review",
+      handOverAfter: true,
+    };
   }
 
-  // Round 1: wait for Claude's review, unless Dan has already asked for changes.
-  const claudeDone = gh
-    .json("api", `repos/${REPO}/issues/${pr.number}/comments?per_page=100`)
-    .some(
-      (c) => c.user?.login === REVIEWER && c.body.startsWith("## Code review"),
-    );
-  if (!claudeDone && !changesRequested)
-    return { state: "waiting", why: "Claude's review" };
+  // Round 1. If Dan has already asked for changes, that goes first.
   const since =
     events.filter((e) => e.event === "ready_for_review").at(-1)?.created_at ??
     "";
-  const comments = prComments(gh, pr.number, {
-    logins: [OWNER, REVIEWER],
-    since,
-  });
+  const verified = gh
+    .json("api", `repos/${REPO}/issues/${pr.number}/comments?per_page=100`)
+    .some((c) => isVerifyReport(c) && c.created_at > since);
+  if (!verified && !changesRequested) {
+    // Broken CI first: there's no point checking a page that doesn't build.
+    if (ciFailed)
+      return {
+        state: "fix",
+        comments: [],
+        ciFailed,
+        round: "failed CI",
+        handOverAfter: false,
+      };
+    if (rendersSomething(gh, pr)) return { state: "verify" };
+  }
+  const comments = prComments(gh, pr.number, { verify: true, since });
   if (comments.length === 0 && !ciFailed && !changesRequested)
     return { state: "clean" };
-  return { state: "fix", comments, ciFailed, round: "Claude's review" };
+  return {
+    state: "fix",
+    comments,
+    ciFailed,
+    round: changesRequested ? "Dan's review" : "the verify pass",
+    handOverAfter: true,
+  };
+}
+
+/** Whether a PR changes anything a page shows: source or public files, other than tests. */
+function rendersSomething(gh, pr) {
+  return gh
+    .json("api", `repos/${REPO}/pulls/${pr.number}/files?per_page=100`)
+    .some(
+      (file) =>
+        /^(src|public)\//.test(file.filename) &&
+        !/\.test\.[cm]?[jt]sx?$/.test(file.filename),
+    );
 }
 
 // ---------------------------------------------------------------- a run
@@ -540,11 +575,11 @@ function setUp(slug, token, { existing = false } = {}) {
   return { runDir, repo, assets, scratch, settingsFile };
 }
 
-// Resume, fix and rebase runs carry on the PR's branch; new items and retries start from main.
+// Resume, fix, rebase and verify runs use the PR's branch; new items and retries start from main.
 const continuesBranch = (mode) => Boolean(mode) && mode.kind !== "retry";
 
 /**
- * @param {{ kind: "resume" | "fix" | "rebase" | "retry", number: number, comments: string[], ciFailed?: boolean } | null} mode
+ * @param {{ kind: "resume" | "fix" | "rebase" | "retry" | "verify", number: number, comments: string[], ciFailed?: boolean } | null} mode
  *   null for a new item. For a retry, `number` is the closed PR it replaces.
  */
 function promptFor(item, dirs, mode) {
@@ -565,6 +600,14 @@ function promptFor(item, dirs, mode) {
 `;
   const prompt = (name) =>
     readFileSync(join(ROOT, `.claude/prompts/${name}`), "utf8");
+  // The verifier gets its own prompt, not the builder's: it checks, it doesn't build.
+  if (mode?.kind === "verify")
+    return (
+      header +
+      prompt("backlog-verify.md")
+        .replaceAll("{{number}}", String(mode.number))
+        .replaceAll("{{slug}}", item.slug)
+    );
   let text = header + prompt("backlog-iteration.md");
   if (mode) {
     const none = {
@@ -648,7 +691,7 @@ function feed(label, message, runDir) {
  * to .loop/transcripts/. Resolves with the final result message (plus the subscription usage
  * it reported, as `rateLimit`), or an error result.
  */
-function runClaude(prompt, dirs, token, label) {
+function runClaude(prompt, dirs, token, label, model) {
   const args = [
     "-p",
     prompt,
@@ -656,7 +699,7 @@ function runClaude(prompt, dirs, token, label) {
     "stream-json",
     "--verbose",
     "--model",
-    opts.smoke ? "haiku" : opts.model,
+    model,
     "--settings",
     dirs.settingsFile,
     // Only the repo's own settings: not your user settings, plugins or MCP connectors.
@@ -752,6 +795,7 @@ async function runItem(item, token, mode = null) {
     fix: "Fixing",
     rebase: "Merging main into",
     retry: "Retrying, replacing",
+    verify: "Verifying",
   }[mode?.kind];
   // A run is always worth showing, along with the survey that led to it.
   if (held) {
@@ -772,7 +816,12 @@ async function runItem(item, token, mode = null) {
       ? SMOKE_PROMPT.replaceAll("SCRATCH", dirs.scratch)
       : promptFor(item, dirs, mode);
     log("  Claude is working:");
-    output = await runClaude(prompt, dirs, token, slug);
+    const model = opts.smoke
+      ? "haiku"
+      : mode?.kind === "verify"
+        ? opts["verify-model"]
+        : opts.model;
+    output = await runClaude(prompt, dirs, token, slug, model);
   } catch (error) {
     output = {
       result: `RESULT: error setup failed: ${error.message.split("\n")[0]}`,
@@ -794,6 +843,7 @@ async function runItem(item, token, mode = null) {
     time: new Date().toISOString(),
     slug,
     kind: opts.smoke ? "smoke" : (mode?.kind ?? "new"),
+    round: mode?.round,
     smoke: opts.smoke || undefined,
     result,
     costUsd: output.total_cost_usd,
@@ -902,7 +952,7 @@ async function pass() {
         log(`Next: resume #${answered.number} (${item.slug})`);
         return "idle";
       }
-      const comments = prComments(gh, answered.number, { logins: [OWNER] });
+      const comments = prComments(gh, answered.number);
       return await runItem(item, token, {
         kind: "resume",
         number: answered.number,
@@ -960,17 +1010,20 @@ async function pass() {
       notify("Backlog loop", `#${pr.number} is ready for your review`);
     };
 
-    // Then feedback: Claude's review first, then any changes Dan requested.
+    // Then feedback: fixes first (they're further along), then verify passes.
     let toFix = null;
+    let toVerify = null;
     for (const pr of open) {
       const feedback = feedbackState(gh, pr);
       if (feedback.state === "waiting") {
         log(`  #${pr.number}: waiting for ${feedback.why}`);
       } else if (feedback.state === "clean") {
-        log(`  #${pr.number}: Claude's review found nothing; over to Dan`);
+        log(`  #${pr.number}: nothing to fix; over to Dan`);
         if (!opts["dry-run"]) handOver(pr);
-      } else if (feedback.state === "fix" && !toFix) {
-        toFix = { pr, feedback };
+      } else if (feedback.state === "fix") {
+        toFix ??= { pr, feedback };
+      } else if (feedback.state === "verify") {
+        toVerify ??= pr;
       }
     }
     if (toFix) {
@@ -986,16 +1039,56 @@ async function pass() {
         );
         return "idle";
       }
+      // A fix run that didn't fix CI shouldn't be followed by another, forever: ask Dan.
+      const last = readLog()
+        .filter((e) => e.slug === item.slug)
+        .at(-1);
+      if (feedback.round === "failed CI" && last?.round === "failed CI") {
+        log(`  #${pr.number}: CI still fails after a fix run; asking Dan`);
+        gh("pr", "ready", String(pr.number), "--repo", REPO, "--undo");
+        gh(
+          "api",
+          "-X",
+          "POST",
+          `repos/${REPO}/issues/${pr.number}/labels`,
+          "-f",
+          "labels[]=needs-input",
+        );
+        gh(
+          "pr",
+          "comment",
+          String(pr.number),
+          "--repo",
+          REPO,
+          "--body",
+          "CI still fails after a fix run, so the loop has stopped working on this PR. Take a look, then remove `needs-input` to let it carry on.",
+        );
+        notify("Backlog loop needs you", `#${pr.number}: CI keeps failing`);
+        return "idle";
+      }
       const result = await runItem(item, token, {
         kind: "fix",
         number: pr.number,
         comments: feedback.comments,
         ciFailed: feedback.ciFailed,
+        round: feedback.round,
       });
       // The driver closes the round, not the run, so a run that forgets can't leave the same
-      // comments to be fixed again.
-      if (result.startsWith("fixed")) handOver(pr);
+      // comments to be fixed again. A fix for CI alone waits for the verify pass instead.
+      if (result.startsWith("fixed") && feedback.handOverAfter) handOver(pr);
       return result;
+    }
+    if (toVerify) {
+      const item = itemFor(toVerify);
+      if (opts["dry-run"]) {
+        log(`Next: verify #${toVerify.number} (${item.slug})`);
+        return "idle";
+      }
+      return await runItem(item, token, {
+        kind: "verify",
+        number: toVerify.number,
+        comments: [],
+      });
     }
     if (open.length >= PR_CAP) {
       log(`Idle: ${open.length} agent PRs are open (cap ${PR_CAP}).`);
@@ -1029,7 +1122,7 @@ async function pass() {
     return await runItem(pick.item, token, {
       kind: "retry",
       number: retryOf,
-      comments: prComments(gh, retryOf, { logins: [OWNER] }),
+      comments: prComments(gh, retryOf),
     });
   } finally {
     if (token) await revokeToken(token);
@@ -1052,7 +1145,7 @@ process.on("SIGINT", () => {
 });
 
 const didWork = (outcome) =>
-  /^(opened|needs-input|fixed|rebased|error)/.test(outcome);
+  /^(opened|needs-input|fixed|rebased|verified|error)/.test(outcome);
 
 if (opts.watch && !opts.smoke && !opts["dry-run"]) {
   const every = Number(opts.every) * 60_000;
@@ -1095,7 +1188,7 @@ if (opts.watch && !opts.smoke && !opts["dry-run"]) {
     opts["until-idle"] &&
     !opts.smoke &&
     !stopping &&
-    /^(opened|needs-input|fixed|rebased)/.test(outcome)
+    /^(opened|needs-input|fixed|rebased|verified)/.test(outcome)
   );
   process.exitCode = /^(error|stop|pause)/.test(outcome) ? 1 : 0;
 }
