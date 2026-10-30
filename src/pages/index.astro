@@ -9,6 +9,14 @@ import { formatYearSpan } from "../lib/resume/dates";
 import { loadResume } from "../lib/resume/load";
 
 const { email, roles } = loadResume();
+
+// Each letter of the name hops and tilts on its own when hovered (static classes so Tailwind sees them)
+const nameLetters = [
+  { char: "D", hover: "motion-safe:hover:-translate-y-[0.14em] motion-safe:hover:-rotate-6" },
+  { char: "a", hover: "motion-safe:hover:-translate-y-[0.14em] motion-safe:hover:rotate-5" },
+  { char: "n", hover: "motion-safe:hover:-translate-y-[0.14em] motion-safe:hover:-rotate-4" },
+  { char: ".", hover: "motion-safe:hover:-translate-y-[0.2em] motion-safe:hover:scale-130" },
+];
 ---
 
 <Layout description="Daniel McGrath is a software engineer in Philadelphia building React and TypeScript products, with full-stack ownership from backend to accessibility.">
@@ -20,7 +28,9 @@ const { email, roles } = loadResume();
           Open to senior frontend and full stack roles
         </div>
         <h1 class="font-serif text-[clamp(68px,10vw,136px)]/[0.88] tracking-[-0.03em]">
-          Hi, I'm <em class="text-accent">Dan.</em>
+          Hi, I'm <em class="text-accent"><span class="sr-only">Dan.</span><span aria-hidden="true" class="inline-flex">{nameLetters.map(({ char, hover }) => (
+            <span class:list={["inline-block motion-safe:transition-[translate,rotate,scale] motion-safe:duration-350 motion-safe:ease-spring", hover]}>{char}</span>
+          ))}</span></em>
         </h1>
         <p class="mt-7 font-light text-[clamp(20px,2.1vw,27px)]/[1.35] tracking-[-0.01em] max-w-[30ch] text-pretty">
           A senior product engineer building end-to-end in TypeScript—where
