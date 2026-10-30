@@ -18,8 +18,8 @@ concurrency:
 
 permissions:
   contents: read
-  pull-requests: read
-  issues: write # read label history, and remove content-ok when content changes after it
+  pull-requests: write # remove content-ok when protected files change after it
+  issues: read # read label history
 
 jobs:
   guard:
