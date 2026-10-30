@@ -349,7 +349,14 @@ function prComments(gh, number, { logins, since = "" }) {
     })),
     ...get(`pulls/${number}/reviews`)
       .filter((r) => r.body?.trim())
-      .map((r) => ({ ...r, kind: "review", created_at: r.submitted_at })),
+      .map((r) => ({
+        ...r,
+        kind:
+          r.state === "CHANGES_REQUESTED"
+            ? "review requesting changes"
+            : "review",
+        created_at: r.submitted_at,
+      })),
   ];
   return (
     all
@@ -372,23 +379,47 @@ function prComments(gh, number, { logins, since = "" }) {
   );
 }
 
+const CLAUDE_REVIEWED = "claude-reviewed";
+
 /**
- * Where a ready agent PR stands with its review:
- * - "none": not ours to handle (a draft, or labelled reviewed or needs-input)
- * - "waiting": CI or the review hasn't finished
- * - "clean": nothing to fix, so it can go straight to Dan
- * - "fix": findings, or a failed CI run, for a fix run
- * Only comments since the PR became ready, or since `reviewed` was last added, count. To ask
- * for another round, Dan comments and removes `reviewed`.
+ * Where a ready agent PR stands with feedback. Two rounds:
+ *
+ * 1. Claude's review. Once it and CI have finished, findings (and anything Dan said since the
+ *    PR became ready) get a fix run. Then the driver hands over: it adds `claude-reviewed` and
+ *    requests Dan's review, so the PR shows up in his GitHub review requests.
+ * 2. Dan's reviews. When his latest review is "Request changes" and came after the loop last
+ *    requested his review, his comments since then get a fix run, and the driver requests his
+ *    review again. Approving, or reviewing with plain comments, starts nothing.
+ *
+ * States: "none" (nothing to do: a draft, needs input, or waiting on Dan), "waiting" (CI or
+ * Claude's review still running), "clean" (hand over without a run), "fix" (a fix run).
  */
-function reviewState(gh, pr) {
+function feedbackState(gh, pr) {
   const labels = pr.labels.map((label) => label.name);
-  if (
-    pr.isDraft ||
-    labels.includes("reviewed") ||
-    labels.includes("needs-input")
-  )
-    return { state: "none" };
+  if (pr.isDraft || labels.includes("needs-input")) return { state: "none" };
+
+  const events = gh.json(
+    "api",
+    `repos/${REPO}/issues/${pr.number}/events?per_page=100`,
+  );
+  const lastAskedDan =
+    events
+      .filter(
+        (e) =>
+          e.event === "review_requested" &&
+          e.requested_reviewer?.login === OWNER,
+      )
+      .at(-1)?.created_at ?? "";
+  const dansVerdict = gh
+    .json("api", `repos/${REPO}/pulls/${pr.number}/reviews?per_page=100`)
+    .filter((r) => r.user?.login === OWNER && r.state !== "COMMENTED")
+    .at(-1);
+  const changesRequested =
+    dansVerdict?.state === "CHANGES_REQUESTED" &&
+    dansVerdict.submitted_at > lastAskedDan;
+  const handedOver = labels.includes(CLAUDE_REVIEWED);
+  if (handedOver && !changesRequested) return { state: "none" };
+
   const { statusCheckRollup } = gh.json(
     "pr",
     "view",
@@ -404,29 +435,36 @@ function reviewState(gh, pr) {
     .sort((a, b) => (a.startedAt ?? "").localeCompare(b.startedAt ?? ""))
     .at(-1);
   if (ci?.status !== "COMPLETED") return { state: "waiting", why: "CI" };
-  const reviewed = gh
+  const ciFailed = ci.conclusion === "FAILURE";
+
+  // Round 2: Dan asked for changes. Only his comments since the loop last asked him count;
+  // Claude's findings were handled in round 1.
+  if (handedOver) {
+    const comments = prComments(gh, pr.number, {
+      logins: [OWNER],
+      since: lastAskedDan,
+    });
+    return { state: "fix", comments, ciFailed, round: "Dan's review" };
+  }
+
+  // Round 1: wait for Claude's review, unless Dan has already asked for changes.
+  const claudeDone = gh
     .json("api", `repos/${REPO}/issues/${pr.number}/comments?per_page=100`)
     .some(
       (c) => c.user?.login === REVIEWER && c.body.startsWith("## Code review"),
     );
-  if (!reviewed) return { state: "waiting", why: "the review" };
-
+  if (!claudeDone && !changesRequested)
+    return { state: "waiting", why: "Claude's review" };
   const since =
-    gh
-      .json("api", `repos/${REPO}/issues/${pr.number}/events?per_page=100`)
-      .filter(
-        (e) =>
-          e.event === "ready_for_review" ||
-          (e.event === "labeled" && e.label?.name === "reviewed"),
-      )
-      .at(-1)?.created_at ?? "";
+    events.filter((e) => e.event === "ready_for_review").at(-1)?.created_at ??
+    "";
   const comments = prComments(gh, pr.number, {
     logins: [OWNER, REVIEWER],
     since,
   });
-  const ciFailed = ci.conclusion === "FAILURE";
-  if (comments.length === 0 && !ciFailed) return { state: "clean" };
-  return { state: "fix", comments, ciFailed };
+  if (comments.length === 0 && !ciFailed && !changesRequested)
+    return { state: "clean" };
+  return { state: "fix", comments, ciFailed, round: "Claude's review" };
 }
 
 // ---------------------------------------------------------------- a run
@@ -788,8 +826,7 @@ async function runItem(item, token, mode = null) {
   const pr = result.match(/#(\d+)/)?.[0] ?? "";
   if (result.startsWith("needs-input"))
     notify("Backlog loop needs you", `${pr} ${slug} is waiting for an answer`);
-  else if (result.startsWith("fixed"))
-    notify("Backlog loop", `${pr} ${slug} is reviewed and ready for you`);
+  // A finished fix run is announced when the driver hands the PR over.
   else if (result.startsWith("error"))
     notify("Backlog loop run failed", `${slug}: ${result}`);
   if (dirs && !opts.keep && !result.startsWith("error")) {
@@ -893,57 +930,71 @@ async function pass() {
       });
     }
 
-    // Then reviewed PRs. A clean review goes straight to Dan; findings get one fix run.
+    // Hand a PR to Dan: label it and request his review, which also notifies him on GitHub.
+    // Requesting his review again is what closes a round of his feedback.
+    const handOver = (pr) => {
+      gh(
+        "api",
+        "-X",
+        "POST",
+        `repos/${REPO}/issues/${pr.number}/labels`,
+        "-f",
+        `labels[]=${CLAUDE_REVIEWED}`,
+      );
+      try {
+        gh(
+          "api",
+          "-X",
+          "POST",
+          `repos/${REPO}/pulls/${pr.number}/requested_reviewers`,
+          "-f",
+          `reviewers[]=${OWNER}`,
+        );
+      } catch (error) {
+        // The label still hands it over. Without the request, a later "Request changes" is
+        // compared against an older request (or none), which still counts as new.
+        log(
+          `  #${pr.number}: couldn't request Dan's review: ${error.message.split("\n")[0]}`,
+        );
+      }
+      notify("Backlog loop", `#${pr.number} is ready for your review`);
+    };
+
+    // Then feedback: Claude's review first, then any changes Dan requested.
     let toFix = null;
     for (const pr of open) {
-      const review = reviewState(gh, pr);
-      if (review.state === "waiting") {
-        log(`  #${pr.number}: waiting for ${review.why}`);
-      } else if (review.state === "clean") {
-        log(`  #${pr.number}: review found nothing; labelling it reviewed`);
-        if (!opts["dry-run"]) {
-          gh(
-            "api",
-            "-X",
-            "POST",
-            `repos/${REPO}/issues/${pr.number}/labels`,
-            "-f",
-            "labels[]=reviewed",
-          );
-          notify("Backlog loop", `#${pr.number} is reviewed and ready for you`);
-        }
-      } else if (review.state === "fix" && !toFix) {
-        toFix = { pr, review };
+      const feedback = feedbackState(gh, pr);
+      if (feedback.state === "waiting") {
+        log(`  #${pr.number}: waiting for ${feedback.why}`);
+      } else if (feedback.state === "clean") {
+        log(`  #${pr.number}: Claude's review found nothing; over to Dan`);
+        if (!opts["dry-run"]) handOver(pr);
+      } else if (feedback.state === "fix" && !toFix) {
+        toFix = { pr, feedback };
       }
     }
     if (toFix) {
-      const { pr, review } = toFix;
+      const { pr, feedback } = toFix;
       const item = itemFor(pr);
       const what = [
-        review.comments.length && `${review.comments.length} comment(s)`,
-        review.ciFailed && "failed CI",
+        feedback.comments.length && `${feedback.comments.length} comment(s)`,
+        feedback.ciFailed && "failed CI",
       ].filter(Boolean);
       if (opts["dry-run"]) {
-        log(`Next: fix #${pr.number} (${item.slug}): ${what.join(", ")}`);
+        log(
+          `Next: fix #${pr.number} (${item.slug}) after ${feedback.round}: ${what.join(", ")}`,
+        );
         return "idle";
       }
       const result = await runItem(item, token, {
         kind: "fix",
         number: pr.number,
-        comments: review.comments,
-        ciFailed: review.ciFailed,
+        comments: feedback.comments,
+        ciFailed: feedback.ciFailed,
       });
-      // Make sure the round is closed even if the run forgot the label; otherwise the next
-      // pass would fix the same comments again.
-      if (result.startsWith("fixed"))
-        gh(
-          "api",
-          "-X",
-          "POST",
-          `repos/${REPO}/issues/${pr.number}/labels`,
-          "-f",
-          "labels[]=reviewed",
-        );
+      // The driver closes the round, not the run, so a run that forgets can't leave the same
+      // comments to be fixed again.
+      if (result.startsWith("fixed")) handOver(pr);
       return result;
     }
     if (open.length >= PR_CAP) {

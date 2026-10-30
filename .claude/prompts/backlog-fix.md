@@ -1,7 +1,8 @@
 # Fix pass
 
 This run doesn't build an item from scratch. PR #{{number}} (`agent/{{slug}}`) has been
-reviewed, and you handle that review: one round, then hand the PR to Dan. Use the iteration
+reviewed, by the Claude review or by Dan requesting changes, and you handle that review: one
+round, then it goes back to Dan. Use the iteration
 prompt above for conventions, verifying, screenshots and the hard rules. Skip its steps 1, 4
 and 6: the "Done when" list exists, the item is already ticked, and the PR is open.
 
@@ -48,11 +49,12 @@ Then:
 
 5. If what changed or how to test it is different now, update the PR body
    (`gh pr edit {{number}} --body-file …`).
-6. Add the `reviewed` label: `gh pr edit {{number}} --add-label reviewed`. It tells Dan the PR
-   is his turn.
+
+Don't change the PR's labels or reviewers. When you finish, the driver labels it
+`claude-reviewed` and asks Dan for a review.
 
 If a comment needs a decision you can't make, reply to it with the options and the one you'd
 pick, then convert the PR to a draft (`gh pr ready {{number}} --undo`), add `needs-input`
-instead of `reviewed`, and stop with `RESULT: needs-input #{{number}} agent/{{slug}}`.
+and stop with `RESULT: needs-input #{{number}} agent/{{slug}}`.
 
 When you're done, your last line is `RESULT: fixed #{{number}} agent/{{slug}}`.
