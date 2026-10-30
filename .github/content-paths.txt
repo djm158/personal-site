@@ -8,7 +8,8 @@
 resume/resume.yaml
 src/content/**
 
-# The loop's own rules and checks
+# The loop's own rules and checks (CLAUDE.md is a symlink to AGENTS.md)
 CLAUDE.md
+AGENTS.md
 .claude/**
 .github/**

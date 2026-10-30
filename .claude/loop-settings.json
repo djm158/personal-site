@@ -30,6 +30,7 @@
   },
   "permissions": {
     "allow": [
+      "Bash",
       "WebFetch(domain:docs.astro.build)",
       "WebFetch(domain:tailwindcss.com)",
       "WebFetch(domain:playwright.dev)",

@@ -43,7 +43,7 @@ Then:
    - Inline comment:
      `gh api repos/djm158/personal-site/pulls/{{number}}/comments/<id>/replies -F body=@<file>`
    - PR comments and reviews: one PR comment, `gh pr comment {{number}} --body-file <file>`,
-     with a line for each point.
+     with a line for each point. If an inline reply fails, put it in this comment instead.
 
    Say what you changed and in which commit, or why you didn't.
 

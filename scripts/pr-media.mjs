@@ -22,6 +22,8 @@ Shoots each path at each width, before (production) and after (local build).
                      Use it to click, hover, scroll or open dialogs. If it fails on
                      the before side (the feature isn't live yet), that shot is skipped.
   --clip <selector>  Capture only this element instead of the viewport.
+  --clip-box <x,y,w,h>  Capture this rectangle of the viewport instead, in CSS
+                     pixels. For things that close or move during the setup.
   --name <label>     Add a label to the file names, e.g. --name sheet-open gives
                      resume-sheet-open-after-375.png. Use one per captured state.
   --full-page        Capture the whole page instead of the viewport.
@@ -30,6 +32,9 @@ Shoots each path at each width, before (production) and after (local build).
   --record <secs>    Also record the after side as a GIF: the setup runs, then
                      recording continues for <secs>. Needs ffmpeg; without it
                      the .webm is kept.
+  --replay           With --record: restart the page's animations when the
+                     recording starts, so animations that play on load are in
+                     the GIF (otherwise they finish before it begins).
   --motion           Allow motion in screenshots. By default stills use
                      reduced motion and disabled animations so they're stable.
   --skip-before      Only shoot the after side (new pages).
@@ -46,11 +51,13 @@ const { values: opts } = parseArgs({
     path: { type: "string", multiple: true },
     setup: { type: "string" },
     clip: { type: "string" },
+    "clip-box": { type: "string" },
     name: { type: "string" },
     "full-page": { type: "boolean", default: false },
     theme: { type: "string" },
     widths: { type: "string", default: "375,1280" },
     record: { type: "string" },
+    replay: { type: "boolean", default: false },
     motion: { type: "boolean", default: false },
     "skip-before": { type: "boolean", default: false },
     before: { type: "string", default: "https://danielmcgrath.xyz" },
@@ -69,6 +76,15 @@ if (opts.help || !opts.path?.length) {
 const root = resolve(import.meta.dirname, "..");
 const widths = opts.widths.split(",").map(Number);
 const recordSecs = opts.record ? Number(opts.record) : 0;
+const clipBox = opts["clip-box"]
+  ? (([x, y, width, height]) => ({ x, y, width, height }))(
+      opts["clip-box"].split(",").map(Number),
+    )
+  : null;
+if (clipBox && Object.values(clipBox).some(Number.isNaN)) {
+  console.error("--clip-box takes four numbers: x,y,width,height");
+  process.exit(1);
+}
 const outDir = resolve(opts.out);
 const setup = opts.setup
   ? (await import(pathToFileURL(resolve(opts.setup)).href)).default
@@ -174,12 +190,14 @@ async function shoot(browser, side, base, path, width) {
       path: join(outDir, file),
       animations: opts.motion ? "allow" : "disabled",
     };
-    if (opts.clip)
+    if (clipBox) await page.screenshot({ ...shotOptions, clip: clipBox });
+    else if (opts.clip)
       await page
         .locator(opts.clip)
         .filter({ visible: true })
         .first()
-        .screenshot(shotOptions);
+        // A selector that matches nothing should fail fast, not after 30 seconds.
+        .screenshot({ ...shotOptions, timeout: 10_000 });
     else await page.screenshot({ ...shotOptions, fullPage: opts["full-page"] });
     return file;
   } catch (error) {
@@ -250,15 +268,29 @@ async function record(browser, afterUrl, path, width) {
 
   // The video starts with the page load; measure it so it can be cut.
   const loadSecs = (await page.evaluate(() => performance.now())) / 1000;
+  if (opts.replay) {
+    await page.evaluate(() => {
+      for (const animation of document.getAnimations()) {
+        animation.cancel();
+        animation.play();
+      }
+    });
+  }
   if (setup) await setup(page, { side: "after", width });
+  // Where to crop: a fixed box, or the element straight after the setup (it may close by the
+  // end), or at the end if it only appears later.
+  const measure = () =>
+    page
+      .locator(opts.clip)
+      .filter({ visible: true })
+      .first()
+      .boundingBox({ timeout: 2000 })
+      .catch(() => null);
+  let box = clipBox ?? (opts.clip ? await measure() : null);
   await page.waitForTimeout(recordSecs * 1000);
-  const box = opts.clip
-    ? await page
-        .locator(opts.clip)
-        .filter({ visible: true })
-        .first()
-        .boundingBox()
-    : null;
+  if (opts.clip && !box) box = await measure();
+  if (opts.clip && !box)
+    console.warn(`--clip ${opts.clip} wasn't visible; recording the viewport`);
   await context.close();
   const webm = await page.video().path();
 

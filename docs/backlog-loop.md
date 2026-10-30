@@ -7,10 +7,9 @@ detailed evidence is in [`docs/research/`](research/):
 [loop-github-identity.md](research/loop-github-identity.md) (App vs machine user) and
 [loop-sandbox.md](research/loop-sandbox.md) (sandbox tests).
 
-Status: everything below is built. The first item went through end to end: a run got
-blocked, asked for input, and a second run resumed and finished it (see
-[First runs](#6-first-runs)). The fix, rebase and retry passes are built but haven't met a real
-case yet.
+Status, 2026-10-30: everything below is built and in use. Over the first evening the loop did
+17 runs: 11 new items, 4 fix runs and 2 rebases, opening PRs #3–#12, of which #3–#10 were
+merged (see [First runs](#6-first-runs)). The retry pass hasn't met a real case yet.
 
 ## 1. What it is
 
@@ -35,20 +34,22 @@ iteration prompt lifts that rule for the one item a run picks, and only that ite
 ## 2. One pass, end to end
 
 Each `pnpm loop` is one pass, and each pass does at most one Claude run. `--until-idle` keeps
-going until there's nothing to do.
+going until there's nothing to do; `--watch` never stops, checking again every few minutes when
+idle, so merging a PR frees a slot and the loop carries on.
 
 ```
-pnpm loop
+pnpm loop --watch
  │
  ├─ mint a 1-hour GitHub App token (private key read from the macOS keychain)
- ├─ stop if: CI red on main · daily budget spent · 2 failed runs in a row
- ├─ survey GitHub: open agent PRs, conflicts, labels, branches, PR history, BACKLOG.md on main
+ ├─ pause if: subscription usage high · daily budget spent · CI red on main
+ ├─ stop if: 2 failed runs in a row
+ ├─ survey GitHub: open agent PRs, conflicts, labels, reviews, branches, BACKLOG.md on main
  │
  ├─ pick the first thing to do, in this order:
  │    1. resume   a needs-input draft Dan has answered (label removed)
  │    2. rebase   a PR that conflicts with main
- │    3. fix      a reviewed PR with findings or failed CI
- │               (a clean review is labelled `reviewed` by the driver, no run needed)
+ │    3. fix      Claude's review found something, CI failed, or Dan requested changes
+ │               (a clean review is handed straight to Dan, no run needed)
  │    4. new      the next backlog item, if fewer than 3 agent PRs are open;
  │               a retry if its last PR was closed with the `retry` label
  │
@@ -59,34 +60,38 @@ pnpm loop
  │      → screenshots (production vs build) → push media → push branch → open PR
  │    resume / fix / rebase / retry: the same prompt plus a short addendum for that pass
  │    → NOTE: lines → RESULT: opened | needs-input | fixed | rebased | error
- ├─ log the result, cost and notes to .loop/
+ │    (each step printed live as it happens; full transcript saved)
+ ├─ log the result, cost, usage and notes to .loop/
  └─ revoke the token, delete the run folder
           │
           ▼  on GitHub
    CI (check, test, build) · content guard · Claude review · Netlify preview
           │
           ▼
-   next pass: fix run or straight to `reviewed` → Dan approves and merges
+   next pass: fix run, or hand over: `claude-reviewed` label + review request to Dan
+          │
+          ▼
+   Dan approves and merges, or requests changes (→ fix run → review requested again)
 ```
 
 ## 3. The pieces
 
-| Piece             | File                                                               | Job                                                                                                                                                                                 |
-| ----------------- | ------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Backlog tags      | `BACKLOG.md`                                                       | `(agent: slug)` opts an item in; `(after: slug)` waits on another; `(me)` and `(deferred)` keep it out                                                                              |
-| Driver            | `scripts/loop/run.mjs`                                             | Limits, survey, selection, clone, runs Claude, logs, cleanup. `--dry-run`, `--smoke`, `--until-idle`                                                                                |
-| Selection         | `scripts/loop/backlog.mjs`                                         | Pure functions with Vitest tests: parse the backlog, pick the next item or retry, report rejected or stranded items                                                                 |
-| App tokens        | `scripts/loop/app-token.mjs`                                       | JWT from the keychain key, mint and revoke installation tokens                                                                                                                      |
-| Sandbox settings  | `.claude/loop-settings.json`                                       | Network allowlist, blocked credential paths, permission rules                                                                                                                       |
-| Iteration prompt  | `.claude/prompts/backlog-iteration.md`                             | What one run does, the PR template, hard rules, output format                                                                                                                       |
-| Pass addenda      | `.claude/prompts/backlog-{resume,fix,rebase,retry}.md`             | Added after the iteration prompt for the other passes; each replaces only the steps that differ                                                                                     |
-| Screenshot helper | `scripts/pr-media.mjs`                                             | Before/after PNGs and GIFs with Playwright, markdown for the PR                                                                                                                     |
-| Media hosting     | orphan `pr-assets` branch                                          | Images linked from PRs by `raw.githubusercontent.com` URL                                                                                                                           |
-| CI                | `.github/workflows/ci.yml`                                         | `pnpm check`, `pnpm test --run`, `pnpm build` (with Typst)                                                                                                                          |
-| Content guard     | `.github/workflows/content-guard.yml`, `.github/content-paths.txt` | Fails agent PRs that touch content until Dan adds `content-ok`                                                                                                                      |
-| Review            | `.github/workflows/claude-code-review.yml`                         | `claude-code-action` running the `code-review` plugin                                                                                                                               |
-| Ruleset on `main` | GitHub settings                                                    | PRs only, both checks required, no force push; only the admin role bypasses                                                                                                         |
-| Labels            | GitHub                                                             | `agent` (made by the loop), `needs-input` (blocked, Dan's turn), `reviewed` (review handled, Dan's turn), `content-ok` (Dan approved content), `retry` (on a closed PR: start over) |
+| Piece             | File                                                               | Job                                                                                                                                                                                                 |
+| ----------------- | ------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Backlog tags      | `BACKLOG.md`                                                       | `(agent: slug)` opts an item in; `(after: slug)` waits on another; `(me)` and `(deferred)` keep it out                                                                                              |
+| Driver            | `scripts/loop/run.mjs`                                             | Limits, survey, selection, clone, runs Claude, live feed, logs, cleanup. `--dry-run`, `--smoke`, `--until-idle`, `--watch`, `--notify`                                                              |
+| Selection         | `scripts/loop/backlog.mjs`                                         | Pure functions with Vitest tests: parse the backlog, pick the next item or retry, report rejected or stranded items                                                                                 |
+| App tokens        | `scripts/loop/app-token.mjs`                                       | JWT from the keychain key, mint and revoke installation tokens                                                                                                                                      |
+| Sandbox settings  | `.claude/loop-settings.json`                                       | Network allowlist, blocked credential paths, permission rules                                                                                                                                       |
+| Iteration prompt  | `.claude/prompts/backlog-iteration.md`                             | What one run does, the PR template, hard rules, output format                                                                                                                                       |
+| Pass addenda      | `.claude/prompts/backlog-{resume,fix,rebase,retry}.md`             | Added after the iteration prompt for the other passes; each replaces only the steps that differ                                                                                                     |
+| Screenshot helper | `scripts/pr-media.mjs`                                             | Before/after PNGs and GIFs with Playwright, markdown for the PR                                                                                                                                     |
+| Media hosting     | orphan `pr-assets` branch                                          | Images linked from PRs by `raw.githubusercontent.com` URL                                                                                                                                           |
+| CI                | `.github/workflows/ci.yml`                                         | `pnpm check`, `pnpm test --run`, `pnpm build` (with Typst)                                                                                                                                          |
+| Content guard     | `.github/workflows/content-guard.yml`, `.github/content-paths.txt` | Fails agent PRs that touch content until Dan adds `content-ok`                                                                                                                                      |
+| Review            | `.github/workflows/claude-code-review.yml`                         | `claude-code-action` running the `code-review` plugin                                                                                                                                               |
+| Ruleset on `main` | GitHub settings                                                    | PRs only, both checks required, no force push; only the admin role bypasses                                                                                                                         |
+| Labels            | GitHub                                                             | `agent` (made by the loop), `needs-input` (blocked, Dan's turn), `claude-reviewed` (Claude's review handled, Dan's turn), `content-ok` (Dan approved content), `retry` (on a closed PR: start over) |
 
 ## 4. Decisions and why
 
@@ -172,6 +177,23 @@ so the fix pass does one round only.
 **Review on open, not on every push.** Re-reviewing each push would repeat the review after
 every fix-pass commit, all on the subscription.
 
+**What the review actually caught: nothing.** Across the first 10 agent PRs the plugin posted
+"No issues found" every time, with no inline comments. Every change that was made came from
+Dan's own reviews:
+
+| PR  | Dan's feedback                                                                   | Why a diff-only bug review misses it                                                                                                                     |
+| --- | -------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| #5  | Use an Astro content collection; numbering belongs in the page, not the content  | A structural preference, not a bug                                                                                                                       |
+| #8  | Hovering the article triggers the timeline highlight, and only on the first item | Only visible in the browser, and a matter of feel ("reads as jarring")                                                                                   |
+| #10 | The letters hop in unison instead of staggering                                  | The CSS looks right; the browser resolves one delay for every letter (`@theme` vs `@theme inline`). Visible by running the page, not by reading the diff |
+
+The plugin works as designed: it reads the diff without running anything and flags only
+compile errors, definite logic errors and quotable rule violations, which CI and small,
+well-scoped items leave little room for. Anthropic's documentation of its managed review says
+the same thing in other words: it works "from reading the diff and the surrounding code,
+without building or running your code". The gap it leaves is the one Anthropic's harness post
+fills with a separate evaluator that drives the running app with Playwright.
+
 **Ready PRs, not drafts.** Agent PRs first opened as drafts, but the review skips drafts.
 Copilot's cloud agent works the same way ("cannot mark its pull requests as 'Ready for
 review'"), which is why a human has to step in there. Here PRs open ready, and only
@@ -179,8 +201,9 @@ review'"), which is why a human has to step in there. Here PRs open ready, and o
 
 ### After the PR opens
 
-Labels carry the whole conversation between Dan and the loop, so the driver can work out what
-each PR needs from GitHub alone, with nothing to remember between passes.
+Labels and GitHub's own review states carry the whole conversation between Dan and the loop,
+so the driver can work out what each PR needs from GitHub alone, with nothing to remember
+between passes.
 
 **Finish open work before starting new work.** Each pass resumes, rebases or fixes an existing
 PR before it picks a new item. Those PRs are already open, so the 3-PR cap doesn't apply to
@@ -191,14 +214,25 @@ blocked. When Dan replies and removes the label, the next pass clones the PR's b
 (including anything Dan pushed), gives the run Dan's comments, and finishes the item. The run
 then rewrites the PR body and marks it ready, which starts the review.
 
-**Fix: one round, then hand over.** Once CI and the review have finished, the driver collects
-comments from Dan and `claude[bot]` made since the PR became ready, or since `reviewed` was last
-added. If there are none and CI passed, it adds `reviewed` itself without starting Claude. If
-there are, a fix run fixes the in-scope ones, replies to the rest with a reason, re-checks,
-re-shoots changed screenshots under the same names (so the PR's image links keep working),
-replies on every comment, and adds `reviewed`. The driver adds the label too, so a forgetful
-run can't fix the same comments again. Dan asks for another round by commenting and removing
-`reviewed`.
+**Fix: two rounds, using GitHub's review flow.**
+
+- _Claude's round._ Once CI and Claude's review have finished, the driver collects comments
+  from Dan and `claude[bot]` made since the PR became ready. If there are none and CI passed,
+  it hands the PR over without starting Claude. If there are, a fix run fixes the in-scope
+  ones, replies to the rest with a reason, re-checks, re-shoots changed screenshots under the
+  same names (so the PR's image links keep working), and replies on every comment.
+- _The handover._ The driver, not the run, adds `claude-reviewed` and requests Dan's review.
+  The request puts the PR in Dan's GitHub review queue with GitHub's own notification, and
+  because the driver does it, a forgetful run can't leave the same comments to be fixed again.
+- _Dan's round._ When Dan's latest review is "Request changes" and came after the loop last
+  requested his review, the next pass runs a fix with his comments since then, and requests
+  his review again: the same "re-request review" a human contributor would click. Approving,
+  or reviewing with plain comments, starts nothing. It also works when Claude's review never
+  posted.
+
+The first version used a single `reviewed` label that Dan had to remove to ask for another
+round. He found that clunky ("having to remove a tag after requesting changes"), so the loop
+now reads review states instead of asking him to manage labels.
 
 **Only trusted comments reach a run.** The repo is public, so anyone can comment on a PR. Resume,
 fix and retry runs only see comments from Dan (and, for fixes, `claude[bot]`), and the prompts
@@ -309,41 +343,79 @@ Anything that would need a permission prompt is denied (`--permission-prompts no
   when CI is red on `main`. Pocock and Willison both recommend iteration caps and tight budgets
   for unattended loops; Anthropic's harness runs a smoke check on startup so a broken base
   doesn't look like the agent's own failure.
+- **Real subscription usage, not just estimates.** Claude's streaming output includes
+  `rate_limit_event` messages with the account's actual usage windows: how full the 5-hour
+  and 7-day windows are and when each resets. The driver logs them with every run and pauses
+  before the 5-hour window passes 80% (`--max-usage`) or the 7-day passes 90%, until the window
+  resets, so Dan's own sessions keep some headroom. The same events showed extra usage turned
+  off on the account, so loop runs can't incur charges.
+
+### Watching it run
+
+**A live feed instead of "Claude is working…".** Runs use `--output-format stream-json`, and
+the driver prints one line per step: each tool call (a command, a file edited, a screenshot
+looked at) and each short thing Claude says, prefixed with the item and with paths shortened.
+Each run's full transcript goes to `.loop/transcripts/`. Before this existed, the same
+transcripts could be read live from `~/.claude/projects/`, where Claude Code keeps every
+session.
+
+**Watch mode.** `--watch` runs forever: straight to the next pass after a run, every 3 minutes
+when idle, printing only when something changes. A red `main` waits and carries on once it's
+fixed, the daily budget and usage limits pause until they reset, and only two failed runs in a
+row stop it. `caffeinate -i` keeps the Mac awake. `--notify` adds macOS notifications when a PR
+becomes Dan's turn.
+
+**Ctrl-C finishes the current run.** Claude starts in its own process group, so the terminal's
+Ctrl-C reaches only the driver. The first press lets a run in progress finish, because killing
+one halfway can leave a pushed branch with no PR (a stranded item). The second press stops it.
+
+**One driver, not several.** Two drivers at once could both claim the same item, misreport
+each other's in-progress branches as stranded, and overshoot the PR cap. Parallel runs, if
+ever needed, belong inside one driver (`--parallel N`), which can claim items itself. They
+aren't needed yet: many items are chained, and review is the bottleneck, not run time.
 
 ## 5. What went wrong, and the fixes
 
 In roughly the order they happened.
 
-| Problem                                                                            | Cause                                                                                                                                                                                                     | Fix                                                                                                                                                                    |
-| ---------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| First screenshot run hung, and would have shot the wrong site                      | A dev server from another project was still on port 4321                                                                                                                                                  | The helper serves `./dist` itself on a free port                                                                                                                       |
-| "astro preview didn't start"                                                       | Astro 7 allows one preview server per project, and an old one was still running in the background                                                                                                         | Same: the built-in static server replaced `astro preview`                                                                                                              |
-| `timeout: command not found`                                                       | macOS has no `timeout`                                                                                                                                                                                    | The driver is Node, with its own timer                                                                                                                                 |
-| Desktop PNGs around 1.8 MB                                                         | The page's grain overlay doesn't compress                                                                                                                                                                 | Desktop shots at 1x scale, phones at 2x                                                                                                                                |
-| Clipped screenshot timed out on the home page                                      | The selector's first match was a link inside the closed mobile menu                                                                                                                                       | Clip only visible matches                                                                                                                                              |
-| `git worktree add --orphan` failed                                                 | Needs git 2.42; the Mac has 2.39                                                                                                                                                                          | `checkout --orphan` instead (later replaced by clones)                                                                                                                 |
-| The first agent PR had no screenshots                                              | "No visible change" read as "nothing to show"                                                                                                                                                             | Media required for anything that renders; backfilled by hand                                                                                                           |
-| PR checkboxes ticked by the agent                                                  | The template had `[x]` built in                                                                                                                                                                           | CI runs the checks; boxes removed                                                                                                                                      |
-| Draft PRs would never be reviewed                                                  | The review and the plugin both skip drafts                                                                                                                                                                | PRs open ready; only `needs-input` is a draft                                                                                                                          |
-| The review did nothing on PR #2                                                    | The action only runs when the workflow file matches the copy on `main`                                                                                                                                    | Expected on the PR that adds it. Also means open PRs need updating whenever the review workflow changes                                                                |
-| The review ran 2 turns in 4 seconds and posted nothing                             | The plugin's subagents started in the background; a headless session ends when its turn ends, so they were dropped                                                                                        | `CLAUDE_CODE_DISABLE_BACKGROUND_TASKS=1`. Found with `display_report: true`, which writes Claude's report to the job summary without making the full transcript public |
-| Reopening a PR doesn't re-review it                                                | The plugin skips PRs Claude has already commented on                                                                                                                                                      | Delete the comment to re-review                                                                                                                                        |
-| Chromium crashed inside the sandbox                                                | It registers a macOS Mach service at startup, which the sandbox forbids                                                                                                                                   | `--single-process`, with a fresh browser per screenshot because single-process mode can't open a second context                                                        |
-| Chromium couldn't reach production                                                 | It ignores the sandbox's `HTTPS_PROXY`                                                                                                                                                                    | Pass the proxy to Playwright at launch                                                                                                                                 |
-| `gh` failed TLS verification in the sandbox                                        | Go programs verify certificates through a macOS service the sandbox blocks                                                                                                                                | `enableWeakerNetworkIsolation`, a documented and accepted loosening                                                                                                    |
-| **The keychain leaked inside the sandbox**                                         | The sandbox profile always allows the keychain services, and no setting removes them                                                                                                                      | Block reads of `~/Library/Keychains`; the login keychain is a file the client reads. Dan found this by running the check himself                                       |
-| `$TMPDIR` pointed somewhere unexpected                                             | Claude Code sets its own temp folder inside the sandbox                                                                                                                                                   | Runs get an explicit scratch folder                                                                                                                                    |
-| Testing anything near a real token was blocked                                     | Claude Code's auto-mode safety check refuses to put credentials in commands                                                                                                                               | Fake tokens for TLS tests; Dan ran the real-credential checks                                                                                                          |
-| `LOOP_LOGINS` contained `<app-name>[bot]`                                          | The placeholder from the instructions was copied literally                                                                                                                                                | Set to the App's real bot name                                                                                                                                         |
-| The App's permissions couldn't be checked via the API                              | The App is private, so it's hidden from Dan's `gh` login                                                                                                                                                  | The token-mint response lists the permissions granted                                                                                                                  |
-| Smoke test: screenshots crashed                                                    | Runs clone `main`, which didn't have the sandbox fix yet                                                                                                                                                  | Push first, then smoke test                                                                                                                                            |
-| **Smoke test: the build had no fonts, and still passed**                           | Astro downloads the fonts from Fontsource while building; the sandbox blocked it and the build fell back silently                                                                                         | Allow `api.fontsource.org` and `cdn.jsdelivr.net`; the smoke test now counts font files                                                                                |
-| First real run: `pnpm add nanostores` failed, so the item stopped at `needs-input` | pnpm 12 takes a lock in `/private/tmp/pnpm-store-operation-locks-<uid>` before writing to its store, outside every folder the sandbox allowed. Moving the store didn't help, because the lock isn't in it | Allow that folder; the smoke test now runs `pnpm add`. The agent's own note pinned down the lock                                                                       |
-| Commands with `VAR=value`, `sed -i` or `${...}` were denied                        | Claude Code treats them as needing approval, and nothing can approve in a headless run                                                                                                                    | The prompt says so and points to the Edit tool and full paths. Both came from the agent's notes                                                                        |
-| A command ran in the wrong folder                                                  | Two Bash calls running at once, one of which had `cd`'d into the `pr-assets` clone, shared a working directory                                                                                            | The prompt says to use `git -C` and absolute paths. Also from the agent's notes                                                                                        |
-| Loop fixes ended up on an agent branch                                             | Uncommitted changes followed Dan when he switched branches to add nanostores, and were committed there                                                                                                    | Caught before the push; moved back to `main`. The driver reads its prompts from Dan's checkout, so uncommitted loop changes are fragile                                |
-| (Design) A fix pass could read an old CI result                                    | A PR can have several runs of one check, including cancelled ones                                                                                                                                         | Use the latest run                                                                                                                                                     |
-| (Design) Dan's answer to a `needs-input` question would have started a fix pass    | It's a comment from Dan on the PR                                                                                                                                                                         | Fix passes only count comments since the PR became ready or `reviewed` was last added                                                                                  |
+| Problem                                                                                                                                                                                  | Cause                                                                                                                                                                                                                                                                                                                | Fix                                                                                                                                                                                                                                                                              |
+| ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| First screenshot run hung, and would have shot the wrong site                                                                                                                            | A dev server from another project was still on port 4321                                                                                                                                                                                                                                                             | The helper serves `./dist` itself on a free port                                                                                                                                                                                                                                 |
+| "astro preview didn't start"                                                                                                                                                             | Astro 7 allows one preview server per project, and an old one was still running in the background                                                                                                                                                                                                                    | Same: the built-in static server replaced `astro preview`                                                                                                                                                                                                                        |
+| `timeout: command not found`                                                                                                                                                             | macOS has no `timeout`                                                                                                                                                                                                                                                                                               | The driver is Node, with its own timer                                                                                                                                                                                                                                           |
+| Desktop PNGs around 1.8 MB                                                                                                                                                               | The page's grain overlay doesn't compress                                                                                                                                                                                                                                                                            | Desktop shots at 1x scale, phones at 2x                                                                                                                                                                                                                                          |
+| Clipped screenshot timed out on the home page                                                                                                                                            | The selector's first match was a link inside the closed mobile menu                                                                                                                                                                                                                                                  | Clip only visible matches                                                                                                                                                                                                                                                        |
+| `git worktree add --orphan` failed                                                                                                                                                       | Needs git 2.42; the Mac has 2.39                                                                                                                                                                                                                                                                                     | `checkout --orphan` instead (later replaced by clones)                                                                                                                                                                                                                           |
+| The first agent PR had no screenshots                                                                                                                                                    | "No visible change" read as "nothing to show"                                                                                                                                                                                                                                                                        | Media required for anything that renders; backfilled by hand                                                                                                                                                                                                                     |
+| PR checkboxes ticked by the agent                                                                                                                                                        | The template had `[x]` built in                                                                                                                                                                                                                                                                                      | CI runs the checks; boxes removed                                                                                                                                                                                                                                                |
+| Draft PRs would never be reviewed                                                                                                                                                        | The review and the plugin both skip drafts                                                                                                                                                                                                                                                                           | PRs open ready; only `needs-input` is a draft                                                                                                                                                                                                                                    |
+| The review did nothing on PR #2                                                                                                                                                          | The action only runs when the workflow file matches the copy on `main`                                                                                                                                                                                                                                               | Expected on the PR that adds it. Also means open PRs need updating whenever the review workflow changes                                                                                                                                                                          |
+| The review ran 2 turns in 4 seconds and posted nothing                                                                                                                                   | The plugin's subagents started in the background; a headless session ends when its turn ends, so they were dropped                                                                                                                                                                                                   | `CLAUDE_CODE_DISABLE_BACKGROUND_TASKS=1`. Found with `display_report: true`, which writes Claude's report to the job summary without making the full transcript public                                                                                                           |
+| Reopening a PR doesn't re-review it                                                                                                                                                      | The plugin skips PRs Claude has already commented on                                                                                                                                                                                                                                                                 | Delete the comment to re-review                                                                                                                                                                                                                                                  |
+| Chromium crashed inside the sandbox                                                                                                                                                      | It registers a macOS Mach service at startup, which the sandbox forbids                                                                                                                                                                                                                                              | `--single-process`, with a fresh browser per screenshot because single-process mode can't open a second context                                                                                                                                                                  |
+| Chromium couldn't reach production                                                                                                                                                       | It ignores the sandbox's `HTTPS_PROXY`                                                                                                                                                                                                                                                                               | Pass the proxy to Playwright at launch                                                                                                                                                                                                                                           |
+| `gh` failed TLS verification in the sandbox                                                                                                                                              | Go programs verify certificates through a macOS service the sandbox blocks                                                                                                                                                                                                                                           | `enableWeakerNetworkIsolation`, a documented and accepted loosening                                                                                                                                                                                                              |
+| **The keychain leaked inside the sandbox**                                                                                                                                               | The sandbox profile always allows the keychain services, and no setting removes them                                                                                                                                                                                                                                 | Block reads of `~/Library/Keychains`; the login keychain is a file the client reads. Dan found this by running the check himself                                                                                                                                                 |
+| `$TMPDIR` pointed somewhere unexpected                                                                                                                                                   | Claude Code sets its own temp folder inside the sandbox                                                                                                                                                                                                                                                              | Runs get an explicit scratch folder                                                                                                                                                                                                                                              |
+| Testing anything near a real token was blocked                                                                                                                                           | Claude Code's auto-mode safety check refuses to put credentials in commands                                                                                                                                                                                                                                          | Fake tokens for TLS tests; Dan ran the real-credential checks                                                                                                                                                                                                                    |
+| `LOOP_LOGINS` contained `<app-name>[bot]`                                                                                                                                                | The placeholder from the instructions was copied literally                                                                                                                                                                                                                                                           | Set to the App's real bot name                                                                                                                                                                                                                                                   |
+| The App's permissions couldn't be checked via the API                                                                                                                                    | The App is private, so it's hidden from Dan's `gh` login                                                                                                                                                                                                                                                             | The token-mint response lists the permissions granted                                                                                                                                                                                                                            |
+| Smoke test: screenshots crashed                                                                                                                                                          | Runs clone `main`, which didn't have the sandbox fix yet                                                                                                                                                                                                                                                             | Push first, then smoke test                                                                                                                                                                                                                                                      |
+| **Smoke test: the build had no fonts, and still passed**                                                                                                                                 | Astro downloads the fonts from Fontsource while building; the sandbox blocked it and the build fell back silently                                                                                                                                                                                                    | Allow `api.fontsource.org` and `cdn.jsdelivr.net`; the smoke test now counts font files                                                                                                                                                                                          |
+| First real run: `pnpm add nanostores` failed, so the item stopped at `needs-input`                                                                                                       | pnpm 12 takes a lock in `/private/tmp/pnpm-store-operation-locks-<uid>` before writing to its store, outside every folder the sandbox allowed. Moving the store didn't help, because the lock isn't in it                                                                                                            | Allow that folder; the smoke test now runs `pnpm add`. The agent's own note pinned down the lock                                                                                                                                                                                 |
+| Commands with `VAR=value`, `sed -i` or `${...}` were denied                                                                                                                              | Claude Code treats them as needing approval, and nothing can approve in a headless run                                                                                                                                                                                                                               | The prompt says so and points to the Edit tool and full paths. Both came from the agent's notes                                                                                                                                                                                  |
+| A command ran in the wrong folder                                                                                                                                                        | Two Bash calls running at once, one of which had `cd`'d into the `pr-assets` clone, shared a working directory                                                                                                                                                                                                       | The prompt says to use `git -C` and absolute paths. Also from the agent's notes                                                                                                                                                                                                  |
+| Loop fixes ended up on an agent branch                                                                                                                                                   | Uncommitted changes followed Dan when he switched branches to add nanostores, and were committed there                                                                                                                                                                                                               | Caught before the push; moved back to `main`. The driver reads its prompts from Dan's checkout, so uncommitted loop changes are fragile                                                                                                                                          |
+| (Design) A fix pass could read an old CI result                                                                                                                                          | A PR can have several runs of one check, including cancelled ones                                                                                                                                                                                                                                                    | Use the latest run                                                                                                                                                                                                                                                               |
+| (Design) Dan's answer to a `needs-input` question would have started a fix pass                                                                                                          | It's a comment from Dan on the PR                                                                                                                                                                                                                                                                                    | Fix passes only count comments since the PR became ready or `reviewed` was last added                                                                                                                                                                                            |
+| Many ordinary commands were denied in runs: chains with `;`, `cd` into another folder, `$(...)`, `ffmpeg`, `gh api` POSTs with `-F body=@file`, and once `node scripts/pr-media.mjs / …` | Claude Code asks for approval on Bash commands it can't fully analyse (heredocs, shell variables, loops, `$(...)`, dense quoting, `@file` arguments) unless an allow rule matches; the sandbox's auto-approval didn't cover them. In a headless run nobody can approve, so they're denied. Runs had 0–3 denials each | Tested in headless sandboxed runs: specific allow rules fixed all but loops and `$(...)`; a blanket `Bash` allow rule fixed everything, and the sandbox still blocked `~/.ssh`, unlisted hosts and writes outside the run. The sandbox is the boundary, so `Bash` is now allowed |
+| Replies to inline review comments failed                                                                                                                                                 | The `gh api …/replies` call was one of the denied commands                                                                                                                                                                                                                                                           | Fixed by allowing `Bash`. The fix prompt also says to fall back to the PR comment if an inline reply fails                                                                                                                                                                       |
+| The content guard didn't protect the agent rules file                                                                                                                                    | `CLAUDE.md` is a symlink to `AGENTS.md`, and the guard matches paths, so an edit to `AGENTS.md` would have passed. Found while adding a lesson to it                                                                                                                                                                 | `AGENTS.md` added to the guard's list and to the prompt's hard rules                                                                                                                                                                                                             |
+| `git push -u` couldn't set the upstream                                                                                                                                                  | The sandbox always write-protects `.git/config`                                                                                                                                                                                                                                                                      | Harmless: the push itself works                                                                                                                                                                                                                                                  |
+| On-load animations were missed in recordings, and clipping a dialog that had closed failed                                                                                               | `pr-media.mjs --record` trims the video to start after load and measures the clip box after the setup runs                                                                                                                                                                                                           | The agents worked around both in setup modules (restart animations with `document.getAnimations()`; clip to a placeholder box). The helper now has `--replay` and `--clip-box`, and `--clip` measures straight after the setup                                                   |
+| GIFs of the full skill sheet came out at 4–6 MB                                                                                                                                          | A full-viewport backdrop changes every frame                                                                                                                                                                                                                                                                         | Clip to the part that moves (about 3 MB)                                                                                                                                                                                                                                         |
+| A fix run repeated work on #5 that was already done, after Dan had approved it                                                                                                           | The label was renamed from `reviewed` to `claude-reviewed` while an old driver was still running. It looked for "labeled reviewed" events, which now showed the new name, so it saw the PR as never reviewed. The same old driver then recreated `reviewed` on #8 and #11                                            | Restart the driver after changing labels or its code. The new flow also stops after an approval. Cost: one short run ($0.20)                                                                                                                                                     |
+| #5 needed a round of structural changes                                                                                                                                                  | The backlog item said _how_ to do it ("load it the way `load.ts` loads `resume.yaml`"), and Dan wanted an Astro content collection instead                                                                                                                                                                           | A lesson about items: describe the outcome, and prescribe an approach only when it's the point                                                                                                                                                                                   |
 
 Patterns worth noting:
 
@@ -357,6 +429,13 @@ Patterns worth noting:
   three sandbox gotchas itself, and each became a fix or a line in the prompt.
 - When the agent hit the sandbox it stopped and asked, instead of trying to get around it. It
   tried several legitimate options for pnpm first, then filed a clear `needs-input` PR.
+- The notes kept paying off over the first evening: denied command patterns, Tailwind v4
+  gotchas (an `animate-*` utility resets a separate `animation-delay`; a `@theme` token that
+  uses a per-element `var()` must go in `@theme inline`), and limits of the screenshot helper.
+  One note even suggested a driver improvement (check for an approval before a fix pass) that
+  the redesigned review flow now covers.
+- Changing the loop while it runs is risky: a running driver keeps its old code, and GitHub
+  state it doesn't expect (a renamed label) makes it misread PRs.
 
 ## 6. First runs
 
@@ -380,19 +459,66 @@ Everything on GitHub came from the App: the PR author was `djm158-site-loop[bot]
 commits had the bot as author and Claude as co-author, and the App's PR triggered CI, the guard,
 the review (through `allowed_bots`) and the Netlify preview.
 
+**The first evening.** Over about four and a half hours of wall time (with a break), the loop
+did 17 runs totalling 31 minutes of run time:
+
+| Time (UTC) | Pass         | Item               | Result         | Est. cost | Minutes |
+| ---------- | ------------ | ------------------ | -------------- | --------- | ------- |
+| 21:29      | new          | skill-picker-state | needs-input #3 | $0.73     | 1.9     |
+| 21:41      | resume       | skill-picker-state | opened #3      | $0.96     | 2.7     |
+| 22:06      | new          | skill-clear        | opened #4      | $0.51     | 1.5     |
+| 22:08      | new          | copy-data-file     | opened #5      | $0.87     | 2.3     |
+| 22:10      | new          | skill-note         | opened #6      | $0.65     | 1.9     |
+| 22:12      | new          | hero-letter-hover  | opened #7      | $0.59     | 1.8     |
+| 01:22      | new          | timeline-hover     | opened #8      | $0.85     | 2.4     |
+| 01:22      | rebase       | copy-data-file     | rebased #5     | $0.32     | 0.8     |
+| 01:24      | new          | pdf-button-hover   | opened #9      | $0.36     | 1.1     |
+| 01:27      | fix (Dan)    | copy-data-file     | fixed #5       | $1.07     | 3.1     |
+| 01:28      | fix (Claude) | timeline-hover     | fixed #8       | $0.39     | 1.0     |
+| 01:30      | new          | hero-letter-intro  | opened #10     | $0.69     | 2.2     |
+| 01:38      | new          | sheet-drag-dismiss | opened #11     | $1.02     | 4.4     |
+| 01:49      | fix          | hero-letter-intro  | fixed #10      | $0.47     | 1.4     |
+| 01:50      | fix (stale)  | copy-data-file     | fixed #5       | $0.20     | 0.4     |
+| 01:50      | rebase       | hero-letter-intro  | rebased #10    | $0.34     | 0.8     |
+| 01:52      | new          | avatar-svg         | opened #12     | $0.50     | 1.1     |
+
+Notes on it:
+
+- Runs are short: a new item took 1–4 minutes, fixes and rebases under a minute or two. Dan's
+  review, not the agent, set the pace, as Willison predicts.
+- The rebase pass met its first real conflicts (#5 and #10, after neighbouring PRs merged) and
+  resolved both.
+- The fix pass handled Claude's findings (#8, #10) and Dan's structural feedback on #5: move
+  the copy into an Astro content collection.
+- The only `needs-input` was the pnpm lock. No run failed.
+- Two items, `pdf-button-hover` and `hero-letter-intro`, weren't in the original backlog: Dan
+  added them during the evening, and the loop picked them up on its next pass.
+
 ## 7. Cost notes
 
 - Everything runs on the Claude subscription. Cost figures in logs are estimates at API prices,
   not charges, unless extra usage is turned on.
-- Observed estimates: the first item took about $1.70 over two runs (Opus); a review run that
-  stalled early cost about $0.05–0.11; a setup check on Haiku cost under $0.01; CI takes about
-  40 seconds on GitHub's free runners for public repos.
+- Observed estimates: the first evening's 17 runs came to about $10.50 (Opus), or $0.20–1.07 a
+  run; a review run that stalled early cost about $0.05–0.11; a setup check on Haiku cost under
+  $0.01; CI takes about 40 seconds on GitHub's free runners for public repos.
+- Real usage: across the second half of the evening, the 5-hour window went from 20% to 53%
+  and the 7-day window from 38% to 41%. That includes Dan's own interactive sessions running at
+  the same time, so it's an upper bound for the loop, but it shows a busy loop can use a large
+  share of a 5-hour window, which is why the usage pause exists.
 - gh-aw would have billed per token through an API key, plus about 3 minutes of runner setup
   per run.
 
 ## 8. Not built yet, or not tested
 
-- **Fix, rebase and retry passes:** built, but no real PR has needed them yet.
+- **Retry pass:** built, but no PR has been closed with `retry` yet.
+- **The new review flow** (`claude-reviewed`, review requests, "Request changes") and watch
+  mode's pauses haven't run for real yet.
+- **A review that runs the page.** The code-review plugin found nothing in 10 PRs (see
+  [Verification and review](#verification-and-review)). Options: replace or supplement it with
+  an evaluator that builds the site, drives it with Playwright, and checks the PR's "Done when"
+  list and the design; or drop it and rely on CI plus Dan.
+- **Dan's review feedback as conventions**, where it's general: for example "content files hold
+  copy; order and numbering come from the page".
 - **Stranded branches** (a branch with no PR, from a run that died) are reported, not retried:
   there's no PR to label, and an automatic retry of a run that crashes would keep crashing.
 - **Route sweep:** shoot every page on every PR, so changes outside the item's area show up.

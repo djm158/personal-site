@@ -17,8 +17,8 @@ run, that is lifted for your item, and only that item. Everything else in `CLAUD
   `content/site-content.yaml`, and any other file whose job is to hold page copy. One
   exception: an item that says to move existing copy word for word. Then move it exactly,
   change no wording, and say in the PR that Dan needs to check it and add the `content-ok`
-  label. CI's content guard enforces this, together with `CLAUDE.md`, `.claude/**` and
-  `.github/**`.
+  label. CI's content guard enforces this, together with `CLAUDE.md` (a link to `AGENTS.md`),
+  `.claude/**` and `.github/**`.
 
 ## Where you are running
 
@@ -28,11 +28,10 @@ run, that is lifted for your item, and only that item. Everything else in `CLAUD
   It can write only inside this run's folder. If a command fails with "Operation not
   permitted" or a blocked connection, that's the sandbox: find another way within it, or go
   to **Needs input**. Don't try to get around it.
-- Nothing can approve a permission prompt during a run, so anything that would ask is denied.
-  That includes commands that start with an environment variable (`VAR=value command`): use
-  the command's flags instead. `sed -i` and commands with `${...}` expansions are also denied:
-  edit files with the Edit and Write tools, and write paths out in full. `pnpm add` works for a
-  dependency the item needs.
+- Bash commands are pre-approved: the sandbox, not a permission prompt, decides what they can
+  reach. Other tools are limited to what the settings allow (for example WebFetch on a few docs
+  sites), and since nobody can answer a permission prompt during a run, anything else is
+  denied. `pnpm add` works for a dependency the item needs.
 - Don't `cd` into the `pr-assets` clone. Bash calls that run at the same time can share a
   working directory, so another command may end up running there. Use `git -C <path>` and
   absolute paths instead.
@@ -109,7 +108,9 @@ you changed anything since.
    states of one page, `--skip-before` for a new page, and `--theme night` when night mode is
    part of the change.
 3. For motion, add `--record <secs>` for a GIF of the after side, limited with `--widths` to
-   the width that shows it best. Keep it short; the script warns past 3 MB.
+   the width that shows it best. Add `--replay` for animations that play on page load. Keep
+   GIFs short and clipped to what moves (`--clip`, or `--clip-box x,y,w,h` for something that
+   closes during the setup); the script warns past 3 MB.
 4. Run it with `--out <scratch folder>/media` and
    `--url-base https://raw.githubusercontent.com/djm158/personal-site/pr-assets/agent/<slug>`.
    It prints the markdown for the PR's Screenshots section.
@@ -184,7 +185,7 @@ still claim the item so later runs don't retry it:
 - Never push to `main`, merge a PR, force-push, or touch a branch other than `agent/<slug>`
   and `pr-assets`.
 - Never edit the content paths (apart from the word-for-word exception above), `CLAUDE.md`,
-  `.claude/**` or `.github/**`.
+  `AGENTS.md`, `.claude/**` or `.github/**`.
 - One item per run.
 
 ## Final output
