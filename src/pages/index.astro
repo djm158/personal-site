@@ -5,6 +5,7 @@ import Button from "../components/Button.astro";
 import Container from "../components/Container.astro";
 import Emphasis from "../components/Emphasis.astro";
 import Eyebrow from "../components/Eyebrow.astro";
+import Marquee from "../components/Marquee.astro";
 import TextLink from "../components/TextLink.astro";
 import Layout from "../layouts/Layout.astro";
 import { formatYearSpan } from "../lib/resume/dates";
@@ -14,7 +15,7 @@ const { email, roles } = loadResume();
 // The file loader only logs when the YAML can't be read, so fail the build here instead
 const home = await getEntry("siteContent", "home");
 if (!home) throw new Error("src/content/site-content.yaml did not load");
-const { description, hero, about, experience } = home.data;
+const { description, hero, marquee, about, experience } = home.data;
 
 // Each letter of the name hops and tilts on its own when hovered (static classes so Tailwind sees them).
 // On load the letters hop in turn with the same lift and tilt, via the hop custom properties.
@@ -40,7 +41,7 @@ const letterMotions = [
 
 <Layout description={description}>
   <section>
-    <Container class="flex flex-wrap-reverse items-center gap-[clamp(40px,5vw,72px)] pt-[clamp(56px,8vw,112px)]">
+    <Container class="flex flex-wrap-reverse items-center gap-[clamp(40px,5vw,72px)] pt-[clamp(56px,8vw,112px)] pb-[clamp(56px,7vw,96px)]">
       <div class="flex-[1_1_400px] min-w-0">
         <div class="inline-flex items-center gap-2.5 font-mono font-medium text-xs uppercase mb-8 text-muted rounded-full border tracking-wider border-line py-1.75 pl-2.75 pr-3.5">
           <span class="size-2 rounded-full bg-moss motion-safe:animate-pulse"></span>
@@ -74,6 +75,7 @@ const letterMotions = [
       <Avatar class="mx-auto shrink-0 w-[min(100%,420px,40svh)]" />
     </Container>
   </section>
+  {marquee && marquee.length > 0 && <Marquee items={marquee} />}
   <Container
     as="section"
     id="about"
