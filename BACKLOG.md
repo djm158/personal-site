@@ -99,7 +99,7 @@ LaTeX (then the PDF) is generated from it. Nothing parses LaTeX in the build.
 - [ ] Move the home page's existing copy into `content/site-content.yaml`, word for word: status badge, hero text, about text, links. Load it with a Zod schema the way `src/lib/resume/load.ts` loads `resume.yaml`. Housekeeping only: no wording changes, and the copy review below stays separate. Site copy lives in this file and `resume/resume.yaml` only (agent: copy-data-file)
 - [ ] Copy review: status badge, hero text, about text, the three cards, marquee items, links (deferred: needs its own review)
 - [ ] Status badge driven by data: an optional `openTo` string shows "Open to {openTo}" (green pulse dot); without it, show "Building X at Y" instead. Decide whether the field lives in `resume.yaml` (add it to the schema) or the home copy file (me)
-- [ ] Hero: status badge, heading with per-letter hover, intro, two buttons (agent: hero-letter-hover)
+- [x] Hero: status badge, heading with per-letter hover, intro, two buttons (agent: hero-letter-hover)
 - [ ] Avatar SVG from the updated design (drop the duplicated ears and face shapes) (agent: avatar-svg)
 - [ ] Avatar behaviour: eyes follow the cursor, blink and mouth change on click, cursor glow in the hero (agent: avatar-behaviour) (after: avatar-svg)
 - [ ] Night mode: five clicks on the avatar toggles it, toast message, saved to `localStorage`, applied before first paint to avoid a flash (agent: night-toggle) (after: avatar-svg)
