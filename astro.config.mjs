@@ -2,6 +2,7 @@
 import { defineConfig, fontProviders } from "astro/config";
 
 import react from "@astrojs/react";
+import sitemap from "@astrojs/sitemap";
 import tailwindcss from "@tailwindcss/vite";
 import { resumePdf } from "./src/integrations/resume-pdf";
 
@@ -10,7 +11,7 @@ export default defineConfig({
   site: "https://danielmcgrath.xyz",
   // Netlify serves each page as a directory index and redirects /page to /page/
   trailingSlash: "always",
-  integrations: [react(), resumePdf()],
+  integrations: [react(), sitemap(), resumePdf()],
   fonts: [
     {
       provider: fontProviders.fontsource(),

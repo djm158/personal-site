@@ -118,7 +118,7 @@ LaTeX (then the PDF) is generated from it. Nothing parses LaTeX in the build.
 
 - [x] Per-page titles and descriptions; favicon from the nav avatar (`src/assets/avatar-mini.svg`, also used in the header; 32px `favicon.ico` and `apple-touch-icon.png` rendered from it)
 - [ ] Open Graph tags (agent: og-tags)
-- [ ] Sitemap (agent: sitemap)
+- [x] Sitemap (agent: sitemap)
 - [ ] RSS feed (deferred: waits for the blog)
 - [ ] 404 page design session in claude.ai/design (me)
 - [ ] 404 page (deferred: waits for the design session)
