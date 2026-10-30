@@ -48,6 +48,7 @@ skill picker (section 4) and landing page polish (section 5) come first.
 - [x] Header, mobile (under 760px): Menu button, full-screen `<dialog>` with numbered links and Résumé button, scroll lock, close when a same-page anchor is clicked
 - [x] Mobile menu motion: overlay fades in and out (350ms), links rise 16px and fade in staggered by 50ms, Résumé button follows; hover and pressed states on the Menu, Close, link and Résumé controls
 - [x] Footer
+- [ ] Section links scroll smoothly, as the design's `jump()` does: `scroll-behavior: smooth` on `html` under `prefers-reduced-motion: no-preference`, and `scroll-padding-top` so a section stops below the sticky header (the design uses 70px; tie it to the header's real height). CSS only, no JS. Arriving from another page (`/resume` → `/#contact`) can jump; the design's page transition is not ported
 - [x] Extract shared pieces: `Container`, `Eyebrow`, `Button` (filled, outlined, soft)
 - [x] Extract the shared pieces now in use: `TextLink` (the underlined "Full résumé →" link on the home page) and `Chip` (the skill pills on `/resume` and in `SkillSheet`, which differ in size). The larger hero `Button` size is done (`xl`) (agent: shared-pieces)
 - [ ] Type scale tokens in `@theme` (display, page title, lede, body, label) with their line-heights, once sizes start repeating; replace the inline `text-[clamp(...)]` classes (deferred: no size repeats yet)
