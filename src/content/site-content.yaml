@@ -13,6 +13,16 @@ hero:
   resumeLink: View résumé
   emailLink: Say hello
 
+marquee:
+  - TypeScript
+  - Full stack
+  - React
+  - Accessibility
+  - Node.js
+  - Web performance
+  - PostgreSQL
+  - Startups
+
 about:
   eyebrow: About
   lead: >-

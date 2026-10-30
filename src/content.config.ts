@@ -21,6 +21,8 @@ const siteContent = defineCollection({
       resumeLink: z.string(),
       emailLink: z.string(),
     }),
+    // Words that scroll in the strip under the hero; the strip is left out until there are some
+    marquee: z.array(z.string()).optional(),
     about: z.strictObject({
       eyebrow: z.string(),
       lead: richText,

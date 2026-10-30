@@ -5,7 +5,8 @@ piece is the way it is, what broke while building it, and the prior art it draws
 detailed evidence is in [`docs/research/`](research/):
 [agentic-backlog-loop.md](research/agentic-backlog-loop.md) (prior art and gaps),
 [loop-github-identity.md](research/loop-github-identity.md) (App vs machine user) and
-[loop-sandbox.md](research/loop-sandbox.md) (sandbox tests).
+[loop-sandbox.md](research/loop-sandbox.md) (sandbox tests). For running it day to day, see
+the [runbook](loop-runbook.md).
 
 Status, 2026-10-30: everything below is built and in use. Over the first evening the loop did
 17 runs: 11 new items, 4 fix runs and 2 rebases, opening PRs #3–#12, of which #3–#10 were
