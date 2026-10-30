@@ -32,6 +32,25 @@
   /* motion */
   --ease-soft: cubic-bezier(0.2, 0.8, 0.2, 1);
   --ease-spring: cubic-bezier(0.3, 1.6, 0.5, 1);
+
+  /* one hop up and back; each element sets --hop-y, --hop-rotate, --hop-scale and --hop-delay
+     (the delay goes through a property because the animation shorthand would reset animation-delay).
+     backwards fill holds the rest pose during the delay and lets go at the end, so hover still works */
+  --animate-hop: hop 0.7s var(--ease-soft) var(--hop-delay, 0s) backwards;
+
+  @keyframes hop {
+    0%,
+    100% {
+      translate: 0 0;
+      rotate: 0deg;
+      scale: 1;
+    }
+    40% {
+      translate: 0 var(--hop-y, 0);
+      rotate: var(--hop-rotate, 0deg);
+      scale: var(--hop-scale, 1);
+    }
+  }
 }
 
 @layer base {

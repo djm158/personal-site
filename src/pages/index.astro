@@ -10,12 +10,29 @@ import { loadResume } from "../lib/resume/load";
 
 const { email, roles } = loadResume();
 
-// Each letter of the name hops and tilts on its own when hovered (static classes so Tailwind sees them)
+// Each letter of the name hops and tilts on its own when hovered (static classes so Tailwind sees them).
+// On load the letters hop in turn with the same lift and tilt, via the hop custom properties.
 const nameLetters = [
-  { char: "D", hover: "motion-safe:hover:-translate-y-[0.14em] motion-safe:hover:-rotate-6" },
-  { char: "a", hover: "motion-safe:hover:-translate-y-[0.14em] motion-safe:hover:rotate-5" },
-  { char: "n", hover: "motion-safe:hover:-translate-y-[0.14em] motion-safe:hover:-rotate-4" },
-  { char: ".", hover: "motion-safe:hover:-translate-y-[0.2em] motion-safe:hover:scale-130" },
+  {
+    char: "D",
+    hover: "motion-safe:hover:-translate-y-[0.14em] motion-safe:hover:-rotate-6",
+    intro: "[--hop-y:-0.14em] [--hop-rotate:-6deg] [--hop-delay:150ms]",
+  },
+  {
+    char: "a",
+    hover: "motion-safe:hover:-translate-y-[0.14em] motion-safe:hover:rotate-5",
+    intro: "[--hop-y:-0.14em] [--hop-rotate:5deg] [--hop-delay:240ms]",
+  },
+  {
+    char: "n",
+    hover: "motion-safe:hover:-translate-y-[0.14em] motion-safe:hover:-rotate-4",
+    intro: "[--hop-y:-0.14em] [--hop-rotate:-4deg] [--hop-delay:330ms]",
+  },
+  {
+    char: ".",
+    hover: "motion-safe:hover:-translate-y-[0.2em] motion-safe:hover:scale-130",
+    intro: "[--hop-y:-0.2em] [--hop-scale:1.3] [--hop-delay:420ms]",
+  },
 ];
 ---
 
@@ -28,8 +45,8 @@ const nameLetters = [
           Open to senior frontend and full stack roles
         </div>
         <h1 class="font-serif text-[clamp(68px,10vw,136px)]/[0.88] tracking-[-0.03em]">
-          Hi, I'm <em class="text-accent"><span class="sr-only">Dan.</span><span aria-hidden="true" class="inline-flex">{nameLetters.map(({ char, hover }) => (
-            <span class:list={["inline-block motion-safe:transition-[translate,rotate,scale] motion-safe:duration-350 motion-safe:ease-spring", hover]}>{char}</span>
+          Hi, I'm <em class="text-accent"><span class="sr-only">Dan.</span><span aria-hidden="true" class="inline-flex">{nameLetters.map(({ char, hover, intro }) => (
+            <span class:list={["inline-block motion-safe:animate-hop motion-safe:transition-[translate,rotate,scale] motion-safe:duration-350 motion-safe:ease-spring", hover, intro]}>{char}</span>
           ))}</span></em>
         </h1>
         <p class="mt-7 font-light text-[clamp(20px,2.1vw,27px)]/[1.35] tracking-[-0.01em] max-w-[30ch] text-pretty">
