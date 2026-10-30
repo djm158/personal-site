@@ -267,8 +267,8 @@ const nonPortfolioLinks = resume.links.filter(
     scope?.toggleAttribute("data-picked", skills.length > 0);
   });
 
-  // Hover link: pointing at a segment or a role, or focusing the segment, marks both with
-  // data-linked, which lights the segment and the role's dates
+  // Hover link: pointing at or focusing a segment marks it and its role with data-linked,
+  // which lights the segment and the role's dates
   articles.forEach((article) => {
     const segment = segmentFor(article);
     if (!segment) return;
@@ -279,10 +279,8 @@ const nonPortfolioLinks = resume.links.filter(
       article.toggleAttribute("data-linked", isLinked);
       segment.toggleAttribute("data-linked", isLinked);
     };
-    for (const el of [article, segment]) {
-      el.addEventListener("pointerenter", () => update({ hovered: true }));
-      el.addEventListener("pointerleave", () => update({ hovered: false }));
-    }
+    segment.addEventListener("pointerenter", () => update({ hovered: true }));
+    segment.addEventListener("pointerleave", () => update({ hovered: false }));
     segment.addEventListener("focus", () => update({ focused: true }));
     segment.addEventListener("blur", () => update({ focused: false }));
   });
