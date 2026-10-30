@@ -49,6 +49,12 @@ with `astro dev stop`, `astro dev status` and `astro dev logs`.
   the picker is a sticky bar and bottom sheet (`SkillSheet`), above it a sticky sidebar.
 - **Native elements first.** For example `<dialog>` for the mobile menu. Respect
   `prefers-reduced-motion`.
+- **Tailwind v4 animation gotchas.** An `animate-*` utility sets the whole `animation`
+  shorthand, so it resets a separate `[animation-delay:…]` class: pass a per-element delay
+  through a custom property in the animation token instead. A `@theme` token whose value uses a
+  `var()` set on each element has to go in `@theme inline`; otherwise the `var()` is resolved
+  once on `:root` and every element gets the same value. Check the computed style on the
+  elements, not just the built CSS.
 
 ## Content
 

@@ -17,8 +17,8 @@ run, that is lifted for your item, and only that item. Everything else in `CLAUD
   `content/site-content.yaml`, and any other file whose job is to hold page copy. One
   exception: an item that says to move existing copy word for word. Then move it exactly,
   change no wording, and say in the PR that Dan needs to check it and add the `content-ok`
-  label. CI's content guard enforces this, together with `CLAUDE.md`, `.claude/**` and
-  `.github/**`.
+  label. CI's content guard enforces this, together with `CLAUDE.md` (a link to `AGENTS.md`),
+  `.claude/**` and `.github/**`.
 
 ## Where you are running
 
@@ -28,11 +28,10 @@ run, that is lifted for your item, and only that item. Everything else in `CLAUD
   It can write only inside this run's folder. If a command fails with "Operation not
   permitted" or a blocked connection, that's the sandbox: find another way within it, or go
   to **Needs input**. Don't try to get around it.
-- Nothing can approve a permission prompt during a run, so anything that would ask is denied.
-  That includes commands that start with an environment variable (`VAR=value command`): use
-  the command's flags instead. `sed -i` and commands with `${...}` expansions are also denied:
-  edit files with the Edit and Write tools, and write paths out in full. `pnpm add` works for a
-  dependency the item needs.
+- Bash commands are pre-approved: the sandbox, not a permission prompt, decides what they can
+  reach. Other tools are limited to what the settings allow (for example WebFetch on a few docs
+  sites), and since nobody can answer a permission prompt during a run, anything else is
+  denied. `pnpm add` works for a dependency the item needs.
 - Don't `cd` into the `pr-assets` clone. Bash calls that run at the same time can share a
   working directory, so another command may end up running there. Use `git -C <path>` and
   absolute paths instead.
@@ -49,7 +48,9 @@ run, that is lifted for your item, and only that item. Everything else in `CLAUD
 
 Before building, write down a short **Done when** list: 2–5 checks that would show the item is
 finished, taken from the item's own words (for example "the clear button is hidden until a
-skill is picked", "matchingRoles has tests for zero and one skills"). You'll tick it in the PR.
+skill is picked", "matchingRoles has tests for zero and one skills"). Where you can, write each
+one as something Dan can see or do on the deploy preview: the list doubles as his test plan.
+You'll tick it in the PR.
 
 If the item is ambiguous, needs a decision the backlog doesn't make, or would mean writing or
 changing content in the content paths, don't guess. Go to **Needs input** below.
@@ -57,7 +58,7 @@ changing content in the content paths, don't guess. Go to **Needs input** below.
 ## 2. Build
 
 - Do exactly what the item says. If you notice other problems, write them down for the PR's
-  "Noticed, not changed" section and leave them alone.
+  "Noticed, not changed" line and leave them alone.
 - Follow the conventions in `CLAUDE.md`: Astro first, the narrowest `client:*`, theme utilities
   instead of raw values, the 760px breakpoint only, native elements, `prefers-reduced-motion`.
 - Pure logic goes in `src/lib/` with Vitest tests, written test-first where it's practical.
@@ -109,10 +110,14 @@ you changed anything since.
    states of one page, `--skip-before` for a new page, and `--theme night` when night mode is
    part of the change.
 3. For motion, add `--record <secs>` for a GIF of the after side, limited with `--widths` to
-   the width that shows it best. Keep it short; the script warns past 3 MB.
+   the width that shows it best. Add `--replay` for animations that play on page load. Keep
+   GIFs short and clipped to what moves (`--clip`, or `--clip-box x,y,w,h` for something that
+   closes during the setup); the script warns past 3 MB.
 4. Run it with `--out <scratch folder>/media` and
    `--url-base https://raw.githubusercontent.com/djm158/personal-site/pr-assets/agent/<slug>`.
-   It prints the markdown for the PR's Screenshots section.
+   It prints the markdown for the PR's media. Paste it as printed, with no prose around the
+   tables apart from "No visible change expected" for refactors. Add one line under a GIF only
+   when it shows something a still can't.
 5. Copy the files into `agent/<slug>/` in the `pr-assets` clone, then commit and push with
    `git -C <pr-assets clone>`: `add`, `commit`, `push origin HEAD:pr-assets`. If the push is
    rejected because another run pushed first, pull with `--rebase` the same way and push again.
@@ -132,40 +137,61 @@ gh pr create --base main --head agent/<slug> --label agent \
   --title "<type>: <short summary>" --body-file <scratch folder>/pr-body.md
 ```
 
-Body template:
+### The PR body
+
+Dan reads the body on GitHub, then opens the deploy preview to try the change. He needs to
+know what a visitor will see change, what to check, and anything you departed from or
+noticed. The diff, CI and the screenshots already show the rest, so don't repeat them: no
+file, class or function names unless he needs them to read the diff, no "checks pass" line, no
+mention of ticking `BACKLOG.md`.
+
+Keep your own words short: under about 100 when the diff is under ~30 lines, under 250
+otherwise. The item quote and the media don't count. A small change gets a small body.
 
 ```markdown
-## Backlog item
+<One or two sentences: what changes for a visitor, and why if the item doesn't already say.>
 
 > <the item's text, verbatim>
 
-## Done when
+- [x] <each check from step 1> (<a few words of evidence, only if it isn't obvious: a test
+      name, which shot>)
+- [ ] <a check you couldn't confirm>: <why>
 
-- [x] <each check from step 1, ticked, with a few words of evidence: a test name, a screenshot,
-      what you clicked>
+<Only if they apply, one line each: "Also check:" reduced motion, night mode, a real device.>
 
-## What changed
+<the markdown printed by pr-media.mjs, or "No media: nothing that renders changed.">
 
-<2–5 bullets in plain language: what a reviewer will see and where the code lives>
-
-## How to test
-
-<steps on the Netlify deploy preview: which page, which width, what to click; include
-reduced-motion and night mode when they apply>
-
-## Screenshots
-
-<the markdown printed by pr-media.mjs; a one-line caption under each GIF>
-
-## Noticed, not changed
-
-<things outside this item's scope, or "Nothing.">
+<Only if any, one line each: "Departed from the item: …", "Noticed, not changed: …">
 
 🤖 Generated with [Claude Code](https://claude.com/claude-code)
 ```
 
-Leave a "Done when" box unticked, and say why, if you couldn't confirm it. Don't wait for CI,
-the review or the deploy preview; other runs handle those.
+Leave out any line that has nothing in it; never write "Nothing." or "N/A". If Dan needs
+implementation detail to read the diff (a workaround, a non-obvious approach), put it in a
+collapsed `<details><summary>Implementation notes</summary>` block at the end, a few lines at
+most.
+
+Example, for a two-class change:
+
+```markdown
+**Download PDF** on `/resume` now lifts 2px on hover, the same as the header's Résumé button.
+
+> Download PDF button hover: lift it on hover the same way the header's Résumé button does
+> (`transition-transform duration-200 hover:-translate-y-0.5` in `Header.astro`)
+> (agent: pdf-button-hover)
+
+- [x] Download PDF lifts on hover, at both widths
+- [x] The lift matches the header's Résumé button
+
+<media table>
+
+Noticed, not changed: neither button turns the lift off under reduced motion (no
+`motion-safe:`). I matched the header, as the item asks.
+
+🤖 Generated with [Claude Code](https://claude.com/claude-code)
+```
+
+Don't wait for CI, the review or the deploy preview; other runs handle those.
 
 ## Needs input
 
@@ -184,7 +210,7 @@ still claim the item so later runs don't retry it:
 - Never push to `main`, merge a PR, force-push, or touch a branch other than `agent/<slug>`
   and `pr-assets`.
 - Never edit the content paths (apart from the word-for-word exception above), `CLAUDE.md`,
-  `.claude/**` or `.github/**`.
+  `AGENTS.md`, `.claude/**` or `.github/**`.
 - One item per run.
 
 ## Final output
