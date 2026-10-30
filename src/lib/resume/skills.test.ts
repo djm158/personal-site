@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest";
-import { matchingRoles, toggleSkill } from "./skills";
+import { matchingRoles, skillNote, toggleSkill } from "./skills";
 
 const roles = [
   { id: "a", tags: ["React", "TypeScript"] },
@@ -29,6 +29,30 @@ describe("matchingRoles", () => {
 
   test("roles without tags never match", () => {
     expect(ids(matchingRoles([{ id: "d" }], ["React"]))).toEqual([]);
+  });
+});
+
+describe("skillNote", () => {
+  test("prompts to pick when no skill is picked", () => {
+    expect(skillNote(undefined, [])).toBe("Pick a skill to see where I used it.");
+  });
+
+  test("names the one place a skill was used", () => {
+    expect(skillNote("React", ["Acme"])).toBe("React at Acme.");
+  });
+
+  test("joins two places with an ampersand", () => {
+    expect(skillNote("React", ["Acme", "Globex"])).toBe("React at Acme & Globex.");
+  });
+
+  test("joins three or more places with commas and a final ampersand", () => {
+    expect(skillNote("React", ["Acme", "Globex", "Initech"])).toBe(
+      "React at Acme, Globex & Initech.",
+    );
+  });
+
+  test("falls back when no role uses the skill", () => {
+    expect(skillNote("Rust", [])).toBe("Rust: part of the daily toolkit.");
   });
 });
 
