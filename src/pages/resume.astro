@@ -15,6 +15,7 @@ import {
   inclusiveMonths,
 } from "../lib/resume/dates";
 import { loadResume } from "../lib/resume/load";
+import { skillNote } from "../lib/resume/skills";
 const resume = loadResume();
 
 const todayYearMonth = toYearMonth(new Date());
@@ -147,12 +148,26 @@ const nonPortfolioLinks = resume.links.filter(
         data-picker
       >
         <div class="bg-surface rounded-[22px] px-6 pt-6.5 pb-7 min-[1000px]:max-h-[calc(100svh-7rem)] min-[1000px]:overflow-y-auto scrollbar-thin">
-          <Eyebrow size="sm" as="div" class="mb-2">
-            Technical skills
-          </Eyebrow>
-          <div class="italic mb-5 font-serif text-[22px]/[1.2] min-h-[2.4em]">
-            Pick a skill to see where I used it.
+          <div class="flex justify-between items-baseline gap-3 mb-2">
+            <Eyebrow size="sm" as="div">
+              Technical skills
+            </Eyebrow>
+            <button
+              type="button"
+              data-picker-clear
+              aria-label="Clear skill"
+              class="invisible group-data-picked:visible font-mono font-medium text-[11px] text-accent cursor-pointer"
+            >
+              clear
+            </button>
           </div>
+          <p
+            data-skill-note
+            aria-live="polite"
+            class="italic mb-5 font-serif text-[22px]/[1.2] min-h-[2.4em] text-pretty"
+          >
+            {skillNote(undefined, [])}
+          </p>
           <div class="flex flex-col gap-4.5">
             {resume.skills.map((skill) => (
               <div>
@@ -200,15 +215,17 @@ const nonPortfolioLinks = resume.links.filter(
 
 <script>
   import { $selectedSkills } from "../lib/resume/skill-store";
-  import { matchingRoles, toggleSkill } from "../lib/resume/skills";
+  import { matchingRoles, skillNote, toggleSkill } from "../lib/resume/skills";
 
   const scope = document.querySelector<HTMLElement>("[data-skill-scope]");
   const picker = scope?.querySelector<HTMLElement>("[data-picker]");
+  const note = picker?.querySelector("[data-skill-note]");
   const articles = [
     ...document.querySelectorAll<HTMLElement>("article[data-role]"),
   ];
   const roles = articles.map((article) => ({
     id: article.id,
+    short: article.dataset.short ?? "",
     tags: article.dataset.tags?.split(","),
   }));
 
@@ -229,7 +246,16 @@ const nonPortfolioLinks = resume.links.filter(
         tag.toggleAttribute("data-hit", skills.includes(tag.dataset.tag ?? "")),
       );
 
-    const hits = new Set(matchingRoles(roles, skills).map((role) => role.id));
+    const matches = matchingRoles(roles, skills);
+    // One skill for now; the note names the first
+    if (note) {
+      note.textContent = skillNote(
+        skills[0],
+        matches.map((role) => role.short),
+      );
+    }
+
+    const hits = new Set(matches.map((role) => role.id));
     articles.forEach((article) => {
       const isHit = hits.has(article.id);
       article.toggleAttribute("data-hit", isHit);
@@ -260,6 +286,10 @@ const nonPortfolioLinks = resume.links.filter(
     );
     if (toggle) {
       toggleGroup(toggle);
+      return;
+    }
+    if (e.target.closest("button[data-picker-clear]")) {
+      $selectedSkills.set([]);
       return;
     }
     const skill = e.target.closest<HTMLElement>("button[data-skill]")?.dataset

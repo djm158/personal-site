@@ -6,7 +6,6 @@
 
 # Site copy
 resume/resume.yaml
-content/site-content.yaml
 src/content/**
 
 # The loop's own rules and checks

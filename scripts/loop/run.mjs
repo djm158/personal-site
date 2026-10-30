@@ -15,7 +15,7 @@ import {
   writeFileSync,
 } from "node:fs";
 import { homedir } from "node:os";
-import { join, resolve } from "node:path";
+import { basename, join, resolve } from "node:path";
 import { parseArgs } from "node:util";
 import { mintToken, revokeToken } from "./app-token.mjs";
 import { parseBacklog, pickNext } from "./backlog.mjs";
@@ -27,6 +27,12 @@ Runs one backlog item: picks it, opens a PR for it as djm158-site-loop[bot], and
   --dry-run           Show what would run next, using your own gh login. Changes nothing.
   --until-idle        Keep going, one item at a time, until the PR cap is reached, nothing
                       is eligible, a limit is hit or a run fails.
+  --watch             Never exit: when there's nothing to do, check again every few minutes.
+                      Ctrl-C once finishes the current run and stops; twice stops now.
+  --every <min>       How often --watch checks when idle. Default: 3
+  --notify            macOS notification when a PR becomes your turn.
+  --max-usage <pct>   Pause before your subscription's 5-hour window is this full, until it
+                      resets, leaving room for your own sessions. Default: 80 (7-day: 90)
   --smoke             Check the setup: mint a token, clone, and have Claude run a fixed list
                       of sandbox checks. Opens no PR.
   --model <name>      Default: opus
@@ -37,12 +43,17 @@ Runs one backlog item: picks it, opens a PR for it as djm158-site-loop[bot], and
   --force             Run even after two failed runs in a row or with CI failing on main.
   -h, --help
 
-Logs go to .loop/runs.jsonl, and notes the runs leave for you to .loop/notes.md.`;
+While a run works, each step it takes is printed as it happens. Logs go to .loop/runs.jsonl,
+full transcripts to .loop/transcripts/, and notes the runs leave for you to .loop/notes.md.`;
 
 const { values: opts } = parseArgs({
   options: {
     "dry-run": { type: "boolean", default: false },
     "until-idle": { type: "boolean", default: false },
+    watch: { type: "boolean", default: false },
+    every: { type: "string", default: "3" },
+    notify: { type: "boolean", default: false },
+    "max-usage": { type: "string", default: "80" },
     smoke: { type: "boolean", default: false },
     model: { type: "string", default: "opus" },
     budget: { type: "string", default: "10" },
@@ -75,7 +86,40 @@ mkdirSync(join(RUNS_DIR, ".gh"), { recursive: true });
 
 // ---------------------------------------------------------------- helpers
 
-const log = (...lines) => console.log(...lines);
+// In --watch, an idle pass's output is held back and shown only if it differs from the last
+// one, so hours of "nothing to do" don't fill the terminal.
+let held = null;
+const log = (...parts) => {
+  if (held) held.push(parts.join(" "));
+  else console.log(...parts);
+};
+const flushHeld = () => {
+  const lines = held ?? [];
+  held = null;
+  for (const line of lines) console.log(line);
+};
+
+const clock = (date = new Date()) =>
+  date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+
+/** A macOS notification, with --notify. Arguments go through argv, so nothing needs escaping. */
+function notify(title, message) {
+  if (!opts.notify) return;
+  try {
+    execFileSync("osascript", [
+      "-e",
+      "on run argv",
+      "-e",
+      "display notification (item 2 of argv) with title (item 1 of argv)",
+      "-e",
+      "end run",
+      title,
+      message,
+    ]);
+  } catch {
+    // A missing notification isn't worth stopping for.
+  }
+}
 
 function run(command, args, { env, cwd, input } = {}) {
   return execFileSync(command, args, {
@@ -126,7 +170,11 @@ function writeLog(entry) {
 
 // ---------------------------------------------------------------- checks
 
-/** Reasons not to start a run, from the log. */
+/**
+ * A reason not to start a run, from the log, or null. `until` is when it lifts by itself;
+ * without one, it needs Dan.
+ * @returns {{ reason: string, until?: Date } | null}
+ */
 function limitsReached() {
   const entries = readLog();
   const today = new Date().toDateString();
@@ -134,15 +182,42 @@ function limitsReached() {
     .filter((e) => new Date(e.time).toDateString() === today)
     .reduce((sum, e) => sum + (e.costUsd ?? 0), 0);
   if (spent >= Number(opts["daily-budget"])) {
-    return `today's runs add up to an estimated $${spent.toFixed(2)} (--daily-budget ${opts["daily-budget"]})`;
+    const midnight = new Date();
+    midnight.setHours(24, 5, 0, 0);
+    return {
+      reason: `today's runs add up to an estimated $${spent.toFixed(2)} (--daily-budget ${opts["daily-budget"]})`,
+      until: midnight,
+    };
   }
+
+  // Subscription usage, as the last run reported it. Pausing early leaves room for Dan's own
+  // sessions, which share the same limits.
+  const usage = entries.findLast((e) => e.usage)?.usage;
+  const windows = [
+    ["5-hour", usage?.fiveHour, Number(opts["max-usage"]) / 100],
+    ["7-day", usage?.sevenDay, 0.9],
+  ];
+  for (const [name, window, limit] of windows) {
+    if (!window || window.utilization < limit) continue;
+    const until = new Date(window.resetsAt * 1000);
+    if (until > new Date()) {
+      return {
+        reason: `the ${name} usage window is ${Math.round(window.utilization * 100)}% used`,
+        until,
+      };
+    }
+  }
+
   const lastTwo = entries.filter((e) => !e.smoke).slice(-2);
   if (
     !opts.force &&
     lastTwo.length === 2 &&
     lastTwo.every((e) => e.result.startsWith("error"))
   ) {
-    return "the last two runs failed; read .loop/runs.jsonl, then rerun with --force";
+    return {
+      reason:
+        "the last two runs failed; read .loop/runs.jsonl, then rerun with --force",
+    };
   }
   return null;
 }
@@ -490,13 +565,58 @@ verbatim (first 3 lines) in a numbered list. Some are meant to fail; don't retry
 End with a line "RESULT: smoke ok" if 1, 2, 7 (with more than 0 font files), 8 and 9 worked and 3–6 failed or printed
 "blocked"; otherwise "RESULT: error smoke" and say which check was wrong.`;
 
-/** Runs Claude in the clone. Resolves with its JSON output, or an error result. */
-function runClaude(prompt, dirs, token) {
+// The Claude run in progress, so Ctrl-C can stop it.
+let currentChild = null;
+const killGroup = (child, signal) => {
+  try {
+    process.kill(-child.pid, signal);
+  } catch {
+    // Already gone.
+  }
+};
+
+/** One line per step a run takes: each tool call and each thing Claude says. */
+function feed(label, message, runDir) {
+  if (message.type !== "assistant") return;
+  // Steps inside a subagent are indented under the call that started it.
+  const indent = message.parent_tool_use_id ? "      " : "  ";
+  for (const part of message.message?.content ?? []) {
+    let text;
+    if (part.type === "tool_use") {
+      const input = part.input ?? {};
+      const detail =
+        input.command ??
+        input.file_path ??
+        input.path ??
+        input.pattern ??
+        input.url ??
+        input.description ??
+        "";
+      text = `→ ${part.name}${detail ? `: ${detail}` : ""}`;
+    } else if (part.type === "text" && part.text.trim()) {
+      text = part.text.trim();
+    } else {
+      continue;
+    }
+    const line = text.replaceAll(`${runDir}/`, "").replace(/\s+/g, " ");
+    log(
+      `${indent}[${label}] ${line.length > 150 ? `${line.slice(0, 149)}…` : line}`,
+    );
+  }
+}
+
+/**
+ * Runs Claude in the clone, printing its steps as they happen and saving the full transcript
+ * to .loop/transcripts/. Resolves with the final result message (plus the subscription usage
+ * it reported, as `rateLimit`), or an error result.
+ */
+function runClaude(prompt, dirs, token, label) {
   const args = [
     "-p",
     prompt,
     "--output-format",
-    "json",
+    "stream-json",
+    "--verbose",
     "--model",
     opts.smoke ? "haiku" : opts.model,
     "--settings",
@@ -528,34 +648,62 @@ function runClaude(prompt, dirs, token) {
   delete env.ANTHROPIC_API_KEY; // always the subscription, never an API key
   delete env.GITHUB_TOKEN;
 
+  const transcripts = join(LOG_DIR, "transcripts");
+  mkdirSync(transcripts, { recursive: true });
+  const transcript = join(transcripts, `${basename(dirs.runDir)}.jsonl`);
+
   return new Promise((done) => {
+    // Its own process group, so Ctrl-C in the terminal reaches the driver, which decides
+    // whether to let the run finish.
     const child = spawn("claude", args, {
       cwd: dirs.repo,
       env,
       stdio: ["ignore", "pipe", "pipe"],
+      detached: true,
     });
-    let stdout = "";
+    currentChild = child;
+    let pending = "";
     let stderr = "";
-    child.stdout.on("data", (chunk) => (stdout += chunk));
+    let result = null;
+    let rateLimit = null;
+    child.stdout.on("data", (chunk) => {
+      pending += chunk;
+      let end;
+      while ((end = pending.indexOf("\n")) >= 0) {
+        const line = pending.slice(0, end);
+        pending = pending.slice(end + 1);
+        if (!line.trim()) continue;
+        appendFileSync(transcript, `${line}\n`);
+        let message;
+        try {
+          message = JSON.parse(line);
+        } catch {
+          continue;
+        }
+        if (message.type === "result") result = message;
+        else if (message.type === "rate_limit_event")
+          rateLimit = message.rate_limit_info;
+        else feed(label, message, dirs.runDir);
+      }
+    });
     child.stderr.on("data", (chunk) => (stderr += chunk));
     const minutes = Number(opts.timeout);
     const timer = setTimeout(() => {
       log(`  Timed out after ${minutes} minutes; stopping the run.`);
-      child.kill("SIGTERM");
-      setTimeout(() => child.kill("SIGKILL"), 10_000).unref();
+      killGroup(child, "SIGTERM");
+      setTimeout(() => killGroup(child, "SIGKILL"), 10_000).unref();
     }, minutes * 60_000);
     child.on("close", (code) => {
       clearTimeout(timer);
-      writeFileSync(join(dirs.runDir, "claude-output.json"), stdout);
+      currentChild = null;
       writeFileSync(join(dirs.runDir, "claude-stderr.log"), stderr);
-      try {
-        done(JSON.parse(stdout));
-      } catch {
-        done({
-          result: `RESULT: error claude exited ${code} without JSON output`,
+      done({
+        ...(result ?? {
+          result: `RESULT: error claude exited ${code} without a result`,
           is_error: true,
-        });
-      }
+        }),
+        rateLimit,
+      });
     });
   });
 }
@@ -567,6 +715,11 @@ async function runItem(item, token, mode = null) {
     rebase: "Merging main into",
     retry: "Retrying, replacing",
   }[mode?.kind];
+  // A run is always worth showing, along with the survey that led to it.
+  if (held) {
+    console.log(`\n── ${clock()} ──`);
+    flushHeld();
+  }
   log(
     `\n${action ? `${action} #${mode.number}` : "Running"} ${item.slug}: ${item.text.slice(0, 100)}${item.text.length > 100 ? "…" : ""}`,
   );
@@ -580,8 +733,8 @@ async function runItem(item, token, mode = null) {
     const prompt = opts.smoke
       ? SMOKE_PROMPT.replaceAll("SCRATCH", dirs.scratch)
       : promptFor(item, dirs, mode);
-    log("  Claude is working…");
-    output = await runClaude(prompt, dirs, token);
+    log("  Claude is working:");
+    output = await runClaude(prompt, dirs, token, slug);
   } catch (error) {
     output = {
       result: `RESULT: error setup failed: ${error.message.split("\n")[0]}`,
@@ -594,6 +747,11 @@ async function runItem(item, token, mode = null) {
     [...text.matchAll(/^RESULT: (.+)$/gm)].at(-1)?.[1] ??
     "error no RESULT line";
   const notes = [...text.matchAll(/^NOTE: (.+)$/gm)].map((m) => m[1]);
+  const windows = output.rateLimit?.unifiedWindows;
+  const usage = windows && {
+    fiveHour: windows.five_hour,
+    sevenDay: windows.seven_day,
+  };
   const entry = {
     time: new Date().toISOString(),
     slug,
@@ -605,6 +763,7 @@ async function runItem(item, token, mode = null) {
     minutes: Math.round((Date.now() - started) / 600) / 100,
     denials: output.permission_denials?.length,
     sessionId: output.session_id,
+    usage,
     runDir: dirs?.runDir,
   };
   writeLog(entry);
@@ -617,10 +776,22 @@ async function runItem(item, token, mode = null) {
 
   log(opts.smoke ? `\n${text}\n` : "");
   log(`  RESULT: ${result}`);
+  const percent = (window) =>
+    window ? `${Math.round(window.utilization * 100)}%` : "?";
   log(
-    `  ~$${(entry.costUsd ?? 0).toFixed(2)} estimated, ${entry.turns ?? "?"} turns, ${entry.minutes} min`,
+    `  ~$${(entry.costUsd ?? 0).toFixed(2)} estimated, ${entry.turns ?? "?"} turns, ${entry.minutes} min` +
+      (usage
+        ? ` · usage: 5-hour ${percent(usage.fiveHour)}, 7-day ${percent(usage.sevenDay)}`
+        : ""),
   );
   if (notes.length) log(`  ${notes.length} note(s) added to .loop/notes.md`);
+  const pr = result.match(/#(\d+)/)?.[0] ?? "";
+  if (result.startsWith("needs-input"))
+    notify("Backlog loop needs you", `${pr} ${slug} is waiting for an answer`);
+  else if (result.startsWith("fixed"))
+    notify("Backlog loop", `${pr} ${slug} is reviewed and ready for you`);
+  else if (result.startsWith("error"))
+    notify("Backlog loop run failed", `${slug}: ${result}`);
   if (dirs && !opts.keep && !result.startsWith("error")) {
     rmSync(dirs.runDir, { recursive: true, force: true });
   } else if (dirs) {
@@ -631,10 +802,22 @@ async function runItem(item, token, mode = null) {
 
 // ---------------------------------------------------------------- main
 
+// When a pass returns "pause": the time a limit lifts, or null to check again as usual.
+let pauseUntil = null;
+
+/**
+ * One pass: at most one Claude run. Returns its RESULT, or "idle", "pause" (wait, then carry
+ * on) or "stop" (needs Dan).
+ */
 async function pass() {
   const limit = limitsReached();
   if (limit && !opts["dry-run"]) {
-    log(`Stopping: ${limit}.`);
+    if (limit.until && opts.watch) {
+      log(`Paused: ${limit.reason}. Carrying on at ${clock(limit.until)}.`);
+      pauseUntil = limit.until;
+      return "pause";
+    }
+    log(`Stopping: ${limit.reason}.`);
     return "stop";
   }
 
@@ -642,11 +825,7 @@ async function pass() {
   const token = minted?.token ?? null;
   try {
     const gh = ghFor(token);
-    log(
-      opts["dry-run"]
-        ? "Dry run, using your gh login."
-        : `Token for djm158-site-loop[bot], expires ${minted.expiresAt}.`,
-    );
+    if (opts["dry-run"]) log("Dry run, using your gh login.");
 
     if (opts.smoke)
       return await runItem({ slug: "smoke", text: "setup check" }, token);
@@ -655,14 +834,16 @@ async function pass() {
     const { mainCi, open, pick, items } = survey(gh);
     if (open.length === 0) log("  none");
     if (mainCi?.conclusion === "failure" && !opts.force) {
+      if (opts.watch) {
+        log(`Waiting: CI is failing on main (${mainCi.url}).`);
+        return "pause";
+      }
       log(
         `Stopping: CI is failing on main (${mainCi.url}). Fix it first, or rerun with --force.`,
       );
       return "stop";
     }
 
-    // Finish answered PRs before starting anything new. They're already open, so the cap
-    // doesn't apply.
     // The backlog item behind an open PR, or a stand-in if its line has gone.
     const itemFor = (pr) => {
       const slug = pr.headRefName.replace(/^agent\//, "");
@@ -675,6 +856,8 @@ async function pass() {
       );
     };
 
+    // Finish answered PRs before starting anything new. They're already open, so the cap
+    // doesn't apply.
     const answered = open.find(isResumable);
     if (answered) {
       const item = itemFor(answered);
@@ -718,7 +901,7 @@ async function pass() {
         log(`  #${pr.number}: waiting for ${review.why}`);
       } else if (review.state === "clean") {
         log(`  #${pr.number}: review found nothing; labelling it reviewed`);
-        if (!opts["dry-run"])
+        if (!opts["dry-run"]) {
           gh(
             "api",
             "-X",
@@ -727,6 +910,8 @@ async function pass() {
             "-f",
             "labels[]=reviewed",
           );
+          notify("Backlog loop", `#${pr.number} is reviewed and ready for you`);
+        }
       } else if (review.state === "fix" && !toFix) {
         toFix = { pr, review };
       }
@@ -800,12 +985,66 @@ async function pass() {
   }
 }
 
-let outcome;
-do {
-  outcome = await pass();
-} while (
-  opts["until-idle"] &&
-  !opts.smoke &&
-  /^(opened|needs-input|fixed|rebased)/.test(outcome)
-);
-process.exitCode = /^(error|stop)/.test(outcome) ? 1 : 0;
+// Ctrl-C once: let a run in progress finish, then stop. Twice: stop it now. With no run in
+// progress there's nothing to finish, so the first one stops straight away.
+let stopping = false;
+process.on("SIGINT", () => {
+  if (stopping || !currentChild) {
+    if (currentChild) killGroup(currentChild, "SIGTERM");
+    console.log("\nStopped.");
+    process.exit(130);
+  }
+  stopping = true;
+  console.log(
+    "\nFinishing the current run, then stopping. Press Ctrl-C again to stop it now.",
+  );
+});
+
+const didWork = (outcome) =>
+  /^(opened|needs-input|fixed|rebased|error)/.test(outcome);
+
+if (opts.watch && !opts.smoke && !opts["dry-run"]) {
+  const every = Number(opts.every) * 60_000;
+  console.log(
+    `Watching ${REPO}: checking every ${opts.every} min when there's nothing to do. Ctrl-C to stop.`,
+  );
+  let lastIdle = null;
+  for (;;) {
+    held = [];
+    pauseUntil = null;
+    const outcome = await pass();
+    const lines = held ?? [];
+    held = null;
+    if (stopping) break;
+    if (outcome === "stop") {
+      console.log(`\n── ${clock()} ──\n${lines.join("\n")}`);
+      notify("Backlog loop stopped", lines.at(-1) ?? "");
+      process.exitCode = 1;
+      break;
+    }
+    // After a run there may be more to do (a fix, the next item), so check again now.
+    if (didWork(outcome)) {
+      lastIdle = null;
+      continue;
+    }
+    // Idle or paused: print only what changed since the last quiet pass.
+    const text = lines.join("\n");
+    if (text !== lastIdle) {
+      console.log(`\n── ${clock()} ──\n${text}`);
+      lastIdle = text;
+    }
+    const wait = pauseUntil ? Math.max(pauseUntil - Date.now(), 60_000) : every;
+    await new Promise((wake) => setTimeout(wake, wait));
+  }
+} else {
+  let outcome;
+  do {
+    outcome = await pass();
+  } while (
+    opts["until-idle"] &&
+    !opts.smoke &&
+    !stopping &&
+    /^(opened|needs-input|fixed|rebased)/.test(outcome)
+  );
+  process.exitCode = /^(error|stop|pause)/.test(outcome) ? 1 : 0;
+}
