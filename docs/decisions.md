@@ -168,6 +168,12 @@ only declares `lang="en"`.
 `@astrojs/sitemap` picks new routes up at build time. `robots.txt` was the agent's addition:
 the standard way crawlers find the sitemap.
 
+**Favicon and touch icon rendered from the nav avatar at build time** · 2026-10-31 · favicon-render
+Prerendered endpoints render `avatar-mini.svg` with sharp, so the icons can't drift from the
+header avatar. sharp's SVG renderer (librsvg) paints `var()` and `oklch()` fills black, so the
+SVG's fallback colours are converted to hex first (agent). The touch icon sits inset on the day
+page background, as the old copy did, because iOS turns transparent pixels black (agent).
+
 ## Operations
 
 **CI runs check, test and build on every PR** · 2026-10-29 · 98c3594
