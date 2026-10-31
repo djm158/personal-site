@@ -69,14 +69,14 @@ changing content in the content paths, don't guess. Go to **Needs input** below.
 
 ## 3. Verify
 
-Run all three, and fix anything they report:
+Run all four, and fix anything they report:
 
 ```sh
-pnpm check && pnpm test --run && pnpm build
+pnpm check && pnpm test --run && pnpm build && pnpm test:a11y
 ```
 
 If they still fail after a reasonable effort, go to **Needs input** and include the failing
-output. CI runs the same three on the PR.
+output. CI runs the same four on the PR.
 
 ## 4. Update the backlog
 
