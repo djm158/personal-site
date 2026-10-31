@@ -40,6 +40,14 @@ const fullTitle = title ? `${title} · ${siteName}` : siteName;
         }
       }
     </style>
+    <!-- No transition when arriving on a hash (/#about, /#contact): WebKit places the sticky
+         header's snapshot at its unscrolled position, so the header vanishes until it ends.
+         Must run in the head: pagereveal fires before the new page's first render -->
+    <script is:inline>
+      addEventListener("pagereveal", (e) => {
+        if (location.hash) e.viewTransition?.skipTransition();
+      });
+    </script>
     <link rel="icon" href="/favicon.ico" sizes="32x32" />
     <link rel="icon" href={AvatarMini.src} type="image/svg+xml" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
