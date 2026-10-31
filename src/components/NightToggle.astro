@@ -4,9 +4,11 @@ import type { HTMLAttributes } from "astro/types";
 type Props = HTMLAttributes<"button"> & {
   /** The line shown under the button after each click toward a switch, one per click from the first */
   hints?: string[];
+  /** Extra classes for the hint line */
+  hintClass?: string;
 };
 
-const { class: className, hints, ...rest } = Astro.props;
+const { class: className, hints, hintClass, ...rest } = Astro.props;
 ---
 
 <!-- Five clicks on whatever it wraps (the hero avatar) switch between day and night -->
@@ -26,7 +28,7 @@ const { class: className, hints, ...rest } = Astro.props;
     <p
       data-night-hint={JSON.stringify(hints)}
       aria-live="polite"
-      class="h-4.5 font-mono font-medium text-xs text-muted"
+      class:list={["h-4.5 font-mono font-medium text-xs text-muted", hintClass]}
     />
   )
 }

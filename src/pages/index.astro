@@ -87,7 +87,12 @@ const letterMotions = [
           aria-hidden="true"
           class="row-start-1 col-start-1 self-stretch justify-self-stretch -m-[4%] rounded-full border-[1.5px] border-dashed border-line pointer-events-none motion-safe:animate-spin-slow"
         ></div>
-        <NightToggle class="row-start-1 col-start-1 w-full" hints={hero.avatarHints}>
+        <!-- the hint's top margin matches the ring's 4% overhang, so the gap is measured from the ring -->
+        <NightToggle
+          class="row-start-1 col-start-1 w-full"
+          hints={hero.avatarHints}
+          hintClass="mt-[4%]"
+        >
           <Avatar class="w-full" />
         </NightToggle>
       </div>
