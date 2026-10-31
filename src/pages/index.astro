@@ -80,9 +80,11 @@ const letterMotions = [
           </Button>
         </div>
       </div>
-      <NightToggle class="mx-auto shrink-0 w-[min(100%,420px,40svh)]">
-        <Avatar class="w-full" />
-      </NightToggle>
+      <div class="mx-auto shrink-0 w-[min(100%,420px,40svh)] flex flex-col items-center gap-3.5">
+        <NightToggle class="w-full" hints={hero.avatarHints}>
+          <Avatar class="w-full" />
+        </NightToggle>
+      </div>
     </Container>
   </section>
   {marquee && marquee.length > 0 && <Marquee items={marquee} />}
