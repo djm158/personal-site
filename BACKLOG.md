@@ -127,7 +127,7 @@ LaTeX (then the PDF) is generated from it. Nothing parses LaTeX in the build.
 - [ ] 404 page design session in claude.ai/design (me)
 - [ ] 404 page (deferred: waits for the design session)
 - [ ] Page transitions: old page fades up and blurs out (220ms), new page rises in from 22px below (520ms); header stays put; `/#about` and `/#contact` still land on their section when coming from another page (deferred)
-- [ ] Respect `prefers-reduced-motion` for page transitions, the mobile menu, the marquee, spinning ring and hover motion (agent: reduced-motion) (after: marquee) (after: avatar-behaviour)
+- [x] Respect `prefers-reduced-motion` for page transitions, the mobile menu, the marquee, spinning ring and hover motion (agent: reduced-motion) (after: marquee) (after: avatar-behaviour)
 - [x] axe checks: run axe-core (`@axe-core/playwright`) against `/` and `/resume` from `astro preview`, in day and night themes, as `pnpm test:a11y`; fix what it finds, or list anything left in the PR. If Playwright's browser won't install in the loop, open a needs-input PR instead (agent: axe-checks)
 - [x] Run `pnpm test:a11y` in CI after the build (needs `playwright install --with-deps chromium` in the workflow), so the axe checks catch regressions on every PR
 - [x] Focus styles: every interactive element (header links, pills, chips, timeline segments, the menu and sheet controls, form fields and buttons) shows a visible `focus-visible` ring from a theme token, in both themes; only 4 components have one now (agent: focus-styles)

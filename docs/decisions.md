@@ -124,6 +124,12 @@ to close and a backdrop for free.
 Animations sit behind `motion-safe:`. The marquee stops, the hero glow hides, and the avatar
 ring stays still.
 
+**Reduced motion keeps colour, drops movement** · 2026-10-31 · `agent/reduced-motion` (agent)
+Under `prefers-reduced-motion`, hover and press keep their colour, shadow and indent changes,
+but buttons no longer lift, tilt or shrink: every `translate`/`rotate`/`scale` on hover or
+press is behind `motion-safe:`. The cursor-following eyes stay, since they move only with the
+pointer and never animate on their own.
+
 **Per-element animation delays go through a custom property in `@theme inline`** · 2026-10-29
 · #10
 A plain `[animation-delay:…]` class is reset by the `animate-*` shorthand, and a token in

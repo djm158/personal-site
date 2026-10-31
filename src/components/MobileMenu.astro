@@ -11,7 +11,7 @@ const { links } = Astro.props;
 <Button
   id="mobile-menu-open-btn"
   variant="soft"
-  class="nav:hidden hover:-translate-y-px"
+  class="nav:hidden motion-safe:hover:-translate-y-px"
 >
   Menu
 </Button>
@@ -23,7 +23,7 @@ const { links } = Astro.props;
   <div class="flex flex-col min-h-full px-5 pt-3 pb-8">
     <div class="flex justify-between items-center min-h-11">
       <Eyebrow>Menu</Eyebrow>
-      <Button id="mobile-menu-close-btn" variant="soft" class="hover:-rotate-3">
+      <Button id="mobile-menu-close-btn" variant="soft" class="motion-safe:hover:-rotate-3">
         Close
         <span aria-hidden="true">✕</span>
       </Button>
@@ -48,7 +48,7 @@ const { links } = Astro.props;
     <Button
       href="/resume/"
       size="lg"
-      class="menu-resume hover:shadow-[0_12px_24px_-12px_var(--color-ink)] active:scale-97"
+      class="menu-resume hover:shadow-[0_12px_24px_-12px_var(--color-ink)] motion-safe:active:scale-97"
     >
       Résumé <span aria-hidden="true">↗</span>
     </Button>
