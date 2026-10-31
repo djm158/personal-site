@@ -20,6 +20,7 @@ pnpm install
 pnpm dev       # dev server at http://localhost:4321
 pnpm build     # production build to ./dist
 pnpm preview   # serve the production build locally
+pnpm test:a11y # axe checks on / and /resume, day and night (after pnpm build)
 ```
 
 ## Structure
