@@ -80,9 +80,16 @@ const letterMotions = [
           </Button>
         </div>
       </div>
-      <NightToggle class="mx-auto shrink-0 w-[min(100%,420px,40svh)]">
-        <Avatar class="w-full" />
-      </NightToggle>
+      <div class="relative mx-auto shrink-0 w-[min(100%,420px,40svh)]">
+        <!-- outside the button so it stays still when the avatar is pressed -->
+        <div
+          aria-hidden="true"
+          class="absolute -inset-[4%] rounded-full border-[1.5px] border-dashed border-line pointer-events-none motion-safe:animate-spin-slow"
+        ></div>
+        <NightToggle class="w-full">
+          <Avatar class="w-full" />
+        </NightToggle>
+      </div>
     </Container>
   </section>
   {marquee && marquee.length > 0 && <Marquee items={marquee} />}
