@@ -12,6 +12,11 @@ hero:
     Wizard AI.
   resumeLink: View résumé
   emailLink: Say hello
+  avatarHints:
+    - hey!
+    - that tickles
+    - okay, okay…
+    - one more and…
 
 marquee:
   - TypeScript

@@ -23,10 +23,12 @@ pnpm build     # production build to ./dist
 pnpm preview   # serve the production build
 pnpm test      # run unit tests
 pnpm check     # run astro check
+pnpm test:a11y # axe checks on ./dist (after pnpm build)
 ```
 
-Before calling a piece of work done, run `pnpm check`, `pnpm test --run` and `pnpm build`. The
-build does not type-check, so a page can build while `pnpm check` fails.
+Before calling a piece of work done, run `pnpm check`, `pnpm test --run`, `pnpm build` and then
+`pnpm test:a11y` (axe checks against `./dist`, so it needs the build first). The build does not
+type-check, so a page can build while `pnpm check` fails.
 
 TypeScript is pinned to 6 in `devDependencies` because `astro check` fails with TypeScript 7.
 Keep it on 6 when updating dependencies until `@astrojs/check` supports 7.

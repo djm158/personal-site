@@ -45,3 +45,24 @@ jobs:
       - run: pnpm check
       - run: pnpm test --run
       - run: pnpm build
+
+      # Axe checks run against ./dist, so they go after the build. The browser download is
+      # cached per Playwright version; its system libraries aren't, so a cache hit still
+      # installs those.
+      - name: Get Playwright version
+        id: playwright
+        run: echo "version=$(node -p "require('@playwright/test/package.json').version")" >> "$GITHUB_OUTPUT"
+
+      - name: Cache Playwright browser
+        id: playwright-cache
+        uses: actions/cache@v6
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ steps.playwright.outputs.version }}
+
+      - if: steps.playwright-cache.outputs.cache-hit != 'true'
+        run: pnpm exec playwright install --with-deps chromium
+      - if: steps.playwright-cache.outputs.cache-hit == 'true'
+        run: pnpm exec playwright install-deps chromium
+
+      - run: pnpm test:a11y

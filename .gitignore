@@ -33,3 +33,7 @@ resume/*.pdf
 
 # backlog loop logs and notes
 .loop/
+
+# Playwright output from pnpm test:a11y
+test-results/
+playwright-report/
