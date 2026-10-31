@@ -5,6 +5,7 @@ import Container from "../components/Container.astro";
 import Eyebrow from "../components/Eyebrow.astro";
 import SkillSheet from "../components/SkillSheet.astro";
 import Layout from "../layouts/Layout.astro";
+import { RESUME_OG_IMAGE } from "../lib/open-graph";
 import {
   getYearAndMonth,
   resumeSpan,
@@ -37,6 +38,7 @@ const nonPortfolioLinks = resume.links.filter(
 
 <Layout
   title="Résumé"
+  ogImage={RESUME_OG_IMAGE}
   description={`Résumé of Daniel McGrath, a software engineer with ${yearsOfExperience}+ years of React, TypeScript and full-stack product work: roles, dates and skills.`}
 >
   <Container
