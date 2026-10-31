@@ -48,8 +48,12 @@ Fonts links: to fill in._
 `astro check` fails with TypeScript 7. Stay on 6 until `@astrojs/check` supports it.
 
 **Real routes and plain links, no client-side router** · `CLAUDE.md`
-One file per route in `src/pages` and `<a href>` for navigation. Page transitions are an open
-PR (#19).
+One file per route in `src/pages` and `<a href>` for navigation.
+
+**Page transitions deferred** · 2026-10-31 · #19
+The loop's attempt (#19) was closed after two rounds of requested changes, and the item is
+deferred. Smooth section scrolling and reduced-motion support no longer wait on it. _Why: to
+fill in._
 
 ## Content and data
 
