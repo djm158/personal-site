@@ -1,5 +1,7 @@
 # personal-site
 
+[![Netlify Status](https://api.netlify.com/api/v1/badges/812eb6be-e3af-4ffe-904b-ae9d6402cad8/deploy-status)](https://app.netlify.com/projects/brilliant-concha-0d0b91/deploys)
+
 The next version of [danielmcgrath.xyz](https://danielmcgrath.xyz): portfolio, blog and résumé. Work in progress; see [BACKLOG.md](./BACKLOG.md) for what's done and what's next.
 
 ## Stack

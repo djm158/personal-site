@@ -9,6 +9,7 @@ jobs:
   rebuild:
     runs-on: ubuntu-latest
     steps:
-      - run: curl -fsS -X POST -d '{}' "$HOOK"
+      # trigger_title becomes the deploy's title in Netlify's Deploys list.
+      - run: curl -fsS -X POST -d '{}' "$HOOK?trigger_title=Monthly+heartbeat"
         env:
           HOOK: ${{ secrets.NETLIFY_BUILD_HOOK }}
