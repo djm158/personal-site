@@ -16,7 +16,7 @@ const { form, success } = contact;
 const labelClass =
   "flex flex-col gap-2 font-mono font-medium text-[11px] tracking-[0.08em] uppercase text-muted";
 const fieldClass =
-  "bg-bg border border-line rounded-xl py-3.5 px-4 font-sans font-normal text-base text-ink tracking-normal normal-case outline-none placeholder:text-muted/70 focus:border-accent aria-invalid:border-accent motion-safe:transition-colors motion-safe:duration-200";
+  "bg-bg border border-line rounded-xl py-3.5 px-4 font-sans font-normal text-base text-ink tracking-normal normal-case placeholder:text-muted/70 focus:border-accent aria-invalid:border-accent motion-safe:transition-colors motion-safe:duration-200";
 ---
 
 <Container
@@ -58,7 +58,7 @@ const fieldClass =
         <Eyebrow as="legend" size="sm" class="mb-3">{form.topicLabel}</Eyebrow>
         <div class="flex flex-wrap gap-2">
           {form.topics.map((topic, i) => (
-            <label class="rounded-full border border-line py-2 px-4 font-medium text-[13px] cursor-pointer has-checked:bg-ink has-checked:text-onink has-checked:border-ink has-focus-visible:outline-2 has-focus-visible:outline-offset-2 has-focus-visible:outline-accent motion-safe:transition-[color,background-color,border-color] motion-safe:duration-200">
+            <label class="rounded-full border border-line py-2 px-4 font-medium text-[13px] cursor-pointer has-checked:bg-ink has-checked:text-onink has-checked:border-ink has-focus-visible:outline-2 has-focus-visible:outline-offset-2 has-focus-visible:outline-focus motion-safe:transition-[color,background-color,border-color] motion-safe:duration-200">
               <input type="radio" name="topic" value={topic} checked={i === 0} class="sr-only" />
               {topic}
             </label>
