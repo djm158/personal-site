@@ -107,6 +107,7 @@ LaTeX (then the PDF) is generated from it. Nothing parses LaTeX in the build.
 - [x] Avatar SVG from the updated design (drop the duplicated ears and face shapes) (agent: avatar-svg)
 - [ ] Avatar behaviour: eyes follow the cursor, blink and mouth change on click, cursor glow in the hero (agent: avatar-behaviour) (after: avatar-svg)
 - [ ] Night mode: five clicks on the avatar toggles it, toast message, saved to `localStorage`, applied before first paint to avoid a flash (agent: night-toggle) (after: avatar-svg)
+- [ ] Avatar click hints: a line under the avatar that changes with each click toward night mode and clears when it toggles. The design's copy, one per click count 1–4: "hey!", "that tickles", "okay, okay…", "one more and…". Copy goes in `content/site-content.yaml` (deferred: copy needs confirming) (after: night-toggle)
 - [x] Marquee strip (agent: marquee)
 - [ ] About section: the three cards, once their content is refined (me)
 - [x] Experience list from the résumé data, each row linking to that role on `/resume`
