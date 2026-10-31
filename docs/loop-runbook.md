@@ -99,6 +99,9 @@ Writing backlog items:
 - The **verify pass** hasn't run on a real PR yet. Check its first reports, and its real cost
   in `.loop/runs.jsonl`, against the plugin review's $0.05–0.10.
 - The **retry pass** hasn't met a real case.
+- The fix for **a review submitted during a fix run** (the driver skips the review request and
+  fixes it next) hasn't met a real case. Watch for "Dan requested changes during the fix run"
+  in the loop's output.
 - An old **`reviewed`** label is left over from the rename; it can be deleted.
 - Not built: a route sweep (shoot every page on every PR), `--compare` for the screenshot
   helper, `--parallel`, and starting the loop at login (launchd).

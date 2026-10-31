@@ -388,6 +388,23 @@ function prComments(gh, number, { verify = false, since = "" } = {}) {
 
 const CLAUDE_REVIEWED = "claude-reviewed";
 
+// GitHub's timestamp format, a minute early so clock skew re-reads a comment rather than
+// missing one.
+const githubNow = () =>
+  new Date(Date.now() - 60_000).toISOString().replace(/\.\d+Z$/, "Z");
+
+// PR number → when the last fix run read Dan's feedback. A fix run takes minutes, and Dan
+// can request changes during it; the review request after the run must not count those as
+// handled. In memory only: after a restart the fallback re-reads more comments, not fewer.
+const feedbackReadAt = new Map();
+
+/** Dan's latest approve or request-changes review on a PR, if any. */
+const latestVerdict = (gh, number) =>
+  gh
+    .json("api", `repos/${REPO}/pulls/${number}/reviews?per_page=100`)
+    .filter((r) => r.user?.login === OWNER && r.state !== "COMMENTED")
+    .at(-1);
+
 /**
  * Where a ready agent PR stands with feedback. Two rounds:
  *
@@ -398,7 +415,9 @@ const CLAUDE_REVIEWED = "claude-reviewed";
  *    review requests.
  * 2. Dan's reviews. When his latest review is "Request changes" and came after the loop last
  *    requested his review, his comments since then get a fix run, and the driver requests his
- *    review again. Approving, or reviewing with plain comments, starts nothing.
+ *    review again. Approving, or reviewing with plain comments, starts nothing. A review he
+ *    submits during a fix run is still new: the driver then doesn't request his review (see
+ *    `handOver`), and his comments count from when the run read its feedback.
  *
  * States: "none" (nothing to do: a draft, needs input, or waiting on Dan), "waiting" (CI
  * still running), "verify" (a verify run), "clean" (hand over without a run), "fix" (a fix
@@ -408,25 +427,28 @@ function feedbackState(gh, pr) {
   const labels = pr.labels.map((label) => label.name);
   if (pr.isDraft || labels.includes("needs-input")) return { state: "none" };
 
+  // Before reading anything, so feedback that lands while this runs counts as unread.
+  const readAt = githubNow();
   const events = gh.json(
     "api",
     `repos/${REPO}/issues/${pr.number}/events?per_page=100`,
   );
-  const lastAskedDan =
+  const handledUpTo = [
     events
       .filter(
         (e) =>
           e.event === "review_requested" &&
           e.requested_reviewer?.login === OWNER,
       )
-      .at(-1)?.created_at ?? "";
-  const dansVerdict = gh
-    .json("api", `repos/${REPO}/pulls/${pr.number}/reviews?per_page=100`)
-    .filter((r) => r.user?.login === OWNER && r.state !== "COMMENTED")
+      .at(-1)?.created_at ?? "",
+    feedbackReadAt.get(pr.number) ?? "",
+  ]
+    .sort()
     .at(-1);
+  const dansVerdict = latestVerdict(gh, pr.number);
   const changesRequested =
     dansVerdict?.state === "CHANGES_REQUESTED" &&
-    dansVerdict.submitted_at > lastAskedDan;
+    dansVerdict.submitted_at > handledUpTo;
   const handedOver = labels.includes(CLAUDE_REVIEWED);
   if (handedOver && !changesRequested) return { state: "none" };
 
@@ -447,16 +469,17 @@ function feedbackState(gh, pr) {
   if (ci?.status !== "COMPLETED") return { state: "waiting", why: "CI" };
   const ciFailed = ci.conclusion === "FAILURE";
 
-  // Round 2: Dan asked for changes. Only his comments since the loop last asked him count;
-  // the verify pass's findings were handled in round 1.
+  // Round 2: Dan asked for changes. Only his comments since the last round count; the verify
+  // pass's findings were handled in round 1.
   if (handedOver) {
-    const comments = prComments(gh, pr.number, { since: lastAskedDan });
+    const comments = prComments(gh, pr.number, { since: handledUpTo });
     return {
       state: "fix",
       comments,
       ciFailed,
       round: "Dan's review",
       handOverAfter: true,
+      readAt,
     };
   }
 
@@ -488,6 +511,7 @@ function feedbackState(gh, pr) {
     ciFailed,
     round: changesRequested ? "Dan's review" : "the verify pass",
     handOverAfter: true,
+    readAt,
   };
 }
 
@@ -981,8 +1005,10 @@ async function pass() {
     }
 
     // Hand a PR to Dan: label it and request his review, which also notifies him on GitHub.
-    // Requesting his review again is what closes a round of his feedback.
-    const handOver = (pr) => {
+    // Requesting his review again is what closes a round of his feedback. After a fix run,
+    // `readAt` is when it read the feedback: if Dan requested changes since, the request is
+    // left out, so his review still counts as new and gets the next fix run.
+    const handOver = (pr, readAt) => {
       gh(
         "api",
         "-X",
@@ -991,6 +1017,19 @@ async function pass() {
         "-f",
         `labels[]=${CLAUDE_REVIEWED}`,
       );
+      if (readAt) {
+        feedbackReadAt.set(pr.number, readAt);
+        const verdict = latestVerdict(gh, pr.number);
+        if (
+          verdict?.state === "CHANGES_REQUESTED" &&
+          verdict.submitted_at > readAt
+        ) {
+          log(
+            `  #${pr.number}: Dan requested changes during the fix run; fixing those next`,
+          );
+          return;
+        }
+      }
       try {
         gh(
           "api",
@@ -1075,7 +1114,8 @@ async function pass() {
       });
       // The driver closes the round, not the run, so a run that forgets can't leave the same
       // comments to be fixed again. A fix for CI alone waits for the verify pass instead.
-      if (result.startsWith("fixed") && feedback.handOverAfter) handOver(pr);
+      if (result.startsWith("fixed") && feedback.handOverAfter)
+        handOver(pr, feedback.readAt);
       return result;
     }
     if (toVerify) {
