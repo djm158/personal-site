@@ -3,6 +3,7 @@ import AvatarMini from "../assets/avatar-mini.svg";
 import Button from "./Button.astro";
 import Container from "./Container.astro";
 import MobileMenu from "./MobileMenu.astro";
+import ThemeSwitch from "./ThemeSwitch.astro";
 
 const { pathname } = Astro.url;
 const links = [
@@ -36,6 +37,7 @@ const links = [
           {l.label}
         </a>
       ))}
+      <ThemeSwitch aria-label="Night mode" class="self-center ml-1.5" />
       <Button
         href="/resume/"
         size="sm"

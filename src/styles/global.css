@@ -3,6 +3,9 @@
 /* design/ is a reference copy of the prototype; keep Tailwind from scanning it for class names */
 @source not "../../design";
 
+/* night: styles that follow the theme without JavaScript, e.g. the theme switch's knob */
+@custom-variant night (&:where([data-theme="night"], [data-theme="night"] *));
+
 @theme {
   /* colours (day) */
   --color-bg: oklch(0.965 0.012 80);

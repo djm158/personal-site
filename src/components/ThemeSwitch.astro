@@ -1,0 +1,108 @@
+---
+import type { HTMLAttributes } from "astro/types";
+
+type Props = HTMLAttributes<"button"> & {
+  /** sm in the desktop header, lg in the mobile menu (a 36px-tall touch target with its label) */
+  size?: keyof typeof sizes;
+};
+
+// The knob moves by the track's inner width minus its own width and both gaps
+const sizes = {
+  sm: {
+    track: "w-13.5 h-7.5",
+    knob: "top-0.5 left-0.5 size-6 night:translate-x-6",
+    icon: "size-3.5",
+  },
+  lg: {
+    track: "w-16 h-9",
+    knob: "top-0.75 left-0.75 size-7 night:translate-x-7",
+    icon: "size-3.75",
+  },
+};
+
+const { size = "sm", class: className, ...rest } = Astro.props;
+const s = sizes[size];
+---
+
+<!-- Night mode on or off. The knob and icon follow [data-theme] in CSS, so they're right before
+     the script runs; the script keeps aria-checked in step. Give it a name with aria-label or a
+     <label for>. -->
+<button
+  type="button"
+  role="switch"
+  aria-checked="false"
+  data-theme-switch
+  class:list={[
+    "relative shrink-0 cursor-pointer rounded-full border border-line bg-surface hover:border-ink transition-colors duration-200",
+    s.track,
+    className,
+  ]}
+  {...rest}
+>
+  <span
+    class:list={[
+      "absolute grid place-items-center rounded-full bg-ink text-onink motion-safe:transition-[translate] motion-safe:duration-350 motion-safe:ease-spring",
+      s.knob,
+    ]}
+  >
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="2"
+      stroke-linecap="round"
+      aria-hidden="true"
+      class:list={["night:hidden", s.icon]}
+    >
+      <circle cx="12" cy="12" r="4"></circle>
+      <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"></path>
+    </svg>
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="2"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      aria-hidden="true"
+      class:list={["hidden night:block", s.icon]}
+    >
+      <path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"></path>
+    </svg>
+  </span>
+</button>
+
+<script>
+  import { THEME_EVENT, THEME_KEY, readTheme, setTheme } from "../lib/theme";
+
+  // Astro runs this once however many switches the page has
+  const switches = document.querySelectorAll<HTMLButtonElement>(
+    "[data-theme-switch]",
+  );
+  const current = () =>
+    readTheme(document.documentElement.dataset.theme ?? null);
+  const sync = () => {
+    const checked = String(current() === "night");
+    for (const s of switches) s.setAttribute("aria-checked", checked);
+  };
+
+  for (const s of switches) {
+    s.addEventListener("click", () =>
+      setTheme(current() === "night" ? "day" : "night"),
+    );
+  }
+  // Every switch follows, whichever control (or the avatar) changed the theme
+  document.addEventListener(THEME_EVENT, sync);
+  sync();
+
+  // Until a choice is saved, keep following the system as it changes (e.g. at sunset)
+  matchMedia("(prefers-color-scheme: dark)").addEventListener("change", (e) => {
+    let stored = null;
+    try {
+      stored = localStorage.getItem(THEME_KEY);
+    } catch {
+      // storage blocked: treat as nothing saved
+    }
+    if (stored === null) setTheme(e.matches ? "night" : "day", { save: false });
+  });
+</script>
