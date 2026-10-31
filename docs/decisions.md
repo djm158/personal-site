@@ -137,6 +137,12 @@ lives in `--header-h` (69px under 760px, 63px above), written by hand from its p
 tallest control, since CSS can't measure it. The résumé roles' `scroll-margin-top` now
 subtracts it, so they land where they did before.
 
+**Theme colour pairs are checked against WCAG AA in a unit test** · 2026-10-31 · agent/contrast (agent)
+`contrast.test.ts` reads the tokens from `global.css` and checks each text and background pair
+in day and night, so a token change that breaks AA fails `pnpm test`. axe sees only what's
+rendered at rest; this covers pressed chips and matched tags too. The tokens all passed. The
+one failure was the form placeholder at 70% muted (3.3:1 in day), which is now full muted.
+
 **Accessible split-letter heading** · 2026-10-29 · #7 (agent)
 "Dan." is split into spans for the per-letter hover, which are `aria-hidden`, with an `sr-only`
 copy so screen readers read one word.
