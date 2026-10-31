@@ -131,7 +131,7 @@ LaTeX (then the PDF) is generated from it. Nothing parses LaTeX in the build.
 - [x] axe checks: run axe-core (`@axe-core/playwright`) against `/` and `/resume` from `astro preview`, in day and night themes, as `pnpm test:a11y`; fix what it finds, or list anything left in the PR. If Playwright's browser won't install in the loop, open a needs-input PR instead (agent: axe-checks)
 - [x] Run `pnpm test:a11y` in CI after the build (needs `playwright install --with-deps chromium` in the workflow), so the axe checks catch regressions on every PR
 - [x] Focus styles: every interactive element (header links, pills, chips, timeline segments, the menu and sheet controls, form fields and buttons) shows a visible `focus-visible` ring from a theme token, in both themes; only 4 components have one now (agent: focus-styles)
-- [ ] Contrast: check the text and background token pairs (body, muted, accent, chips, buttons) in day and night against WCAG AA, and adjust the tokens that fail in `global.css` (agent: contrast) (after: axe-checks)
+- [x] Contrast: check the text and background token pairs (body, muted, accent, chips, buttons) in day and night against WCAG AA, and adjust the tokens that fail in `global.css` (agent: contrast) (after: axe-checks)
 - [ ] Keyboard walkthrough of `/`, `/resume`, the mobile menu and the skill sheet: tab order, Escape, focus returning to the opener, nothing unreachable (me) (after: focus-styles)
 - [ ] Accessibility pass for pages built later (blog, projects, 404): add them to the axe checks (deferred: once those pages exist)
 - [ ] Performance pass: Lighthouse, image optimisation with `astro:assets` (fonts are already self-hosted through Astro's fonts API) (deferred: once the pages are built)
