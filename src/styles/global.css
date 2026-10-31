@@ -13,6 +13,8 @@
   --color-accent: oklch(0.52 0.12 42);
   --color-moss: oklch(0.55 0.08 130);
   --color-onink: oklch(0.965 0.012 80);
+  /* keyboard focus ring; follows the accent, so night mode gets its own */
+  --color-focus: var(--color-accent);
   /* dims the page behind a sheet; stays dark in both themes */
   --color-scrim: oklch(0.25 0.025 50 / 0.38);
 
@@ -90,6 +92,12 @@
   }
   a:hover {
     color: var(--color-accent);
+  }
+
+  /* one ring for every focusable element, shown only for keyboard focus */
+  :focus-visible {
+    outline: 2px solid var(--color-focus);
+    outline-offset: 2px;
   }
 
   ::selection {
