@@ -2,20 +2,22 @@
 import { getEntry } from "astro:content";
 import Avatar from "../components/Avatar.astro";
 import Button from "../components/Button.astro";
+import ContactSection from "../components/ContactSection.astro";
 import Container from "../components/Container.astro";
 import Emphasis from "../components/Emphasis.astro";
 import Eyebrow from "../components/Eyebrow.astro";
 import Marquee from "../components/Marquee.astro";
+import NightToggle from "../components/NightToggle.astro";
 import TextLink from "../components/TextLink.astro";
 import Layout from "../layouts/Layout.astro";
 import { formatYearSpan } from "../lib/resume/dates";
 import { loadResume } from "../lib/resume/load";
 
-const { email, roles } = loadResume();
+const { roles } = loadResume();
 // The file loader only logs when the YAML can't be read, so fail the build here instead
 const home = await getEntry("siteContent", "home");
 if (!home) throw new Error("src/content/site-content.yaml did not load");
-const { description, hero, marquee, about, experience } = home.data;
+const { description, hero, marquee, about, experience, contact } = home.data;
 
 // Each letter of the name hops and tilts on its own when hovered (static classes so Tailwind sees them).
 // On load the letters hop in turn with the same lift and tilt, via the hop custom properties.
@@ -40,8 +42,14 @@ const letterMotions = [
 ---
 
 <Layout description={description}>
-  <section>
-    <Container class="flex flex-wrap-reverse items-center gap-[clamp(40px,5vw,72px)] pt-[clamp(56px,8vw,112px)] pb-[clamp(56px,7vw,96px)]">
+  <section data-hero class="relative overflow-hidden">
+    <!-- a soft glow that trails the cursor; hidden under reduced motion as it drifts by design -->
+    <div
+      data-glow
+      aria-hidden="true"
+      class="absolute top-0 left-0 size-140 -m-70 rounded-full bg-radial from-hair/30 to-transparent to-62% blur-xl pointer-events-none translate-x-225 translate-y-75 transition-[translate] duration-1000 ease-soft motion-reduce:hidden"
+    ></div>
+    <Container class="relative flex flex-wrap-reverse items-center gap-[clamp(40px,5vw,72px)] pt-[clamp(56px,8vw,112px)] pb-[clamp(56px,7vw,96px)]">
       <div class="flex-[1_1_400px] min-w-0">
         <div class="inline-flex items-center gap-2.5 font-mono font-medium text-xs uppercase mb-8 text-muted rounded-full border tracking-wider border-line py-1.75 pl-2.75 pr-3.5">
           <span class="size-2 rounded-full bg-moss motion-safe:animate-pulse"></span>
@@ -67,12 +75,14 @@ const letterMotions = [
           >
             {hero.resumeLink}
           </Button>
-          <Button href={`mailto:${email}`} variant="outlined" size="xl">
+          <Button href="#contact" variant="outlined" size="xl">
             {hero.emailLink}
           </Button>
         </div>
       </div>
-      <Avatar class="mx-auto shrink-0 w-[min(100%,420px,40svh)]" />
+      <NightToggle class="mx-auto shrink-0 w-[min(100%,420px,40svh)]">
+        <Avatar class="w-full" />
+      </NightToggle>
     </Container>
   </section>
   {marquee && marquee.length > 0 && <Marquee items={marquee} />}
@@ -134,4 +144,29 @@ const letterMotions = [
       ))}
     </ul>
   </Container>
+  <ContactSection number="03" contact={contact} />
 </Layout>
+
+<script>
+  // Moves the hero glow to the cursor, at most once a frame; the CSS transition makes it trail
+  const hero = document.querySelector<HTMLElement>("[data-hero]");
+  const glow = hero?.querySelector<HTMLElement>("[data-glow]");
+
+  if (hero && glow) {
+    let frame = 0;
+    let x = 0;
+    let y = 0;
+
+    const follow = () => {
+      frame = 0;
+      const box = hero.getBoundingClientRect();
+      glow.style.translate = `${x - box.left}px ${y - box.top}px`;
+    };
+
+    window.addEventListener("pointermove", (event) => {
+      x = event.clientX;
+      y = event.clientY;
+      frame ||= requestAnimationFrame(follow);
+    });
+  }
+</script>

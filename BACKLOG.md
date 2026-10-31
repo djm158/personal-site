@@ -105,21 +105,22 @@ LaTeX (then the PDF) is generated from it. Nothing parses LaTeX in the build.
 - [x] Hero: status badge, heading with per-letter hover, intro, two buttons (agent: hero-letter-hover)
 - [x] Hero name intro: on page load the letters of "Dan." hop in turn, once, with the same lift and tilt as the hover. CSS only: an `--animate-hop` token and `@keyframes` in `global.css` that animate `translate`, `rotate` and `scale` (not `transform`) from per-letter custom properties, staggered with `animation-delay`, fill mode `backwards` so it never blocks the hover afterwards, behind `motion-safe:`. Plays on every visit to `/`; no once-per-session logic (agent: hero-letter-intro) (after: hero-letter-hover)
 - [x] Avatar SVG from the updated design (drop the duplicated ears and face shapes) (agent: avatar-svg)
-- [ ] Avatar behaviour: eyes follow the cursor, blink and mouth change on click, cursor glow in the hero (agent: avatar-behaviour) (after: avatar-svg)
-- [ ] Night mode: five clicks on the avatar toggles it, toast message, saved to `localStorage`, applied before first paint to avoid a flash (agent: night-toggle) (after: avatar-svg)
 - [ ] Avatar click hints: a line under the avatar that changes with each click toward night mode and clears when it toggles. The design's copy, one per click count 1–4: "hey!", "that tickles", "okay, okay…", "one more and…". Copy goes in `content/site-content.yaml` (deferred: copy needs confirming) (after: night-toggle)
+- [x] Avatar behaviour: eyes follow the cursor, blink and mouth change on click, cursor glow in the hero (agent: avatar-behaviour) (after: avatar-svg)
+- [x] Night mode: five clicks on the avatar toggles it, toast message, saved to `localStorage`, applied before first paint to avoid a flash (agent: night-toggle) (after: avatar-svg)
 - [x] Marquee strip (agent: marquee)
 - [ ] About section: the three cards, once their content is refined (me)
 - [x] Experience list from the résumé data, each row linking to that role on `/resume`
 - [ ] Featured project cards: description panel slides up on hover, always visible on touch devices (deferred: waits for projects)
 - [ ] Latest three posts (deferred: waits for the blog)
-- [ ] Contact section and form with Netlify Forms: topic chips, validation messages, honeypot, success state (agent: contact-form)
+- [x] Contact section and form with Netlify Forms: topic chips, validation messages, honeypot, success state (agent: contact-form)
 
 ## 6. Polish and launch
 
 - [x] Per-page titles and descriptions; favicon from the nav avatar (`src/assets/avatar-mini.svg`, also used in the header; 32px `favicon.ico` and `apple-touch-icon.png` rendered from it)
-- [ ] Open Graph tags (agent: og-tags)
-- [ ] Sitemap (agent: sitemap)
+- [x] Open Graph tags (agent: og-tags)
+- [x] Open Graph share image: `public/og.png` (1200×630, the avatar hero from the design canvas, already in the repo) as `og:image` on every page, with an absolute URL, `og:image:width`/`og:image:height`/`og:image:alt`, and the large `twitter:card` (`summary_large_image`); update `open-graph.ts` and its tests (agent: og-image)
+- [x] Sitemap (agent: sitemap)
 - [ ] RSS feed (deferred: waits for the blog)
 - [ ] 404 page design session in claude.ai/design (me)
 - [ ] 404 page (deferred: waits for the design session)
@@ -127,7 +128,8 @@ LaTeX (then the PDF) is generated from it. Nothing parses LaTeX in the build.
 - [ ] Respect `prefers-reduced-motion` for page transitions, the mobile menu, the marquee, spinning ring and hover motion (agent: reduced-motion) (after: page-transitions) (after: marquee) (after: avatar-behaviour)
 - [ ] Accessibility pass: keyboard navigation, focus styles, contrast in both themes, axe checks (deferred: once the pages are built)
 - [ ] Performance pass: Lighthouse, image optimisation with `astro:assets`, consider self-hosting fonts (deferred: once the pages are built)
-- [ ] Update the small nav avatar to match the new hero face (agent: nav-avatar) (after: avatar-svg)
+- [x] Update the small nav avatar to match the new hero face (agent: nav-avatar) (after: avatar-svg)
+- [ ] Re-render `favicon.ico` and `apple-touch-icon.png` from the updated `src/assets/avatar-mini.svg`; they still show the old face
 - [x] Decide on the hero line "Most recently at Wizard AI" (keep it)
 - [ ] Verify the contact form on the live domain (me)
 - [ ] Heartbeat rebuild every month so date-derived content stays current (years of experience in the résumé description, "Present" durations): a scheduled GitHub Action calling a Netlify build hook (agent: heartbeat-rebuild)
