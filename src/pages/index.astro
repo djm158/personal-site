@@ -80,13 +80,19 @@ const letterMotions = [
           </Button>
         </div>
       </div>
-      <div class="relative mx-auto shrink-0 w-[min(100%,420px,40svh)]">
+      <!-- the ring and the avatar share the first grid cell, so the hint line below sits outside the ring -->
+      <div class="mx-auto shrink-0 w-[min(100%,420px,40svh)] grid justify-items-center gap-3.5">
         <!-- outside the button so it stays still when the avatar is pressed -->
         <div
           aria-hidden="true"
-          class="absolute -inset-[4%] rounded-full border-[1.5px] border-dashed border-line pointer-events-none motion-safe:animate-spin-slow"
+          class="row-start-1 col-start-1 self-stretch justify-self-stretch -m-[4%] rounded-full border-[1.5px] border-dashed border-line pointer-events-none motion-safe:animate-spin-slow"
         ></div>
-        <NightToggle class="w-full">
+        <!-- the hint's top margin matches the ring's 4% overhang, so the gap is measured from the ring -->
+        <NightToggle
+          class="row-start-1 col-start-1 w-full"
+          hints={hero.avatarHints}
+          hintClass="mt-[4%]"
+        >
           <Avatar class="w-full" />
         </NightToggle>
       </div>

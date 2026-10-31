@@ -24,3 +24,8 @@ export function toastFor(theme: Theme): string {
     ? "Night ride unlocked — lights on."
     : "Back to daylight.";
 }
+
+/** The line under the avatar after `count` pokes: hints[0] after the first, none at zero. */
+export function hintFor(count: number, hints: readonly string[]): string {
+  return count > 0 ? (hints[count - 1] ?? "") : "";
+}

@@ -20,6 +20,8 @@ const siteContent = defineCollection({
       intro: richText,
       resumeLink: z.string(),
       emailLink: z.string(),
+      // The line under the avatar after each click toward night mode, one per click from the first
+      avatarHints: z.array(z.string()).optional(),
     }),
     // Words that scroll in the strip under the hero; the strip is left out until there are some
     marquee: z.array(z.string()).optional(),

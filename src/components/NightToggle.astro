@@ -1,9 +1,14 @@
 ---
 import type { HTMLAttributes } from "astro/types";
 
-type Props = HTMLAttributes<"button">;
+type Props = HTMLAttributes<"button"> & {
+  /** The line shown under the button after each click toward a switch, one per click from the first */
+  hints?: string[];
+  /** Extra classes for the hint line */
+  hintClass?: string;
+};
 
-const { class: className, ...rest } = Astro.props;
+const { class: className, hints, hintClass, ...rest } = Astro.props;
 ---
 
 <!-- Five clicks on whatever it wraps (the hero avatar) switch between day and night -->
@@ -18,6 +23,15 @@ const { class: className, ...rest } = Astro.props;
 >
   <slot />
 </button>
+{
+  hints && hints.length > 0 && (
+    <p
+      data-night-hint={JSON.stringify(hints)}
+      aria-live="polite"
+      class:list={["h-4.5 font-mono font-medium text-xs text-muted", hintClass]}
+    />
+  )
+}
 <div
   role="status"
   data-night-toast
@@ -26,10 +40,12 @@ const { class: className, ...rest } = Astro.props;
 </div>
 
 <script>
-  import { THEME_KEY, poke, readTheme, toastFor, type Theme } from "../lib/theme";
+  import { THEME_KEY, hintFor, poke, readTheme, toastFor, type Theme } from "../lib/theme";
 
   const toggle = document.querySelector<HTMLButtonElement>("[data-night-toggle]");
   const toast = document.querySelector<HTMLElement>("[data-night-toast]");
+  const hint = document.querySelector<HTMLElement>("[data-night-hint]");
+  const hints: string[] = hint ? JSON.parse(hint.dataset.nightHint ?? "[]") : [];
 
   if (toggle && toast) {
     let count = 0;
@@ -38,6 +54,7 @@ const { class: className, ...rest } = Astro.props;
     toggle.addEventListener("click", () => {
       const next = poke(count);
       count = next.count;
+      if (hint) hint.textContent = hintFor(count, hints);
       if (!next.toggle) return;
 
       const root = document.documentElement;

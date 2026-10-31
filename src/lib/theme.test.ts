@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest";
-import { poke, readTheme, toastFor } from "./theme";
+import { hintFor, poke, readTheme, toastFor } from "./theme";
 
 describe("poke", () => {
   test("counts up without toggling before the fifth poke", () => {
@@ -37,5 +37,23 @@ describe("toastFor", () => {
   test("has a message for each theme", () => {
     expect(toastFor("night")).toBe("Night ride unlocked — lights on.");
     expect(toastFor("day")).toBe("Back to daylight.");
+  });
+});
+
+describe("hintFor", () => {
+  const hints = ["one", "two", "three", "four"];
+
+  test("no hint before the first poke or after a toggle", () => {
+    expect(hintFor(0, hints)).toBe("");
+  });
+
+  test("one hint per count, starting at the first poke", () => {
+    expect(hintFor(1, hints)).toBe("one");
+    expect(hintFor(4, hints)).toBe("four");
+  });
+
+  test("a count past the end of the list has no hint", () => {
+    expect(hintFor(2, ["one"])).toBe("");
+    expect(hintFor(1, [])).toBe("");
   });
 });
