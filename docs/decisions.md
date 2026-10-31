@@ -147,7 +147,21 @@ subtracts it, so they land where they did before.
 "Dan." is split into spans for the per-letter hover, which are `aria-hidden`, with an `sr-only`
 copy so screen readers read one word.
 
+**No hero avatar on phones, a departure from the design** · 2026-10-31 · #34
+Below 760px the hero avatar was about 340px tall and pushed the heading, intro and buttons
+below the fold. It is hidden there; from 760px up nothing changes. A 96px version was tried
+first and still took too much of the screen. Trade-off: the avatar is the night-mode button, so
+phones have no way to switch themes until night mode gets another control there (see
+`BACKLOG.md`). The nav avatar stays.
+
 ## Site features
+
+**A visible night-mode switch, following the system until used** · 2026-10-31 · #34
+The avatar's five clicks are hidden and don't work for keyboard or screen-reader users, and the
+hero avatar is gone on phones. Night mode gets a sliding switch in the header and mobile menu
+(option C of three in the "Theme toggle options" design canvas), with two states and the
+site's day/night copy. With nothing saved the page follows `prefers-color-scheme`; a third
+"system" state was left out. The avatar clicks stay as an easter egg on desktop.
 
 **Night mode: token overrides, set before first paint** · 2026-10-30 · #16 (agent)
 `[data-theme="night"]` overrides the same theme tokens. An inline script in `<head>` applies

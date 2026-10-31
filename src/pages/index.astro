@@ -80,8 +80,10 @@ const letterMotions = [
           </Button>
         </div>
       </div>
-      <!-- the ring and the avatar share the first grid cell, so the hint line below sits outside the ring -->
-      <div class="mx-auto shrink-0 w-[min(100%,420px,40svh)] grid justify-items-center gap-3.5">
+      <!-- hidden below the nav breakpoint so the heading, intro and buttons lead on phones (night mode
+           is desktop-only until it has another way in there).
+           the ring and the avatar share the first grid cell, so the hint line below sits outside the ring -->
+      <div class="max-nav:hidden mx-auto shrink-0 w-[min(100%,420px,40svh)] grid justify-items-center gap-3.5">
         <!-- outside the button so it stays still when the avatar is pressed -->
         <div
           aria-hidden="true"
