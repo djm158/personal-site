@@ -138,8 +138,10 @@ tallest control, since CSS can't measure it. The résumé roles' `scroll-margin-
 subtracts it, so they land where they did before.
 
 **Theme colour pairs are checked against WCAG AA in a unit test** · 2026-10-31 · agent/contrast (agent)
-`contrast.test.ts` reads the tokens from `global.css` and checks each text and background pair
-in day and night, so a token change that breaks AA fails `pnpm test`. axe sees only what's
+`src/styles/contrast.test.ts` parses `global.css` with `postcss` (day from `@theme`, night from
+the `[data-theme="night"]` rule on top) and checks each text and background pair in day and
+night with `colorjs.io`, so a token change that breaks AA fails `pnpm test`. Both are
+devDependencies, so the colour maths and CSS parsing aren't ours to maintain. axe sees only what's
 rendered at rest; this covers pressed chips and matched tags too. The tokens all passed. The
 one failure was the form placeholder at 70% muted (3.3:1 in day), which is now full muted.
 
