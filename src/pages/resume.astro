@@ -110,7 +110,7 @@ const nonPortfolioLinks = resume.links.filter(
             data-role={role.id}
             data-tags={role.tags?.join(",")}
             data-short={role.short ?? role.company}
-            class="flex flex-wrap gap-y-3 gap-x-10 py-9 border-t-line border-t scroll-mt-20 max-[999px]:scroll-mt-36 group-data-picked:opacity-30 data-hit:opacity-100 motion-safe:transition-opacity motion-safe:duration-400"
+            class="flex flex-wrap gap-y-3 gap-x-10 py-9 border-t-line border-t scroll-mt-[calc(5rem-var(--header-h))] max-[999px]:scroll-mt-[calc(9rem-var(--header-h))] group-data-picked:opacity-30 data-hit:opacity-100 motion-safe:transition-opacity motion-safe:duration-400"
           >
             <div class="flex-[0_0_160px] flex flex-col font-mono font-medium text-muted text-xs gap-1.5">
               <p class="in-data-hit:text-accent in-data-linked:text-accent motion-safe:transition-colors motion-safe:duration-300">
