@@ -49,7 +49,9 @@ const letterMotions = [
       aria-hidden="true"
       class="absolute top-0 left-0 size-140 -m-70 rounded-full bg-radial from-hair/30 to-transparent to-62% blur-xl pointer-events-none translate-x-225 translate-y-75 transition-[translate] duration-1000 ease-soft motion-reduce:hidden"
     ></div>
-    <Container class="relative flex flex-wrap-reverse items-center gap-[clamp(40px,5vw,72px)] pt-[clamp(56px,8vw,112px)] pb-[clamp(56px,7vw,96px)]">
+    <!-- below the nav breakpoint the avatar shrinks to a small mark above the text, so the heading,
+         intro and buttons lead on phones; the full avatar and ring return from 760px -->
+    <Container class="relative flex flex-wrap-reverse items-center gap-[clamp(40px,5vw,72px)] max-nav:gap-6 pt-[clamp(56px,8vw,112px)] max-nav:pt-10 pb-[clamp(56px,7vw,96px)]">
       <div class="flex-[1_1_400px] min-w-0">
         <div class="inline-flex items-center gap-2.5 font-mono font-medium text-xs uppercase mb-8 text-muted rounded-full border tracking-wider border-line py-1.75 pl-2.75 pr-3.5">
           <span class="size-2 rounded-full bg-moss motion-safe:animate-pulse"></span>
@@ -81,17 +83,18 @@ const letterMotions = [
         </div>
       </div>
       <!-- the ring and the avatar share the first grid cell, so the hint line below sits outside the ring -->
-      <div class="mx-auto shrink-0 w-[min(100%,420px,40svh)] grid justify-items-center gap-3.5">
-        <!-- outside the button so it stays still when the avatar is pressed -->
+      <div class="mx-auto max-nav:mx-0 shrink-0 w-[min(100%,420px,40svh)] max-nav:w-24 grid justify-items-center max-nav:justify-items-start gap-3.5 max-nav:gap-2">
+        <!-- outside the button so it stays still when the avatar is pressed; hidden on phones, where it's clutter at this size -->
         <div
           aria-hidden="true"
-          class="row-start-1 col-start-1 self-stretch justify-self-stretch -m-[4%] rounded-full border-[1.5px] border-dashed border-line pointer-events-none motion-safe:animate-spin-slow"
+          class="row-start-1 col-start-1 self-stretch justify-self-stretch -m-[4%] rounded-full border-[1.5px] border-dashed border-line pointer-events-none motion-safe:animate-spin-slow max-nav:hidden"
         ></div>
-        <!-- the hint's top margin matches the ring's 4% overhang, so the gap is measured from the ring -->
+        <!-- the hint's top margin matches the ring's 4% overhang, so the gap is measured from the ring;
+             on phones the hint is wider than the avatar, so it runs on to the right instead of off-screen -->
         <NightToggle
           class="row-start-1 col-start-1 w-full"
           hints={hero.avatarHints}
-          hintClass="mt-[4%]"
+          hintClass="mt-[4%] max-nav:mt-0 whitespace-nowrap"
         >
           <Avatar class="w-full" />
         </NightToggle>

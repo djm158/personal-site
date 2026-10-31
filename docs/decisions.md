@@ -147,6 +147,12 @@ subtracts it, so they land where they did before.
 "Dan." is split into spans for the per-letter hover, which are `aria-hidden`, with an `sr-only`
 copy so screen readers read one word.
 
+**Small hero avatar on phones, a departure from the design** · 2026-10-31 · agent/mobile-hero-avatar (agent)
+Below 760px the hero avatar was about 340px tall and pushed the heading, intro and buttons
+below the fold. It now shrinks to a 96px mark, left-aligned above the status badge, and the
+dashed ring is hidden; from 760px up nothing changes. It stays in the hero rather than being
+removed on phones, because it is the night-mode button and the nav avatar already links home.
+
 ## Site features
 
 **Night mode: token overrides, set before first paint** · 2026-10-30 · #16 (agent)
