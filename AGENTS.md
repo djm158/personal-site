@@ -78,6 +78,11 @@ spec, and don't port its runtime, inline styles or state-based page switching.
 
 ## Documentation
 
+When a change makes a decision about how the site is built (a library, a pattern, a trade-off,
+or a departure from a backlog item or the design), add an entry to
+[docs/decisions.md](docs/decisions.md) in the same PR: what was decided, why, and the PR or
+commit. Tag it `(agent)` if Dan didn't make the call.
+
 Astro docs: https://docs.astro.build
 
 - [Routing](https://docs.astro.build/en/guides/routing/)
