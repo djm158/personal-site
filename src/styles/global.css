@@ -36,6 +36,9 @@
   /* the home strip moves its doubled list left by one copy, then loops */
   --animate-marquee: marquee 45s linear infinite;
 
+  /* the dashed ring around the hero avatar turns once every 80s */
+  --animate-spin-slow: spin 80s linear infinite;
+
   @keyframes marquee {
     to {
       translate: -50% 0;
