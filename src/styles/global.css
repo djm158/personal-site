@@ -118,6 +118,13 @@
 ::view-transition-new(grain) {
   animation: none;
 }
+/* the header is always at the top of the viewport, so pin its group there rather than use the
+   position the browser measured. WebKit measures the sticky header at its unscrolled position
+   when the new page arrives scrolled to a hash (/#about), which puts it off screen */
+::view-transition-group(site-header) {
+  animation: none;
+  transform: none;
+}
 
 @keyframes page-out {
   to {
