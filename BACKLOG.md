@@ -138,4 +138,4 @@ LaTeX (then the PDF) is generated from it. Nothing parses LaTeX in the build.
 - [ ] Generate `favicon.ico` (32px, a PNG inside an ICO header) and `apple-touch-icon.png` (180px) from `src/assets/avatar-mini.svg` with sharp at build time, so they can't go stale again (the committed copies still show the old face). Use prerendered endpoints (`src/pages/favicon.ico.ts`, `src/pages/apple-touch-icon.png.ts`) so the dev server serves them too; delete the committed copies from `public/`; add sharp as a direct devDependency (agent: favicon-render)
 - [x] Decide on the hero line "Most recently at Wizard AI" (keep it)
 - [ ] Verify the contact form on the live domain (me)
-- [ ] Heartbeat rebuild every month so date-derived content stays current (years of experience in the résumé description, "Present" durations): a scheduled GitHub Action calling a Netlify build hook (agent: heartbeat-rebuild)
+- [x] Heartbeat rebuild every month so date-derived content stays current (years of experience in the résumé description, "Present" durations): a scheduled GitHub Action calling a Netlify build hook (agent: heartbeat-rebuild)
