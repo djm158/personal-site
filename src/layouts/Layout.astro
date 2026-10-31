@@ -4,15 +4,17 @@ import AvatarMini from "../assets/avatar-mini.svg";
 import { Font } from "astro:assets";
 import Header from "../components/Header.astro";
 import Footer from "../components/Footer.astro";
-import { openGraphTags } from "../lib/open-graph";
+import { openGraphTags, type OgImage } from "../lib/open-graph";
 import { THEME_KEY } from "../lib/theme";
 
 interface Props {
   title?: string;
   description: string;
+  /** Share image for link previews; defaults to `og.png` */
+  ogImage?: OgImage;
 }
 
-const { title, description } = Astro.props;
+const { title, description, ogImage } = Astro.props;
 const siteName = "Daniel McGrath";
 const fullTitle = title ? `${title} · ${siteName}` : siteName;
 const ogTags = openGraphTags({
@@ -22,6 +24,7 @@ const ogTags = openGraphTags({
   pathname: Astro.url.pathname,
   // `site` is set in astro.config; Astro.url only falls back to localhost
   site: Astro.site ?? Astro.url,
+  image: ogImage,
 });
 ---
 

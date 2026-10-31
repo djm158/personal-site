@@ -121,7 +121,7 @@ LaTeX (then the PDF) is generated from it. Nothing parses LaTeX in the build.
 - [x] Per-page titles and descriptions; favicon from the nav avatar (`src/assets/avatar-mini.svg`, also used in the header; 32px `favicon.ico` and `apple-touch-icon.png` rendered from it)
 - [x] Open Graph tags (agent: og-tags)
 - [x] Open Graph share image: `public/og.png` (1200×630, the avatar hero from the design canvas, already in the repo) as `og:image` on every page, with an absolute URL, `og:image:width`/`og:image:height`/`og:image:alt`, and the large `twitter:card` (`summary_large_image`); update `open-graph.ts` and its tests (agent: og-image)
-- [ ] Résumé share image: `/resume` uses `public/og-resume.png` (1200×630, already in the repo) for `og:image` and its alt text; every other page keeps `og.png`. Let a page pass its own image through `Layout`; update `open-graph.ts` and its tests (agent: og-resume-image)
+- [x] Résumé share image: `/resume` uses `public/og-resume.png` (1200×630, already in the repo) for `og:image` and its alt text; every other page keeps `og.png`. Let a page pass its own image through `Layout`; update `open-graph.ts` and its tests (agent: og-resume-image)
 - [x] Sitemap (agent: sitemap)
 - [ ] RSS feed (deferred: waits for the blog)
 - [ ] 404 page design session in claude.ai/design (me)

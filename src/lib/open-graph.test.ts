@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest";
-import { OG_IMAGE, openGraphTags } from "./open-graph";
+import { OG_IMAGE, RESUME_OG_IMAGE, openGraphTags } from "./open-graph";
 
 const site = new URL("https://danielmcgrath.xyz");
 
@@ -52,6 +52,29 @@ describe("openGraphTags", () => {
     expect(tags).toContainEqual({
       property: "og:image",
       content: "https://deploy-preview-1--example.netlify.app/og.png",
+    });
+  });
+
+  test("uses a page's own image and its alt text when given one", () => {
+    const tags = openGraphTags({
+      title: "Résumé · Daniel McGrath",
+      description: "Roles and skills.",
+      siteName: "Daniel McGrath",
+      pathname: "/resume/",
+      site,
+      image: RESUME_OG_IMAGE,
+    });
+    expect(tags).toContainEqual({
+      property: "og:image",
+      content: "https://danielmcgrath.xyz/og-resume.png",
+    });
+    expect(tags).toContainEqual({
+      property: "og:image:alt",
+      content: RESUME_OG_IMAGE.alt,
+    });
+    expect(tags).not.toContainEqual({
+      property: "og:image:alt",
+      content: OG_IMAGE.alt,
     });
   });
 });
