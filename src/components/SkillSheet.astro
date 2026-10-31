@@ -140,11 +140,7 @@ const skillTotal = skills.reduce((n, group) => n + group.items.length, 0);
 <script>
   import { $selectedSkills } from "../lib/resume/skill-store";
   import { matchingRoles, toggleSkill } from "../lib/resume/skills";
-  import {
-    type DragSample,
-    releaseVelocity,
-    shouldDismiss,
-  } from "../lib/sheet-drag";
+  import { dragToDismiss } from "../lib/sheet-drag";
 
   const sheet = document.querySelector<HTMLDialogElement>("[data-skill-sheet]");
   const head = document.querySelector<HTMLElement>("[data-skill-sheet-head]");
@@ -157,7 +153,7 @@ const skillTotal = skills.reduce((n, group) => n + group.items.length, 0);
   const status = document.querySelector("[data-skill-status]");
   const clears = document.querySelectorAll<HTMLElement>("[data-skill-clear]");
 
-  if (sheet && openBtn && doneBtn && idle && picked) {
+  if (sheet && head && openBtn && doneBtn && idle && picked) {
     const reduceMotion = matchMedia("(prefers-reduced-motion: reduce)");
     const articles = [
       ...document.querySelectorAll<HTMLElement>("article[data-role]"),
@@ -185,66 +181,16 @@ const skillTotal = skills.reduce((n, group) => n + group.items.length, 0);
         ?.focus();
     });
     doneBtn.addEventListener("click", closeSheet);
-    // Pull down from the head to dismiss. While dragging, `data-dragging` turns the transition
-    // off and an inline translate follows the finger; on release the inline style goes and the
-    // CSS animates from the dragged position, back up or (via closeSheet) down and out.
-    let drag: { id: number; startY: number; height: number; samples: DragSample[] } | null =
-      null;
-    // Set when a drag moves the sheet, so the click that can follow letting go over the
-    // backdrop doesn't close it. Reset on the next press.
-    let dragMoved = false;
-    const offsetOf = (e: PointerEvent) =>
-      drag ? Math.max(0, e.clientY - drag.startY) : 0;
-    const endDrag = (e: PointerEvent, cancelled: boolean) => {
-      if (!drag || e.pointerId !== drag.id) return;
-      const offset = offsetOf(e);
-      drag.samples.push({ y: e.clientY, t: e.timeStamp });
-      const dismiss =
-        !cancelled &&
-        shouldDismiss(offset, drag.height, releaseVelocity(drag.samples));
-      drag = null;
-      sheet.removeAttribute("data-dragging");
-      sheet.style.removeProperty("translate");
-      if (dismiss) closeSheet();
-    };
-    // Presses on the backdrop land on the dialog too
-    sheet.addEventListener("pointerdown", () => (dragMoved = false));
-    head?.addEventListener("pointerdown", (e) => {
-      if (drag || !e.isPrimary || e.button !== 0) return;
-      if (sheet.hasAttribute("data-closing")) return;
-      // The head's Clear and Done buttons stay buttons
-      if (e.target instanceof Element && e.target.closest("button")) return;
-      head.setPointerCapture(e.pointerId);
-      drag = {
-        id: e.pointerId,
-        startY: e.clientY,
-        height: sheet.offsetHeight,
-        samples: [{ y: e.clientY, t: e.timeStamp }],
-      };
-      sheet.setAttribute("data-dragging", "");
-    });
-    head?.addEventListener("pointermove", (e) => {
-      if (!drag || e.pointerId !== drag.id) return;
-      const offset = offsetOf(e);
-      if (offset > 0) dragMoved = true;
-      drag.samples.push({ y: e.clientY, t: e.timeStamp });
-      sheet.style.translate = `0 ${offset}px`;
-    });
-    head?.addEventListener("pointerup", (e) => endDrag(e, false));
-    head?.addEventListener("pointercancel", (e) => endDrag(e, true));
+    // Pull down from the head to dismiss
+    const { reset, consumeDrag } = dragToDismiss(sheet, head, closeSheet);
     // Escape mid-drag closes the sheet without a pointerup, so don't carry the drag over to
     // the next open
-    sheet.addEventListener("close", () => {
-      drag = null;
-      sheet.removeAttribute("data-dragging");
-      sheet.style.removeProperty("translate");
-    });
+    sheet.addEventListener("close", reset);
 
     // A click on the dialog itself, not its contents, is a click on the backdrop
     sheet.addEventListener("click", (e) => {
       if (e.target === sheet) {
-        if (dragMoved) return;
-        closeSheet();
+        if (!consumeDrag()) closeSheet();
         return;
       }
       if (!(e.target instanceof Element)) return;
