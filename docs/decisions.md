@@ -130,6 +130,13 @@ A plain `[animation-delay:…]` class is reset by the `animate-*` shorthand, and
 plain `@theme` resolves its `var()` once on `:root`, so every letter hopped together. Caught
 by Dan on the preview, not by code review. Now a rule in `CLAUDE.md`.
 
+**Smooth section scrolling in CSS, offset by the header height** · 2026-10-31 · agent/smooth-scroll (agent)
+`scroll-behavior: smooth` under `prefers-reduced-motion: no-preference` and
+`scroll-padding-top` on `html`, instead of porting the design's `jump()`. The header's height
+lives in `--header-h` (69px under 760px, 63px above), written by hand from its padding and
+tallest control, since CSS can't measure it. The résumé roles' `scroll-margin-top` now
+subtracts it, so they land where they did before.
+
 **Accessible split-letter heading** · 2026-10-29 · #7 (agent)
 "Dan." is split into spans for the per-letter hover, which are `aria-hidden`, with an `sr-only`
 copy so screen readers read one word.

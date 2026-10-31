@@ -108,6 +108,22 @@
   html:has(dialog:modal) {
     overflow: hidden;
   }
+
+  /* height of the sticky header: py-3 around its tallest child, plus the 1px border.
+     Under 760px that's the 44px Menu button (69px); above, the 38px Résumé button (63px).
+     Anchor targets stop below it. Update these if the header's padding or controls change */
+  html {
+    --header-h: 69px;
+    scroll-padding-top: var(--header-h);
+
+    @variant nav {
+      --header-h: 63px;
+    }
+
+    @media (prefers-reduced-motion: no-preference) {
+      scroll-behavior: smooth;
+    }
+  }
 }
 
 @theme inline {
