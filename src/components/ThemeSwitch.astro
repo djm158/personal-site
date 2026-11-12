@@ -73,7 +73,13 @@ const s = sizes[size];
 </button>
 
 <script>
-  import { THEME_EVENT, THEME_KEY, readTheme, setTheme } from "../lib/theme";
+  import {
+    THEME_EVENT,
+    THEME_KEY,
+    readTheme,
+    resolveTheme,
+    setTheme,
+  } from "../lib/theme";
 
   // Astro runs this once however many switches the page has
   const switches = document.querySelectorAll<HTMLButtonElement>(
@@ -103,6 +109,7 @@ const s = sizes[size];
     } catch {
       // storage blocked: treat as nothing saved
     }
-    if (stored === null) setTheme(e.matches ? "night" : "day", { save: false });
+    // a saved choice resolves to itself, so this only moves the theme when nothing valid is saved
+    setTheme(resolveTheme(stored, e.matches), { save: false });
   });
 </script>

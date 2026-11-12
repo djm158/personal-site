@@ -150,9 +150,9 @@ copy so screen readers read one word.
 **No hero avatar on phones, a departure from the design** · 2026-10-31 · #34
 Below 760px the hero avatar was about 340px tall and pushed the heading, intro and buttons
 below the fold. It is hidden there; from 760px up nothing changes. A 96px version was tried
-first and still took too much of the screen. Trade-off: the avatar is the night-mode button, so
-phones have no way to switch themes until night mode gets another control there (see
-`BACKLOG.md`). The nav avatar stays.
+first and still took too much of the screen. Trade-off: the avatar is the night-mode easter
+egg, so phones don't get the five clicks; they switch themes with the switch in the mobile menu
+(see the night-mode switch entry under Site features). The nav avatar stays.
 
 ## Site features
 
