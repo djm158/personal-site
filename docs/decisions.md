@@ -168,6 +168,14 @@ only declares `lang="en"`.
 `@astrojs/sitemap` picks new routes up at build time. `robots.txt` was the agent's addition:
 the standard way crawlers find the sitemap.
 
+**Favicon and touch icon are committed files, exported by hand** · 2026-11-12 · static-favicon
+`favicon.ico` and `apple-touch-icon.png` in `public/` were re-exported once from
+`avatar-mini.svg` and are not generated in the build. Generating them (PR #35, closed) took
+about 200 lines: sharp's SVG renderer paints `var()` and `oklch()` fills black, so it needed
+its own colour conversion. That is too much for two fallback images of an avatar that rarely
+changes; modern browsers use the SVG icon anyway. Re-export both when the avatar changes. The
+touch icon sits inset on the day page background, because iOS turns transparent pixels black.
+
 ## Operations
 
 **CI runs check, test and build on every PR** · 2026-10-29 · 98c3594
