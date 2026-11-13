@@ -53,7 +53,7 @@ with `astro dev stop`, `astro dev status` and `astro dev logs`.
   The only breakpoint is 760px, where the header collapses to a menu. There are two
   exceptions. `/resume` at 1000px, the width where the roles and picker columns stop wrapping:
   below it the picker is a sticky bar and bottom sheet (`SkillSheet`), above it a sticky
-  sidebar. And the home hero at 560px (`--breakpoint-hero`), the narrowest the text and the
+  sidebar. And the home hero at 580px (`--breakpoint-hero`), the narrowest the text and the
   avatar fit side by side: below it the avatar is hidden, above it the hero is one row that
   never wraps.
 - **Native elements first.** For example `<dialog>` for the mobile menu. Respect

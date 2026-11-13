@@ -18,8 +18,8 @@ const noSidewaysScroll = (page: Page) =>
       document.documentElement.clientWidth,
   );
 
-// 560 is the hero breakpoint, the narrowest the avatar shows at
-for (const width of [1280, 560]) {
+// 580 is the hero breakpoint, the narrowest the avatar shows at
+for (const width of [1280, 580]) {
   test(`at ${width}px, five clicks start the ride and five more end it`, async ({
     page,
   }) => {
@@ -43,9 +43,15 @@ for (const width of [1280, 560]) {
     await expect(page.locator("html")).not.toHaveAttribute("data-theme");
 
     // long enough to ride in, climb and lap; he's still going, and the page is no wider
-    for (let second = 0; second < 20; second++) {
-      await page.clock.runFor(1000);
+    // and on the ring he's never cut off by the right edge of the screen
+    const rider = page.locator("[data-ride-rider]");
+    for (let tick = 0; tick < 80; tick++) {
+      await page.clock.runFor(250);
       expect(await noSidewaysScroll(page)).toBe(true);
+      if ((await ring.getAttribute("data-ridden")) !== null) {
+        const box = await rider.boundingBox();
+        expect(box!.x + box!.width).toBeLessThanOrEqual(width);
+      }
     }
     await expect(layer).toBeVisible();
     await expect(ring).toHaveAttribute("data-ridden");

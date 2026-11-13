@@ -36,8 +36,8 @@
   /* layout */
   --breakpoint-nav: 760px;
   /* the home hero shows its avatar beside the text from here: the narrowest the text column
-     and a 180px avatar fit in one row */
-  --breakpoint-hero: 560px;
+     and a 180px avatar, inset from the edge, fit in one row */
+  --breakpoint-hero: 580px;
   --spacing-gutter: clamp(20px, 4vw, 48px);
   --container-page: 1240px;
   --container-blog: 960px;

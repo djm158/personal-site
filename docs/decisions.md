@@ -163,13 +163,16 @@ first and still took too much of the screen. Trade-off: the avatar is the night-
 egg, so phones don't get the five clicks; they switch themes with the switch in the mobile menu
 (see the night-mode switch entry under Site features). The nav avatar stays.
 
-**The hero is one row from 560px, avatar included** · 2026-11-12 · #43
+**The hero is one row from 580px, avatar included** · 2026-11-12 · #43
 Reverses part of #34, which hid the avatar below 760px. Between 760px and about 900px the hero
 wrapped, with a 340px avatar stacked above the text, and the avatar's width also depended on
-the window's height (`40svh`). Now a `--breakpoint-hero` token at 560px shows the avatar, and
+the window's height (`40svh`). Now a `--breakpoint-hero` token at 580px shows the avatar, and
 from there the hero is a single row that never wraps: the text column takes the space left
-and the avatar is `clamp(180px, 30vw, 420px)` wide. 560px is where the 68px heading (about
-260px wide) still fits beside a 180px avatar. Phones still get no hero avatar. Tablets get
+and the avatar is `clamp(180px, 30vw, 420px)` wide, with a right margin of 18% of its width.
+The margin is close to the design's inset, and it is what keeps the cyclist on screen as he
+passes the right of the ring: without it he was cut off below about 1300px. 580px, not the
+backlog item's 560px, is where the 68px heading (263px wide) still fits beside a 180px avatar
+with that margin, with about 20px to spare. Phones still get no hero avatar. Tablets get
 the cyclist easter egg with it.
 
 **No cursor glow in the hero, a departure from the design** · 2026-11-12 · agent/remove-hero-glow
@@ -220,7 +223,7 @@ five more send him off. Dan specified the behaviour, the route, the speeds and t
 (a pure, tested `lib/ride.ts`; a `<script>` that writes `transform` each frame; no React
 island). The calls below were the agent's:
 
-- **Wherever the avatar shows, so from 560px (agent).** The spec asked for a 390px check, but
+- **Wherever the avatar shows, so from 580px (agent).** The spec asked for a 390px check, but
   phones have no hero avatar (#34), so there is nothing to tap and no ring to ride. The ride
   needs the avatar; if the window narrows past the hero breakpoint mid-ride, he is removed.
   The button has `touch-action: manipulation`, so five quick taps don't zoom the page.
