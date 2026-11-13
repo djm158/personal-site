@@ -121,8 +121,7 @@ The mobile menu and the skill sheet are `<dialog>` elements, which give focus tr
 to close and a backdrop for free.
 
 **Respect reduced motion everywhere** · `CLAUDE.md`
-Animations sit behind `motion-safe:`. The marquee stops, the hero glow hides, and the avatar
-ring stays still.
+Animations sit behind `motion-safe:`. The marquee stops and the avatar ring stays still.
 
 **Reduced motion keeps colour, drops movement** · 2026-10-31 · `agent/reduced-motion` (agent)
 Under `prefers-reduced-motion`, hover and press keep their colour, shadow and indent changes,
@@ -163,6 +162,11 @@ below the fold. It is hidden there; from 760px up nothing changes. A 96px versio
 first and still took too much of the screen. Trade-off: the avatar is the night-mode easter
 egg, so phones don't get the five clicks; they switch themes with the switch in the mobile menu
 (see the night-mode switch entry under Site features). The nav avatar stays.
+
+**No cursor glow in the hero, a departure from the design** · 2026-11-12 · agent/remove-hero-glow
+The soft glow that trailed the cursor across the hero is gone. It's a stock "spotlight" effect
+common on templated and AI-generated sites, and it competed with the avatar's cursor-following
+eyes, which are now the hero's one pointer interaction.
 
 ## Site features
 
@@ -213,7 +217,7 @@ island). The calls below were the agent's:
 - **Reduced motion shows the start toast, "Out for a ride." (agent).** The spec said "only a
   toast" without saying which. Nothing else changes, so every fifth click shows it again.
 - **One layer over the hero and marquee, clipped sideways only (agent).** The hero clips its
-  own overflow for the cursor glow, so the rider can't live inside it. A `relative` wrapper
+  own overflow, so the rider can't live inside it. A `relative` wrapper
   now holds the hero, the marquee and the ride layer; the layer uses `overflow-x: clip`, so
   riding in and out never widens the page while he can still stand above the ring.
 - **He goes under the sticky header, not over it (agent).** The layer is page content

@@ -49,3 +49,51 @@ test("the mobile menu has the switch, named by its label", async ({ page }) => {
   await expect(page.locator("html")).toHaveAttribute("data-theme", "night");
   await expect(toggle).toHaveAttribute("aria-checked", "true");
 });
+
+test("a choice in one tab carries to another open tab", async ({ page }) => {
+  await page.emulateMedia({ colorScheme: "light" });
+  await page.goto("/");
+  // Same context, so the two tabs share localStorage and get each other's storage events
+  const other = await page.context().newPage();
+  await other.emulateMedia({ colorScheme: "light" });
+  await other.goto("/resume/");
+  const otherToggle = other
+    .getByRole("banner")
+    .getByRole("switch", { name: "Night mode" });
+  await expect(otherToggle).toHaveAttribute("aria-checked", "false");
+
+  await page
+    .getByRole("banner")
+    .getByRole("switch", { name: "Night mode" })
+    .click();
+
+  await expect(other.locator("html")).toHaveAttribute("data-theme", "night");
+  await expect(otherToggle).toHaveAttribute("aria-checked", "true");
+
+  // And back again, from the other tab
+  await otherToggle.click();
+  await expect(page.locator("html")).not.toHaveAttribute("data-theme", "night");
+});
+
+test("the switches say night is on before any module script runs", async ({
+  page,
+}) => {
+  // Drop the page's module scripts, so only the inline ones can set aria-checked
+  await page.route("/", async (route) => {
+    const response = await route.fetch();
+    const html = (await response.text()).replace(
+      /<script type="module"[\s\S]*?<\/script>/g,
+      "",
+    );
+    await route.fulfill({ response, body: html });
+  });
+  await page.emulateMedia({ colorScheme: "dark" });
+  await page.goto("/");
+
+  await expect(page.locator("html")).toHaveAttribute("data-theme", "night");
+  const switches = page.locator("[data-theme-switch]");
+  await expect(switches).toHaveCount(2);
+  for (const s of await switches.all()) {
+    await expect(s).toHaveAttribute("aria-checked", "true");
+  }
+});

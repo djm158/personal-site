@@ -25,7 +25,8 @@ const s = sizes[size];
 ---
 
 <!-- Night mode on or off. The knob and icon follow [data-theme] in CSS, so they're right before
-     the script runs; the script keeps aria-checked in step. Give it a name with aria-label or a
+     the script runs; the inline script sets aria-checked as the button is parsed, and the module
+     script keeps it in step. Give it a name with aria-label or a
      <label for>. -->
 <button
   type="button"
@@ -71,6 +72,14 @@ const s = sizes[size];
     </svg>
   </span>
 </button>
+<!-- Runs as the button is parsed, so a screen reader never hears "off" in night mode while the
+     module script below is still loading. Repeated for each switch, unlike the module script. -->
+<script is:inline>
+  document.currentScript.previousElementSibling.setAttribute(
+    "aria-checked",
+    String(document.documentElement.dataset.theme === "night"),
+  );
+</script>
 
 <script>
   import {
@@ -101,8 +110,16 @@ const s = sizes[size];
   document.addEventListener(THEME_EVENT, sync);
   sync();
 
+  const systemNight = matchMedia("(prefers-color-scheme: dark)");
+
+  // A choice made in another tab: follow it here without saving it again
+  window.addEventListener("storage", (e) => {
+    if (e.storageArea !== localStorage || e.key !== THEME_KEY) return;
+    setTheme(resolveTheme(e.newValue, systemNight.matches), { save: false });
+  });
+
   // Until a choice is saved, keep following the system as it changes (e.g. at sunset)
-  matchMedia("(prefers-color-scheme: dark)").addEventListener("change", (e) => {
+  systemNight.addEventListener("change", (e) => {
     let stored = null;
     try {
       stored = localStorage.getItem(THEME_KEY);
