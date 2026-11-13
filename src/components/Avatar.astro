@@ -190,6 +190,8 @@ const { class: className, ...rest } = Astro.props;
     };
 
     const follow = (event: PointerEvent) => {
+      // Below the nav breakpoint the hero hides the avatar: skip the frame and layout read
+      if (!avatar.checkVisibility()) return;
       x = event.clientX;
       y = event.clientY;
       frame ||= requestAnimationFrame(look);
