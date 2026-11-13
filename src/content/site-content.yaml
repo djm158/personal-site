@@ -64,11 +64,8 @@ contact:
       - A blog post
       - Just saying hi
     nameLabel: Name
-    namePlaceholder: Your name
     emailLabel: Email
-    emailPlaceholder: you@domain.com
     messageLabel: Message
-    messagePlaceholder: Tell me a little about it…
     submit: Send message →
     errors:
       name: Who am I talking to?
