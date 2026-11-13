@@ -87,6 +87,7 @@ const s = sizes[size];
     THEME_KEY,
     readTheme,
     resolveTheme,
+    savedTheme,
     setTheme,
   } from "../lib/theme";
 
@@ -120,13 +121,7 @@ const s = sizes[size];
 
   // Until a choice is saved, keep following the system as it changes (e.g. at sunset)
   systemNight.addEventListener("change", (e) => {
-    let stored = null;
-    try {
-      stored = localStorage.getItem(THEME_KEY);
-    } catch {
-      // storage blocked: treat as nothing saved
-    }
     // a saved choice resolves to itself, so this only moves the theme when nothing valid is saved
-    setTheme(resolveTheme(stored, e.matches), { save: false });
+    setTheme(resolveTheme(savedTheme(), e.matches), { save: false });
   });
 </script>
