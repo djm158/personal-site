@@ -49,3 +49,28 @@ test("the mobile menu has the switch, named by its label", async ({ page }) => {
   await expect(page.locator("html")).toHaveAttribute("data-theme", "night");
   await expect(toggle).toHaveAttribute("aria-checked", "true");
 });
+
+test("a choice in one tab carries to another open tab", async ({ page }) => {
+  await page.emulateMedia({ colorScheme: "light" });
+  await page.goto("/");
+  // Same context, so the two tabs share localStorage and get each other's storage events
+  const other = await page.context().newPage();
+  await other.emulateMedia({ colorScheme: "light" });
+  await other.goto("/resume/");
+  const otherToggle = other
+    .getByRole("banner")
+    .getByRole("switch", { name: "Night mode" });
+  await expect(otherToggle).toHaveAttribute("aria-checked", "false");
+
+  await page
+    .getByRole("banner")
+    .getByRole("switch", { name: "Night mode" })
+    .click();
+
+  await expect(other.locator("html")).toHaveAttribute("data-theme", "night");
+  await expect(otherToggle).toHaveAttribute("aria-checked", "true");
+
+  // And back again, from the other tab
+  await otherToggle.click();
+  await expect(page.locator("html")).not.toHaveAttribute("data-theme", "night");
+});
