@@ -36,13 +36,18 @@ const ogTags = openGraphTags({
     <meta name="description" content={description} />
     <title>{fullTitle}</title>
     {ogTags.map((tag) => <meta {...tag} />)}
-    <!-- Night mode from an earlier visit, set before first paint so the page doesn't flash day first -->
+    <!-- The theme before first paint, so the page doesn't flash day first: a saved choice wins,
+         otherwise the system's colour scheme (the same rule as resolveTheme in lib/theme) -->
     <script is:inline define:vars={{ key: THEME_KEY }}>
+      let stored = null;
       try {
-        if (localStorage.getItem(key) === "night") {
-          document.documentElement.dataset.theme = "night";
-        }
+        stored = localStorage.getItem(key);
       } catch {}
+      const night =
+        stored === "night" ||
+        (stored !== "day" &&
+          matchMedia("(prefers-color-scheme: dark)").matches);
+      if (night) document.documentElement.dataset.theme = "night";
     </script>
     <link rel="icon" href="/favicon.ico" sizes="32x32" />
     <link rel="icon" href={AvatarMini.src} type="image/svg+xml" />

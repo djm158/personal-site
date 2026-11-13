@@ -40,7 +40,7 @@ const { class: className, hints, hintClass, ...rest } = Astro.props;
 </div>
 
 <script>
-  import { THEME_KEY, hintFor, poke, readTheme, toastFor, type Theme } from "../lib/theme";
+  import { hintFor, poke, readTheme, setTheme, toastFor, type Theme } from "../lib/theme";
 
   const toggle = document.querySelector<HTMLButtonElement>("[data-night-toggle]");
   const toast = document.querySelector<HTMLElement>("[data-night-toast]");
@@ -57,15 +57,9 @@ const { class: className, hints, hintClass, ...rest } = Astro.props;
       if (hint) hint.textContent = hintFor(count, hints);
       if (!next.toggle) return;
 
-      const root = document.documentElement;
-      const theme: Theme = readTheme(root.dataset.theme ?? null) === "night" ? "day" : "night";
-      if (theme === "night") root.dataset.theme = "night";
-      else delete root.dataset.theme;
-      try {
-        localStorage.setItem(THEME_KEY, theme);
-      } catch {
-        // storage blocked: the switch still works for this page
-      }
+      const current = readTheme(document.documentElement.dataset.theme ?? null);
+      const theme: Theme = current === "night" ? "day" : "night";
+      setTheme(theme);
 
       toast.textContent = toastFor(theme);
       toast.dataset.shown = "";
