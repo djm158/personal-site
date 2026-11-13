@@ -6,9 +6,10 @@ of earlier runs; everything you need is in git, GitHub and this prompt. The loop
 branch: see **This run** above. You build that one item, open a PR, and exit. A review runs on
 the PR after you.
 
-`CLAUDE.md` says Dan builds this site himself and agents shouldn't write features. For this
-run, that is lifted for your item, and only that item. Everything else in `CLAUDE.md`
-(conventions, checks, "mention, don't fix") still applies.
+`CLAUDE.md` says to write the code for what Dan asks and not to push or open a PR unless he
+asks. For this run, your item is what he asked for, and pushing its branch and opening its PR
+are part of it. Stay within that one item. Everything else in `CLAUDE.md` (conventions, checks,
+"mention, don't fix") still applies.
 
 ## Settings
 

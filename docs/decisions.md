@@ -227,6 +227,13 @@ at 06:17 UTC on the 1st of each month, and can also be run by hand.
 
 ## Agent workflow (the backlog loop)
 
+**Agents write most of the code; Dan specifies, reviews and decides** · 2026-11-12 · `AGENTS.md`
+The site started as hand-coding practice, with agents told to explain and not write features.
+Dan is now using it to practise agentic engineering instead. `AGENTS.md` ("How to help") says
+agents write what he asks, design and content stay his calls, and small, well-specified
+follow-ups go in the backlog as `(agent: slug)`. The loop's build prompt no longer lifts a
+"don't write features" rule; it says the item is the request and its PR is part of it.
+
 The full reasoning, with sources, is in [`backlog-loop.md` §4](backlog-loop.md#4-decisions-and-why).
 The main calls:
 
