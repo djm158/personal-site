@@ -25,7 +25,8 @@ const s = sizes[size];
 ---
 
 <!-- Night mode on or off. The knob and icon follow [data-theme] in CSS, so they're right before
-     the script runs; the script keeps aria-checked in step. Give it a name with aria-label or a
+     the script runs; the inline script sets aria-checked as the button is parsed, and the module
+     script keeps it in step. Give it a name with aria-label or a
      <label for>. -->
 <button
   type="button"
@@ -71,6 +72,14 @@ const s = sizes[size];
     </svg>
   </span>
 </button>
+<!-- Runs as the button is parsed, so a screen reader never hears "off" in night mode while the
+     module script below is still loading. Repeated for each switch, unlike the module script. -->
+<script is:inline>
+  document.currentScript.previousElementSibling.setAttribute(
+    "aria-checked",
+    String(document.documentElement.dataset.theme === "night"),
+  );
+</script>
 
 <script>
   import {
