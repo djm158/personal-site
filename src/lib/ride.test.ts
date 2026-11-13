@@ -19,6 +19,7 @@ import {
   pedalStroke,
   poseFor,
   poseOnCurve,
+  riderCentre,
   riderWidthFor,
   ringPose,
   sampleCubic,
@@ -100,6 +101,24 @@ describe("riderWidthFor", () => {
     // he stands 0.589 of his width tall, so 50px of headroom fits a rider about 85px wide
     expect(riderWidthFor(162, 50)).toBeCloseTo(84.8, 1);
     expect(riderWidthFor(162, 10)).toBe(64);
+  });
+});
+
+describe("riderCentre", () => {
+  // at 112px wide the middle of him is 35px from the ground
+  test("is above the wheels on the flat", () => {
+    const centre = riderCentre({ x: 100, y: 480, rot: 0 }, 112);
+    expect(centre.x).toBeCloseTo(100);
+    expect(centre.y).toBeCloseTo(445);
+  });
+
+  test("is outside the ring all the way round", () => {
+    const right = riderCentre(ringPose(ring, 0), 112);
+    expect(right.x).toBeCloseTo(1030 + 162 + 35);
+    expect(right.y).toBeCloseTo(250);
+    const bottom = riderCentre(ringPose(ring, Math.PI / 2), 112);
+    expect(bottom.x).toBeCloseTo(1030);
+    expect(bottom.y).toBeCloseTo(250 + 162 + 35);
   });
 });
 

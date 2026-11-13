@@ -60,6 +60,18 @@ export function riderWidthFor(ringRadius: number, headroom: number): number {
   );
 }
 
+// How far the middle of him (about the hips) is above the ground, as a share of his width
+const RIDER_CENTRE_RATIO = 50 / RIDER_VIEWBOX.width;
+
+/** The middle of the rider for a pose: up from where the wheels touch, whichever way up he is. */
+export function riderCentre(pose: Pose, riderWidth: number): Point {
+  const up = RIDER_CENTRE_RATIO * riderWidth;
+  return {
+    x: pose.x + Math.sin(pose.rot) * up,
+    y: pose.y - Math.cos(pose.rot) * up,
+  };
+}
+
 /** How far the wheels have turned, in radians, after rolling `travelled` px. */
 export function wheelTurn(travelled: number, riderWidth: number): number {
   return travelled / ((WHEEL_RADIUS * riderWidth) / RIDER_VIEWBOX.width);

@@ -96,3 +96,55 @@ test("the ride ends if the window gets too narrow for the avatar", async ({
   await page.setViewportSize({ width: 480, height: 900 });
   await expect(layer).toBeHidden();
 });
+
+test("the avatar's eyes follow the cyclist, then go back to the cursor", async ({
+  page,
+}) => {
+  await page.clock.install();
+  await page.goto("/");
+  // how far the pupils have moved from centre, in the avatar's SVG units (4.5 at most)
+  const pupils = async () => {
+    const transform = await page
+      .locator("[data-pupils]")
+      .getAttribute("transform");
+    const [x, y] = (transform ?? "translate(0 0)").match(/-?[\d.]+/g)!;
+    return { x: Number(x), y: Number(y) };
+  };
+
+  // he sets off from the bottom left, and the eyes go to him though the cursor is on the avatar
+  await clickAvatar(page, 5);
+  await page.clock.runFor(100);
+  expect((await pupils()).x).toBeLessThan(-2);
+  expect((await pupils()).y).toBeGreaterThan(0);
+
+  // the cursor is ignored while he's out
+  await page.mouse.move(1270, 80);
+  await page.clock.runFor(100);
+  expect((await pupils()).x).toBeLessThan(-2);
+
+  // on the ring the eyes go round with him: to each side, and up and down
+  const seen = { left: false, right: false, up: false, down: false };
+  for (let tick = 0; tick < 100; tick++) {
+    await page.clock.runFor(200);
+    const { x, y } = await pupils();
+    seen.left ||= x < -3;
+    seen.right ||= x > 3;
+    seen.up ||= y < -3;
+    seen.down ||= y > 3;
+  }
+  expect(seen).toEqual({ left: true, right: true, up: true, down: true });
+
+  // once he's gone, they return to where the cursor was left: up and to the right
+  await clickAvatar(page, 5);
+  await page.mouse.move(1270, 80);
+  await page.clock.runFor(10_000);
+  await expect(page.locator("[data-ride-layer]")).toBeHidden();
+  const after = await pupils();
+  expect(after.x).toBeGreaterThan(2);
+  expect(after.y).toBeLessThan(0);
+
+  // and follow it again
+  await page.mouse.move(10, 700);
+  await page.clock.runFor(100);
+  expect((await pupils()).x).toBeLessThan(-2);
+});

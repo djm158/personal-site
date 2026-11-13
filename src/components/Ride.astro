@@ -51,6 +51,7 @@ const { copy } = Astro.props;
 </div>
 
 <script>
+  import { LOOK_EVENT, type LookTarget } from "../lib/avatar";
   import {
     RIDER_ANCHOR,
     RIDER_VIEWBOX,
@@ -63,6 +64,7 @@ const { copy } = Astro.props;
     isLeaving,
     pedalStroke,
     poseFor,
+    riderCentre,
     riderWidthFor,
     sendOff,
     startRide,
@@ -155,6 +157,13 @@ const { copy } = Astro.props;
       return true;
     };
 
+    // The avatar's eyes follow him, not the cursor, from the moment he sets off until he's
+    // gone; null hands them back
+    const watch = (target: LookTarget) =>
+      document.dispatchEvent(
+        new CustomEvent<LookTarget>(LOOK_EVENT, { detail: target }),
+      );
+
     const draw = (now: Ride, on: Route) => {
       const pose = poseFor(now, on);
       const scale = riderWidth / RIDER_VIEWBOX.width;
@@ -179,6 +188,11 @@ const { copy } = Astro.props;
       parts.farThigh?.setAttribute("d", stroke.far.thigh);
       parts.farShin?.setAttribute("d", stroke.far.shin);
       parts.farShoe?.setAttribute("d", stroke.far.shoe);
+
+      // the layer's coordinates to the viewport's, which is what the eyes work in
+      const origin = layer.getBoundingClientRect();
+      const centre = riderCentre(pose, riderWidth);
+      watch({ x: origin.left + centre.x, y: origin.top + centre.y });
       return pose;
     };
 
@@ -189,6 +203,7 @@ const { copy } = Astro.props;
       hint.textContent = "";
       layer.hidden = true;
       delete ring.dataset.ridden;
+      watch(null);
     };
 
     const tick = (time: number) => {

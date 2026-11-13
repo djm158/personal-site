@@ -229,6 +229,13 @@ island). The calls below were the agent's:
   phones have no hero avatar (#34), so there is nothing to tap and no ring to ride. The ride
   needs the avatar; if the window narrows past the hero breakpoint mid-ride, he is removed.
   The button has `touch-action: manipulation`, so five quick taps don't zoom the page.
+- **The avatar watches him.** Dan's call: from the moment he sets off until he's gone, the
+  avatar's eyes follow the cyclist, not the cursor, so they go round with him on the ring
+  and after him as he flies off. How (agent): `Ride.astro` fires an `avatarlook` event on
+  `document` each frame with the middle of the rider in viewport px, and `null` when the ride
+  ends; `Avatar.astro` looks there and ignores the cursor in between. The avatar keeps noting
+  where the cursor is, so the eyes go straight back to it afterwards. An event, not an
+  import, so neither component reaches into the other's markup.
 - **Reduced motion shows the start toast, "Out for a ride." (agent).** The spec said "only a
   toast" without saying which. Nothing else changes, so every fifth click shows it again.
 - **One layer over the hero and marquee, clipped sideways only (agent).** The hero clips its
