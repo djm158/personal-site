@@ -7,7 +7,8 @@ import Container from "../components/Container.astro";
 import Emphasis from "../components/Emphasis.astro";
 import Eyebrow from "../components/Eyebrow.astro";
 import Marquee from "../components/Marquee.astro";
-import NightToggle from "../components/NightToggle.astro";
+import Ride from "../components/Ride.astro";
+import RideTrigger from "../components/RideTrigger.astro";
 import TextLink from "../components/TextLink.astro";
 import Layout from "../layouts/Layout.astro";
 import { formatYearSpan } from "../lib/resume/dates";
@@ -42,65 +43,67 @@ const letterMotions = [
 ---
 
 <Layout description={description}>
-  <section data-hero class="relative overflow-hidden">
-    <!-- a soft glow that trails the cursor; hidden under reduced motion as it drifts by design -->
-    <div
-      data-glow
-      aria-hidden="true"
-      class="absolute top-0 left-0 size-140 -m-70 rounded-full bg-radial from-hair/30 to-transparent to-62% blur-xl pointer-events-none translate-x-225 translate-y-75 transition-[translate] duration-1000 ease-soft motion-reduce:hidden"
-    ></div>
-    <Container class="relative flex flex-wrap-reverse items-center gap-[clamp(40px,5vw,72px)] pt-[clamp(56px,8vw,112px)] pb-[clamp(56px,7vw,96px)]">
-      <div class="flex-[1_1_400px] min-w-0">
-        <div class="inline-flex items-center gap-2.5 font-mono font-medium text-xs uppercase mb-8 text-muted rounded-full border tracking-wider border-line py-1.75 pl-2.75 pr-3.5">
-          <span class="size-2 rounded-full bg-moss motion-safe:animate-pulse"></span>
-          <Emphasis segments={hero.status} />
+  <!-- the hero and the marquee share a wrapper so the cyclist's layer (Ride) can span both -->
+  <div class="relative">
+    <section data-hero class="relative overflow-hidden">
+      <!-- a soft glow that trails the cursor; hidden under reduced motion as it drifts by design -->
+      <div
+        data-glow
+        aria-hidden="true"
+        class="absolute top-0 left-0 size-140 -m-70 rounded-full bg-radial from-hair/30 to-transparent to-62% blur-xl pointer-events-none translate-x-225 translate-y-75 transition-[translate] duration-1000 ease-soft motion-reduce:hidden"
+      ></div>
+      <Container class="relative flex flex-wrap-reverse items-center gap-[clamp(40px,5vw,72px)] pt-[clamp(56px,8vw,112px)] pb-[clamp(56px,7vw,96px)]">
+        <div class="flex-[1_1_400px] min-w-0">
+          <div class="inline-flex items-center gap-2.5 font-mono font-medium text-xs uppercase mb-8 text-muted rounded-full border tracking-wider border-line py-1.75 pl-2.75 pr-3.5">
+            <span class="size-2 rounded-full bg-moss motion-safe:animate-pulse"></span>
+            <Emphasis segments={hero.status} />
+          </div>
+          <h1 class="font-serif text-[clamp(68px,10vw,136px)]/[0.88] tracking-[-0.03em]">
+            {hero.heading.map((segment) =>
+              segment.em ? (
+                <em class="text-accent"><span class="sr-only">{segment.text}</span><span aria-hidden="true" class="inline-flex">{[...segment.text].map((char, i) => (
+                  <span class:list={["inline-block motion-safe:animate-hop motion-safe:transition-[translate,rotate,scale] motion-safe:duration-350 motion-safe:ease-spring", letterMotions[i % letterMotions.length].hover, letterMotions[i % letterMotions.length].intro]}>{char}</span>
+                ))}</span></em>
+              ) : segment.text,
+            )}
+          </h1>
+          <p class="mt-7 font-light text-[clamp(20px,2.1vw,27px)]/[1.35] tracking-[-0.01em] max-w-[30ch] text-pretty">
+            <Emphasis segments={hero.intro} />
+          </p>
+          <div class="flex flex-wrap gap-3 mt-10">
+            <Button
+              href="/resume/"
+              size="xl"
+              class="transition-[translate,box-shadow] duration-200 motion-safe:hover:-translate-y-0.5 hover:shadow-[0_12px_24px_-12px_var(--color-ink)]"
+            >
+              {hero.resumeLink}
+            </Button>
+            <Button href="#contact" variant="outlined" size="xl">
+              {hero.emailLink}
+            </Button>
+          </div>
         </div>
-        <h1 class="font-serif text-[clamp(68px,10vw,136px)]/[0.88] tracking-[-0.03em]">
-          {hero.heading.map((segment) =>
-            segment.em ? (
-              <em class="text-accent"><span class="sr-only">{segment.text}</span><span aria-hidden="true" class="inline-flex">{[...segment.text].map((char, i) => (
-                <span class:list={["inline-block motion-safe:animate-hop motion-safe:transition-[translate,rotate,scale] motion-safe:duration-350 motion-safe:ease-spring", letterMotions[i % letterMotions.length].hover, letterMotions[i % letterMotions.length].intro]}>{char}</span>
-              ))}</span></em>
-            ) : segment.text,
-          )}
-        </h1>
-        <p class="mt-7 font-light text-[clamp(20px,2.1vw,27px)]/[1.35] tracking-[-0.01em] max-w-[30ch] text-pretty">
-          <Emphasis segments={hero.intro} />
-        </p>
-        <div class="flex flex-wrap gap-3 mt-10">
-          <Button
-            href="/resume/"
-            size="xl"
-            class="transition-[translate,box-shadow] duration-200 motion-safe:hover:-translate-y-0.5 hover:shadow-[0_12px_24px_-12px_var(--color-ink)]"
-          >
-            {hero.resumeLink}
-          </Button>
-          <Button href="#contact" variant="outlined" size="xl">
-            {hero.emailLink}
-          </Button>
+        <!-- hidden below the nav breakpoint so the heading, intro and buttons lead on phones (so the
+             five-click cyclist easter egg is desktop-only).
+             the ring and the avatar share the first grid cell, so the hint line below sits outside the ring -->
+        <div class="max-nav:hidden mx-auto shrink-0 w-[min(100%,420px,40svh)] grid justify-items-center gap-3.5">
+          <!-- outside the button so it stays still when the avatar is pressed.
+               the border goes from line to muted while the cyclist is riding round it -->
+          <div
+            data-ride-ring
+            aria-hidden="true"
+            class="row-start-1 col-start-1 self-stretch justify-self-stretch -m-[4%] rounded-full border-[1.5px] border-dashed border-line data-ridden:border-muted transition-colors duration-800 pointer-events-none motion-safe:animate-spin-slow"
+          ></div>
+          <!-- the hint's top margin matches the ring's 4% overhang, so the gap is measured from the ring -->
+          <RideTrigger class="row-start-1 col-start-1 w-full" hintClass="mt-[4%]">
+            <Avatar class="w-full" />
+          </RideTrigger>
         </div>
-      </div>
-      <!-- hidden below the nav breakpoint so the heading, intro and buttons lead on phones (the five-click
-           easter egg is desktop-only; phones use the night-mode switch in the menu).
-           the ring and the avatar share the first grid cell, so the hint line below sits outside the ring -->
-      <div class="max-nav:hidden mx-auto shrink-0 w-[min(100%,420px,40svh)] grid justify-items-center gap-3.5">
-        <!-- outside the button so it stays still when the avatar is pressed -->
-        <div
-          aria-hidden="true"
-          class="row-start-1 col-start-1 self-stretch justify-self-stretch -m-[4%] rounded-full border-[1.5px] border-dashed border-line pointer-events-none motion-safe:animate-spin-slow"
-        ></div>
-        <!-- the hint's top margin matches the ring's 4% overhang, so the gap is measured from the ring -->
-        <NightToggle
-          class="row-start-1 col-start-1 w-full"
-          hints={hero.avatarHints}
-          hintClass="mt-[4%]"
-        >
-          <Avatar class="w-full" />
-        </NightToggle>
-      </div>
-    </Container>
-  </section>
-  {marquee && marquee.length > 0 && <Marquee items={marquee} />}
+      </Container>
+    </section>
+    {marquee && marquee.length > 0 && <Marquee items={marquee} />}
+    <Ride copy={hero.ride} />
+  </div>
   <Container
     as="section"
     id="about"

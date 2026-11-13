@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Rider character and timing</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500&amp;family=Geist+Mono:wght@500&amp;family=Instrument+Serif:ital@0;1&amp;display=swap">
+<style>
+body{margin:0}
+</style>
+</helmet>
+<div style="width: 1280px; height: 760px; box-sizing: border-box; padding: 48px; background: oklch(0.965 0.012 80); color: oklch(0.25 0.025 50); font-family: Geist, system-ui, sans-serif; display: flex; flex-direction: column; gap: 28px">
+<div style="display: flex; flex-direction: column; gap: 10px">
+<p style="margin: 0; font-family: 'Geist Mono', monospace; font-weight: 500; font-size: 12px; letter-spacing: .05em; text-transform: uppercase; color: oklch(0.46 0.025 55)">Easter egg — handoff</p>
+<h1 style="margin: 0; font-family: 'Instrument Serif', serif; font-weight: 400; font-size: 56px; line-height: 1; letter-spacing: -0.02em">Rider, pedal cycle &amp; <em style="color: oklch(0.52 0.12 42)">timing</em></h1>
+</div>
+<div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 24px">
+<sc-for list="{{poses}}" as="pose" hint-placeholder-count="4">
+<div style="background: oklch(0.92 0.024 75); border-radius: 16px; padding: 16px 16px 14px; display: flex; flex-direction: column; align-items: center; gap: 10px">
+<dc-import name="Rider" crank="{{pose.crank}}" wheel="{{pose.wheel}}" size="240" hint-size="240px,150px"></dc-import>
+<p style="margin: 0; align-self: flex-start; font-family: 'Geist Mono', monospace; font-weight: 500; font-size: 12px; color: oklch(0.46 0.025 55)">{{pose.label}}</p>
+</div>
+</sc-for>
+</div>
+<div style="flex: 1; display: flex; gap: 24px; min-height: 0">
+<div style="flex: 0 0 278px; box-sizing: border-box; background: oklch(0.2 0.015 55); border-radius: 16px; padding: 16px 16px 14px; display: flex; flex-direction: column; justify-content: space-between; gap: 10px">
+<dc-import name="Rider" crank="45" wheel="20" night="{{ true }}" size="240" hint-size="240px,150px"></dc-import>
+<div style="display: flex; flex-direction: column; gap: 6px">
+<p style="margin: 0; font-family: 'Geist Mono', monospace; font-weight: 500; font-size: 12px; color: oklch(0.74 0.02 70)">Night — headlight on</p>
+<p style="margin: 0; font-size: 14px; line-height: 1.45; color: oklch(0.93 0.015 80)">Same tokens as night mode. The beam is the only new colour.</p>
+</div>
+</div>
+<div style="flex: 1; min-width: 0; box-sizing: border-box; border: 1px solid oklch(0.25 0.025 50 / 0.14); border-radius: 16px; padding: 20px 24px; display: flex; flex-direction: column; gap: 10px">
+<div style="display: flex; justify-content: space-between; align-items: baseline">
+<p style="margin: 0; font-family: 'Geist Mono', monospace; font-weight: 500; font-size: 12px; letter-spacing: .05em; text-transform: uppercase; color: oklch(0.46 0.025 55)">Route</p>
+<p style="margin: 0; font-family: 'Geist Mono', monospace; font-weight: 500; font-size: 12px; color: oklch(0.46 0.025 55)">5 clicks in · 5 clicks out</p>
+</div>
+<div style="display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 12px; flex: 1">
+<sc-for list="{{steps}}" as="st" hint-placeholder-count="5">
+<div style="display: flex; flex-direction: column; gap: 8px; padding: 14px; border-radius: 12px; background: {{st.bg}}">
+<span style="font-family: 'Geist Mono', monospace; font-weight: 500; font-size: 11px; color: oklch(0.46 0.025 55)">{{st.n}}</span>
+<span style="font-family: 'Instrument Serif', serif; font-size: 24px; line-height: 1.05">{{st.title}}</span>
+<span style="font-size: 13px; line-height: 1.45; color: oklch(0.46 0.025 55)">{{st.body}}</span>
+</div>
+</sc-for>
+</div>
+</div>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1280,"height":760}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const plain = 'oklch(0.25 0.025 50 / 0.05)', lit = 'oklch(0.52 0.12 42 / 0.12)';
+    return {
+      poses: [0, 90, 180, 270].map((crank) => ({ crank, wheel: crank * 2.2, label: 'Crank ' + crank + '°' })),
+      steps: [
+        { n: '01', title: 'Five clicks', body: 'The avatar’s 5th click sends him out. It no longer switches day and night.', bg: plain },
+        { n: '02', title: 'On the marquee', body: 'Rolls in from the left along the strip’s top edge. No track drawn.', bg: lit },
+        { n: '03', title: 'The climb', body: 'Halfway across, a dashed hill fades in and he slows as he climbs it to the ring.', bg: lit },
+        { n: '04', title: 'Laps', body: 'Clockwise on the outside of the dashed ring, wheels out, for as long as you like.', bg: lit },
+        { n: '05', title: 'Five more', body: 'At the top of the ring he peels off, hops and drops off the right edge.', bg: plain }
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,304 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Cyclist easter egg prototype</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500&amp;family=Geist+Mono:wght@500&amp;family=Instrument+Serif:ital@0;1&amp;display=swap">
+<style>
+body{margin:0}
+a{color:oklch(0.25 0.025 50)}a:hover{color:oklch(0.52 0.12 42)}
+@keyframes marquee{to{transform:translateX(-50%)}}
+@keyframes spinslow{to{transform:rotate(360deg)}}
+@keyframes pulse{50%{opacity:.4}}
+.mq{animation:marquee 45s linear infinite}
+.ring{animation:spinslow 80s linear infinite}
+.pulse{animation:pulse 2s ease-in-out infinite}
+.avatar-btn{transition:transform .5s cubic-bezier(.3,1.6,.5,1)}
+.avatar-btn:active{transform:scale(.96) rotate(-3deg)}
+.avatar-btn:focus-visible{outline:2px solid oklch(0.52 0.12 42);outline-offset:6px}
+@media (prefers-reduced-motion: reduce){.mq,.ring,.pulse{animation:none}}
+</style>
+</helmet>
+<div style="position: relative; width: 1280px; height: 860px; overflow: hidden; background: {{c.bg}}; color: {{c.ink}}; font-family: Geist, system-ui, sans-serif; display: flex; flex-direction: column; transition: background .6s, color .6s">
+<section style="position: relative; height: 480px; flex-shrink: 0; box-sizing: border-box; padding: 64px 48px 56px; display: flex; align-items: center">
+<div style="width: 740px">
+<div style="display: inline-flex; align-items: center; gap: 10px; font-family: 'Geist Mono', monospace; font-weight: 500; font-size: 12px; letter-spacing: .05em; text-transform: uppercase; color: {{c.muted}}; border: 1px solid {{c.line}}; border-radius: 999px; padding: 7px 14px 7px 11px; margin-bottom: 32px">
+<span class="pulse" style="width: 8px; height: 8px; border-radius: 50%; background: {{c.moss}}"></span>
+Open to senior frontend and full stack roles
+</div>
+<h1 style="margin: 0; font-family: 'Instrument Serif', serif; font-weight: 400; font-size: 128px; line-height: .88; letter-spacing: -0.03em">Hi, I'm <em style="color: {{c.accent}}">Dan.</em></h1>
+<p style="margin: 28px 0 0; font-weight: 300; font-size: 25px; line-height: 1.35; letter-spacing: -0.01em; max-width: 30ch">A senior product engineer building end-to-end in TypeScript—where clean architecture meets obsessive UI polish.</p>
+</div>
+<div style="position: absolute; left: 865px; top: 100px; width: 330px; display: flex; flex-direction: column; align-items: center">
+<div style="position: relative; width: 300px; height: 300px">
+<div class="ring" aria-hidden="true" style="position: absolute; inset: -12px; border-radius: 50%; border: 1.5px dashed {{ringColor}}; transition: border-color .8s"></div>
+<button type="button" class="avatar-btn" onClick="{{poke}}" aria-label="Avatar of Dan. Click it a few times." style="position: relative; display: block; width: 300px; height: 300px; padding: 0; border: 0; border-radius: 50%; overflow: hidden; background: {{c.surface}}; cursor: pointer">
+<svg viewBox="0 0 200 200" width="300" height="300" aria-hidden="true" style="display: block">
+<circle cx="100" cy="100" r="100" style="fill: {{c.surface}}"></circle>
+<ellipse cx="100" cy="222" rx="90" ry="62" style="fill: {{c.moss}}"></ellipse>
+<rect x="84" y="140" width="32" height="34" rx="10" style="fill: oklch(0.8 0.06 55)"></rect>
+<rect x="54" y="62" width="20" height="44" rx="9" style="fill: oklch(0.6 0.145 42)"></rect>
+<rect x="126" y="62" width="20" height="44" rx="9" style="fill: oklch(0.6 0.145 42)"></rect>
+<circle cx="56" cy="112" r="9" style="fill: oklch(0.8 0.06 55)"></circle>
+<circle cx="144" cy="112" r="9" style="fill: oklch(0.8 0.06 55)"></circle>
+<ellipse cx="100" cy="106" rx="44" ry="50" style="fill: oklch(0.88 0.045 65)"></ellipse>
+<ellipse cx="98" cy="60" rx="50" ry="22" style="fill: oklch(0.6 0.145 42)"></ellipse>
+<ellipse cx="112" cy="46" rx="40" ry="19" transform="rotate(8 112 46)" style="fill: oklch(0.6 0.145 42)"></ellipse>
+<path d="M80 50 Q104 36 136 44" style="fill: none; stroke: oklch(0.48 0.12 38); stroke-opacity: .35; stroke-width: 3; stroke-linecap: round"></path>
+<path d="M58 116 C59.33 148 73.33 166 100 170 C126.67 166 140.67 148 142 116 C138 129.33 130.67 135.67 120 135 C112.98 133.6 105.96 132.93 98.94 133.01 C92.63 133.07 86.31 133.74 80 135 C69.33 135.67 62 129.33 58 116 Z" style="fill: oklch(0.6 0.145 42)"></path>
+<path d="{{mouthD}}" style="fill: {{mouthFill}}; stroke: #9C5A4A; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round"></path>
+<rect x="66" y="82" width="24" height="5" rx="2.5" style="fill: oklch(0.48 0.12 38)"></rect>
+<rect x="110" y="82" width="24" height="5" rx="2.5" style="fill: oklch(0.48 0.12 38)"></rect>
+<g transform="{{eyesT}}">
+<circle cx="79" cy="110" r="5" style="fill: #8A6A3E"></circle>
+<circle cx="121" cy="110" r="5" style="fill: #8A6A3E"></circle>
+<circle cx="79" cy="110" r="2.2" style="fill: oklch(0.25 0.025 50)"></circle>
+<circle cx="121" cy="110" r="2.2" style="fill: oklch(0.25 0.025 50)"></circle>
+</g>
+<ellipse cx="100" cy="124" rx="6" ry="4" style="fill: oklch(0.8 0.06 55)"></ellipse>
+<circle cx="79" cy="110" r="17" style="fill: white; fill-opacity: .14; stroke: oklch(0.5 0.02 60); stroke-opacity: .85; stroke-width: 4.5"></circle>
+<circle cx="121" cy="110" r="17" style="fill: white; fill-opacity: .14; stroke: oklch(0.5 0.02 60); stroke-opacity: .85; stroke-width: 4.5"></circle>
+<path d="M95 106 Q100 101 105 106" style="fill: none; stroke: oklch(0.5 0.02 60); stroke-opacity: .85; stroke-width: 4"></path>
+</svg>
+</button>
+</div>
+<p aria-live="polite" style="margin: 26px 0 0; height: 18px; font-family: 'Geist Mono', monospace; font-weight: 500; font-size: 12px; color: {{c.muted}}">{{hint}}</p>
+</div>
+</section>
+<div style="position: relative; flex-shrink: 0; overflow: hidden; border-top: 1px solid {{c.line}}; border-bottom: 1px solid {{c.line}}; padding: 20px 0">
+<div class="mq" style="display: flex; width: max-content; white-space: nowrap">
+<sc-for list="{{copies}}" as="copy" hint-placeholder-count="2">
+<ul role="list" aria-hidden="{{copy.hidden}}" style="display: flex; margin: 0; padding: 0; list-style: none">
+<sc-for list="{{items}}" as="item" hint-placeholder-count="8">
+<li style="display: inline-flex; align-items: center; gap: 32px; padding-right: 32px; font-family: 'Instrument Serif', serif; font-size: 36px; line-height: 1; font-style: {{item.style}}">{{item.label}}<span style="display: inline-block; width: 9px; height: 9px; border-radius: 50%; background: {{c.accent}}"></span></li>
+</sc-for>
+</ul>
+</sc-for>
+</div>
+</div>
+<section style="flex: 1; box-sizing: border-box; padding: 72px 48px 0; display: flex; gap: 80px">
+<h2 style="margin: 0; flex: 0 0 200px; padding-top: 12px; font-family: 'Geist Mono', monospace; font-weight: 500; font-size: 12px; letter-spacing: .05em; text-transform: uppercase; color: {{c.muted}}">01 — About</h2>
+<p style="margin: 0; flex: 1 1 520px; font-family: 'Instrument Serif', serif; font-size: 46px; line-height: 1.12; letter-spacing: -0.01em">I got into software by soldering bike power meters and flying quadcopters with hand gestures. These days I build <em style="color: {{c.accent}}">whole products</em> — APIs and data models, component systems, and the quiet details that make software feel effortless.</p>
+</section>
+<sc-if value="{{present}}" hint-placeholder-val="{{ false }}">
+<div aria-hidden="true" style="position: absolute; inset: 0; pointer-events: none">
+<svg viewBox="0 0 1280 860" width="1280" height="860" style="position: absolute; left: 0; top: 0">
+<path d="{{hillD}}" style="fill: none; stroke: {{c.muted}}; stroke-width: 1.5; stroke-dasharray: 6 6; stroke-linecap: round; opacity: {{hillAlpha}}"></path>
+</svg>
+<div style="position: absolute; left: 0; top: 0; width: 112px; height: 70px; transform-origin: 42px 66px; transform: {{riderT}}">
+<dc-import name="Rider" crank="{{crank}}" wheel="{{wheel}}" night="{{night}}" size="112" hint-size="112px,70px"></dc-import>
+</div>
+</div>
+</sc-if>
+<div role="status" style="position: absolute; left: 640px; bottom: 28px; transform: translate(-50%, {{toastY}}px); opacity: {{toastAlpha}}; transition: transform .5s cubic-bezier(.3,1.6,.5,1), opacity .5s; border-radius: 999px; background: {{c.ink}}; color: {{c.bg}}; padding: 12px 20px; font-family: 'Geist Mono', monospace; font-weight: 500; font-size: 13px; white-space: nowrap; pointer-events: none">{{toast}}</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"theme":{"editor":"enum","options":["day","night"],"default":"day","section":"Ride"},"speed":{"editor":"range","min":120,"max":800,"step":20,"unit":"px/s","default":320,"section":"Ride"},"$preview":{"width":1280,"height":860}}'>
+// Route, in artboard px: along the top of the marquee, up a hill, then clockwise on the outside of the avatar's ring
+const GROUND = 480;                 // top edge of the marquee
+const START_X = -90;
+const HILL_X = 640;                 // the climb starts halfway across
+const CX = 1030, CY = 250, RING = 162;
+const JOIN = -135 * Math.PI / 180;  // where the hill meets the ring (10:30), already heading up and right
+const TOP = -Math.PI / 2;           // he leaves the ring from its top, heading right
+
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { count: 0, hint: '', talking: false, toast: '', toastOn: false, frame: 0 };
+    this.sim = null;
+    this.raf = 0;
+    this.buildHill();
+  }
+
+  componentWillUnmount() {
+    cancelAnimationFrame(this.raf);
+    clearTimeout(this.mouthTimer);
+    clearTimeout(this.toastTimer);
+  }
+
+  // Cubic hill from the marquee to the ring, flat at the bottom and tangent to the ring at the top
+  buildHill() {
+    const jx = CX + RING * Math.cos(JOIN), jy = CY + RING * Math.sin(JOIN);
+    const tx = -Math.sin(JOIN), ty = Math.cos(JOIN);
+    const p = [[HILL_X, GROUND], [HILL_X + 150, GROUND], [jx - 130 * tx, jy - 130 * ty], [jx, jy]];
+    const at = (t) => {
+      const u = 1 - t;
+      const b = [u * u * u, 3 * u * u * t, 3 * u * t * t, t * t * t];
+      return [b[0] * p[0][0] + b[1] * p[1][0] + b[2] * p[2][0] + b[3] * p[3][0], b[0] * p[0][1] + b[1] * p[1][1] + b[2] * p[2][1] + b[3] * p[3][1]];
+    };
+    const pts = [];
+    let len = 0, prev = at(0);
+    for (let i = 0; i <= 160; i++) {
+      const q = at(i / 160);
+      len += Math.hypot(q[0] - prev[0], q[1] - prev[1]);
+      pts.push({ x: q[0], y: q[1], d: len });
+      prev = q;
+    }
+    this.hill = { pts, len };
+    this.hillD = 'M' + p[0].join(' ') + ' C' + p[1].map((n) => n.toFixed(1)).join(' ') + ' ' + p[2].map((n) => n.toFixed(1)).join(' ') + ' ' + p[3].map((n) => n.toFixed(1)).join(' ');
+  }
+
+  onHill(d) {
+    const pts = this.hill.pts;
+    let i = 1;
+    while (i < pts.length - 1 && pts[i].d < d) i++;
+    const a = pts[i - 1], b = pts[i];
+    const k = (d - a.d) / Math.max(0.001, b.d - a.d);
+    return { x: a.x + (b.x - a.x) * k, y: a.y + (b.y - a.y) * k, rot: Math.atan2(b.y - a.y, b.x - a.x) };
+  }
+
+  onRing(psi) {
+    return { x: CX + RING * Math.cos(psi), y: CY + RING * Math.sin(psi), rot: psi + Math.PI / 2 };
+  }
+
+  // Where he is now: x, y where the wheels touch, rot in radians
+  pose() {
+    const s = this.sim;
+    if (s.mode === 'in') {
+      const flat = HILL_X - START_X;
+      if (s.s < flat) return { x: START_X + s.s, y: GROUND, rot: 0 };
+      return this.onHill(s.s - flat);
+    }
+    if (s.mode === 'loop') return this.onRing(s.psi);
+    const x = s.x0 + s.vx * s.tau;
+    const y = s.y0 + 0.5 * 900 * s.tau * s.tau;
+    return { x, y, rot: Math.atan2(900 * s.tau, s.vx) };
+  }
+
+  step(dt) {
+    const s = this.sim;
+    const speed = Number(this.props.speed ?? 320) || 320;
+    const here = this.pose();
+    // Slower going up, faster coming down
+    const pace = Math.max(0.55, Math.min(1.45, 1 + 0.45 * Math.sin(here.rot)));
+    const ds = speed * pace * dt;
+    if (s.mode === 'in') {
+      s.s += ds;
+      const over = s.s - (HILL_X - START_X) - this.hill.len;
+      if (over >= 0) { s.mode = 'loop'; s.psi = JOIN + over / RING; this.aimExit(); }
+    } else if (s.mode === 'loop') {
+      const next = s.psi + ds / RING;
+      if (s.leaving && next >= s.exitAt) {
+        const top = this.onRing(TOP);
+        Object.assign(s, { mode: 'out', x0: top.x, y0: top.y, vx: speed * 1.5, tau: 0 });
+      } else {
+        s.psi = next;
+      }
+    } else {
+      s.tau += dt;
+    }
+    s.dist += ds;
+  }
+
+  // The next time he reaches the top of the ring
+  aimExit() {
+    const s = this.sim;
+    if (!s.leaving || s.mode !== 'loop') return;
+    const turn = Math.PI * 2;
+    s.exitAt = TOP + Math.ceil((s.psi - TOP) / turn) * turn;
+  }
+
+  start() {
+    this.sim = { mode: 'in', s: 0, psi: 0, dist: 0, leaving: false };
+    let last = performance.now();
+    const tick = (now) => {
+      const dt = Math.min(0.05, (now - last) / 1000);
+      last = now;
+      this.step(dt);
+      const p = this.pose();
+      if (this.sim.mode === 'out' && (p.x > 1400 || p.y > 940)) {
+        this.sim = null;
+        this.setState({ frame: 0 });
+        return;
+      }
+      this.setState({ frame: this.state.frame + 1 });
+      this.raf = requestAnimationFrame(tick);
+    };
+    cancelAnimationFrame(this.raf);
+    this.raf = requestAnimationFrame(tick);
+  }
+
+  say(text) {
+    clearTimeout(this.toastTimer);
+    this.setState({ toast: text, toastOn: true });
+    this.toastTimer = setTimeout(() => this.setState({ toastOn: false }), 2800);
+  }
+
+  poke() {
+    clearTimeout(this.mouthTimer);
+    this.setState({ talking: true });
+    this.mouthTimer = setTimeout(() => this.setState({ talking: false }), 320);
+    const riding = !!this.sim;
+    if (riding && (this.sim.leaving || this.sim.mode === 'out')) return;
+    const hints = riding
+      ? ['ding ding!', 'nice wheels', 'okay, last lap…', 'one more and he’s off…']
+      : ['hey!', 'that tickles', 'okay, okay…', 'one more and…'];
+    const count = this.state.count + 1;
+    if (count < 5) { this.setState({ count, hint: hints[count - 1] }); return; }
+    this.setState({ count: 0, hint: '' });
+    if (riding) {
+      this.sim.leaving = true;
+      this.aimExit();
+      this.say('Heading out — see ya.');
+    } else {
+      this.start();
+      this.say('Out for a ride.');
+    }
+  }
+
+  renderVals() {
+    const night = this.props.theme === 'night';
+    const c = night ? {
+      bg: 'oklch(0.2 0.015 55)', surface: 'oklch(0.26 0.02 55)', ink: 'oklch(0.93 0.015 80)', muted: 'oklch(0.74 0.02 70)',
+      line: 'oklch(0.93 0.015 80 / 0.14)', accent: 'oklch(0.74 0.12 42)', moss: 'oklch(0.68 0.08 130)'
+    } : {
+      bg: 'oklch(0.965 0.012 80)', surface: 'oklch(0.92 0.024 75)', ink: 'oklch(0.25 0.025 50)', muted: 'oklch(0.46 0.025 55)',
+      line: 'oklch(0.25 0.025 50 / 0.14)', accent: 'oklch(0.52 0.12 42)', moss: 'oklch(0.55 0.08 130)'
+    };
+    const labels = ['TypeScript', 'Full stack', 'React', 'Accessibility', 'Node.js', 'Web performance', 'PostgreSQL', 'Startups'];
+    const items = labels.map((label, i) => ({ label, style: i % 2 === 1 ? 'italic' : 'normal' }));
+    const talking = this.state.talking;
+
+    const sim = this.sim;
+    let riderT = 'translate(-200px, 0px)', hillAlpha = 0, wheel = 0, crank = 0, onRing = false;
+    if (sim) {
+      const p = this.pose();
+      riderT = 'translate(' + (p.x - 42).toFixed(1) + 'px, ' + (p.y - 66).toFixed(1) + 'px) rotate(' + (p.rot * 180 / Math.PI).toFixed(2) + 'deg)';
+      const wd = (sim.dist / 14.7) * 180 / Math.PI;
+      wheel = (wd % 360).toFixed(1);
+      crank = ((wd / 2.2) % 360).toFixed(1);
+      onRing = sim.mode !== 'in';
+      // The hill fades in as he nears it and away once he's on the ring
+      if (sim.mode === 'in') hillAlpha = Math.max(0, Math.min(1, (p.x - 300) / 300));
+      else if (sim.mode === 'loop') hillAlpha = Math.max(0, 1 - (sim.psi - JOIN) / 1.6);
+    }
+
+    return {
+      c, night, items,
+      copies: [{ hidden: 'false' }, { hidden: 'true' }],
+      poke: () => this.poke(),
+      hint: this.state.hint,
+      mouthD: talking ? 'M95 148 A5 5 0 1 0 105 148 A5 5 0 1 0 95 148 Z' : 'M92 146 Q100 151 108 146',
+      mouthFill: talking ? '#9C5A4A' : 'none',
+      eyesT: 'translate(0 0)',
+      ringColor: onRing ? c.muted : c.line,
+      present: !!sim,
+      hillD: this.hillD,
+      hillAlpha: hillAlpha.toFixed ? hillAlpha.toFixed(2) : hillAlpha,
+      riderT, wheel, crank,
+      toast: this.state.toast,
+      toastAlpha: this.state.toastOn ? 1 : 0,
+      toastY: this.state.toastOn ? 0 : 20
+    };
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,36 @@
+---
+import type { HTMLAttributes } from "astro/types";
+
+type Props = HTMLAttributes<"button"> & {
+  /** Extra classes for the hint line */
+  hintClass?: string;
+};
+
+const { class: className, hintClass, ...rest } = Astro.props;
+---
+
+<!-- Whatever it wraps (the hero avatar) becomes the button for the cyclist easter egg, with a
+     hint line under it and a toast. Markup only: the script in Ride.astro counts the clicks. -->
+<button
+  type="button"
+  data-ride-trigger
+  class:list={[
+    "block cursor-pointer rounded-full focus-visible:outline-offset-4 motion-safe:transition-[scale,rotate] motion-safe:duration-500 motion-safe:ease-spring motion-safe:active:scale-96 motion-safe:active:-rotate-3",
+    className,
+  ]}
+  {...rest}
+>
+  <slot />
+</button>
+<p
+  data-ride-hint
+  aria-live="polite"
+  class:list={["h-4.5 font-mono font-medium text-xs text-muted", hintClass]}
+>
+</p>
+<div
+  role="status"
+  data-ride-toast
+  class="fixed left-1/2 bottom-7 z-70 -translate-x-1/2 translate-y-5 opacity-0 data-shown:translate-y-0 data-shown:opacity-100 motion-safe:transition-[translate,opacity] motion-safe:duration-500 motion-safe:ease-spring rounded-full bg-ink text-onink px-5 py-3 font-mono font-medium text-[13px] whitespace-nowrap pointer-events-none"
+>
+</div>

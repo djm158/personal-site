@@ -200,6 +200,49 @@ its own colour conversion. That is too much for two fallback images of an avatar
 changes; modern browsers use the SVG icon anyway. Re-export both when the avatar changes. The
 touch icon sits inset on the day page background, because iOS turns transparent pixels black.
 
+**Cyclist easter egg replaces the avatar's night toggle** · 2026-11-12 · feat/cyclist-easter-egg
+Five clicks on the hero avatar used to switch the theme. Now that the header has a switch for
+that, they send a cyclist out along the marquee, up a hill and round the avatar's ring, and
+five more send him off. Dan specified the behaviour, the route, the speeds and the file layout
+(a pure, tested `lib/ride.ts`; a `<script>` that writes `transform` each frame; no React
+island). The calls below were the agent's:
+
+- **Desktop only (agent).** The spec asked for a 390px check, but the hero avatar has been
+  hidden below 760px since #34, so there is nothing to click and no ring to ride. The ride
+  needs the avatar; if the window narrows past 760px mid-ride, he is removed.
+- **Reduced motion shows the start toast, "Out for a ride." (agent).** The spec said "only a
+  toast" without saying which. Nothing else changes, so every fifth click shows it again.
+- **One layer over the hero and marquee, clipped sideways only (agent).** The hero clips its
+  own overflow for the cursor glow, so the rider can't live inside it. A `relative` wrapper
+  now holds the hero, the marquee and the ride layer; the layer uses `overflow-x: clip`, so
+  riding in and out never widens the page while he can still stand above the ring.
+- **He goes under the sticky header, not over it (agent).** The layer is page content
+  (`z-10`, the header is `z-40`). He is sized to fit under the header at the top of a lap:
+  112px wide at most, 0.69 × the ring's radius beside a smaller ring, and no taller than the
+  space above the ring, down to 64px.
+- **The hill keeps the design's slope, so it can start left of the middle (Dan, in review:
+  "a more gradual climb").** The real avatar is bigger and higher above the marquee than the
+  prototype's, so a hill from the viewport's middle was about twice as steep as designed and
+  pressed against the ring's left side. The start is now 0.8 × the rise before the join (the
+  design's 275px run for a 345px rise), and the middle only when that is further left.
+- **In the stacked layout the hill is steep (agent).** From 760px to about 900px the avatar
+  sits above the text, so the join is near the left edge and high above the marquee. The
+  start stops 16px from the edge, and the curve's handles are capped at the run so it gets
+  steep but never leans back. The dashed line crosses the hero text at these widths.
+- **The ring's radius comes from `offsetWidth`, not `getBoundingClientRect` (agent).** The
+  ring spins, so its bounding box is larger than the ring. The box's centre is still right.
+- **Three new colour tokens (agent):** `shorts` and `shorts2`, because the design keeps the
+  shorts dark at night when `ink` turns light, and `beam` for the headlight. The collar is
+  `color-mix` from `moss`, and the glasses use `muted` (day) and `shorts2` (night), which are
+  close to the design's values, not exact.
+- **`NightToggle` became `RideTrigger`, markup only (agent).** The click handler moved to
+  `Ride.astro` with the animation loop, so one script owns the ride's state. `poke`,
+  `hintFor` and `toastFor` left `lib/theme.ts`; the counter and hints are in `lib/ride.ts`.
+- **A resize mid-ride re-measures but doesn't remap his progress (agent).** On the way in he
+  may jump a little; on the ring he follows it exactly.
+- **Browser tests for the ride run with the axe checks (agent),** in `e2e/ride.e2e.ts`, on
+  Playwright's fake clock.
+
 ## Operations
 
 **CI runs check, test and build on every PR** · 2026-10-29 · 98c3594

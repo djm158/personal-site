@@ -97,7 +97,7 @@ const s = sizes[size];
       setTheme(current() === "night" ? "day" : "night"),
     );
   }
-  // Every switch follows, whichever control (or the avatar) changed the theme
+  // Every switch follows, whichever one changed the theme
   document.addEventListener(THEME_EVENT, sync);
   sync();
 

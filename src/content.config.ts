@@ -20,8 +20,14 @@ const siteContent = defineCollection({
       intro: richText,
       resumeLink: z.string(),
       emailLink: z.string(),
-      // The line under the avatar after each click toward night mode, one per click from the first
-      avatarHints: z.array(z.string()).optional(),
+      // The cyclist easter egg: the line under the avatar after each of clicks 1–4 (before the
+      // ride, and while he's out), and the toasts when he sets off and when he's sent away
+      ride: z.strictObject({
+        hints: z.array(z.string()),
+        ridingHints: z.array(z.string()),
+        startToast: z.string(),
+        leaveToast: z.string(),
+      }),
     }),
     // Words that scroll in the strip under the hero; the strip is left out until there are some
     marquee: z.array(z.string()).optional(),

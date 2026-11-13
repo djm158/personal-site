@@ -1,0 +1,143 @@
+---
+import type { HTMLAttributes } from "astro/types";
+import { RIDER_VIEWBOX, pedalStroke } from "../lib/ride";
+
+type Props = HTMLAttributes<"svg">;
+
+const { class: className, ...rest } = Astro.props;
+
+// The pose until the ride script takes over the legs, cranks and wheels
+const stroke = pedalStroke((51 * Math.PI) / 180);
+---
+
+<!-- Dan on a bike, for the home page's easter egg. Shapes from the design's Rider artboard;
+     colours are theme tokens, so night mode follows, and the headlight only shows at night.
+     Ride.astro moves the parts marked data-ride-*. -->
+<svg
+  viewBox={`0 0 ${RIDER_VIEWBOX.width} ${RIDER_VIEWBOX.height}`}
+  aria-hidden="true"
+  class:list={["pointer-events-none block", className]}
+  {...rest}
+>
+  <g class="hidden night:block">
+    <polygon points="92,36 160,18 160,62" class="fill-beam/32"></polygon>
+    <polygon points="92,36 160,28 160,48" class="fill-beam/40"></polygon>
+  </g>
+  {[26, 94].map((cx) => (
+    <g>
+      <circle
+        cx={cx}
+        cy="73"
+        r="21"
+        fill="none"
+        stroke-width="3"
+        class="stroke-ink"
+      />
+      <g data-ride-wheel={cx} stroke-width="0.9" class="stroke-muted">
+        <line x1={cx} y1="53" x2={cx} y2="93" />
+        <line x1={cx - 17.3} y1="63" x2={cx + 17.3} y2="83" />
+        <line x1={cx - 17.3} y1="83" x2={cx + 17.3} y2="63" />
+      </g>
+      <circle cx={cx} cy="73" r="2.2" class="fill-ink" />
+    </g>
+  ))}
+  <g fill="none" stroke-linecap="round" stroke-linejoin="round">
+    <!-- far leg, behind the frame -->
+    <path
+      data-ride-part="far-thigh"
+      d={stroke.far.thigh}
+      stroke-width="6.5"
+      class="stroke-shorts2"
+    ></path>
+    <path
+      data-ride-part="far-shin"
+      d={stroke.far.shin}
+      stroke-width="4.6"
+      class="stroke-skin2"
+    ></path>
+    <path
+      data-ride-part="far-shoe"
+      d={stroke.far.shoe}
+      stroke-width="3.6"
+      class="stroke-ink"
+    ></path>
+    <!-- frame, seat post, saddle, bars, chainring, cranks -->
+    <path
+      d="M26 73 L54 71 L44 43 Z M44 43 L84 42 L86 53 L54 71 M86 53 L94 73"
+      stroke-width="3.2"
+      class="stroke-accent"
+    ></path>
+    <path d="M44 43 L43 38" stroke-width="3" class="stroke-accent"></path>
+    <path d="M37 37 L50 37" stroke-width="3.4" class="stroke-ink"></path>
+    <path
+      d="M84 42 L87 35 Q95 34 93 42"
+      stroke-width="2.6"
+      class="stroke-ink"
+    ></path>
+    <circle
+      cx="54"
+      cy="71"
+      r="5.2"
+      stroke-width="1.6"
+      class="stroke-muted"
+    ></circle>
+    <path
+      data-ride-part="crank"
+      d={stroke.crank}
+      stroke-width="2.4"
+      class="stroke-ink"
+    ></path>
+    <!-- body, near leg -->
+    <path d="M45 37 L69 20" stroke-width="12" class="stroke-moss"></path>
+    <path
+      data-ride-part="near-thigh"
+      d={stroke.near.thigh}
+      stroke-width="7"
+      class="stroke-shorts"
+    ></path>
+    <path
+      data-ride-part="near-shin"
+      d={stroke.near.shin}
+      stroke-width="5"
+      class="stroke-skin"
+    ></path>
+    <path
+      data-ride-part="near-shoe"
+      d={stroke.near.shoe}
+      stroke-width="4"
+      class="stroke-ink"
+    ></path>
+    <!-- neck, collar (a darker moss), arm -->
+    <path
+      d="M72 15.2 L77.6 17.4 L75.2 22.6 L68.4 21 Z"
+      class="fill-skin2"
+    ></path>
+    <path
+      d="M67.8 21.2 Q71.6 23.8 75.8 22.6"
+      stroke-width="2.6"
+      class="stroke-[color-mix(in_oklch,var(--color-moss),black_18%)]"
+    ></path>
+    <path d="M69 21 L77 30" stroke-width="5.5" class="stroke-moss"></path>
+    <path d="M77 30 L87 35" stroke-width="4" class="stroke-skin"></path>
+  </g>
+  <!-- head: face, sideburn, beard, ear, glasses, helmet -->
+  <circle cx="77" cy="10.5" r="7.6" class="fill-skin"></circle>
+  <path
+    d="M68.4 8.8 Q67.6 13.6 71 16.4 L72.8 14.8 Q70.9 12.6 71.6 9.2 Z"
+    class="fill-hair"
+  ></path>
+  <path
+    d="M70.5 12.5 Q71 19.8 78 19.4 Q84.4 18.6 84.8 13 Q80 15.6 75.5 14.4 Q72.5 13.6 70.5 12.5 Z"
+    class="fill-hair"
+  ></path>
+  <ellipse cx="73.6" cy="11.4" rx="1.9" ry="2.3" class="fill-skin2"></ellipse>
+  <g fill="none" class="stroke-muted night:stroke-shorts2">
+    <circle cx="81.6" cy="9.6" r="2.7" stroke-width="1.3"></circle>
+    <path d="M78.9 9.2 L72.6 8.4" stroke-width="1.1"></path>
+  </g>
+  <path
+    d="M68.4 9.2 Q69.6 0.6 78.6 0.8 Q86.4 1.4 86.6 7.6 Q84.6 6.4 79 6.6 Q73 7 68.4 9.2 Z"
+    class="fill-ink"
+  ></path>
+  <circle cx="91" cy="36" r="2.2" class="hidden fill-beam night:block"></circle>
+</svg>

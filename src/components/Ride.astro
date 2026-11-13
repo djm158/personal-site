@@ -1,0 +1,246 @@
+---
+import Rider from "./Rider.astro";
+
+type Props = {
+  copy: {
+    /** One line per click, 1–4, before the ride */
+    hints: string[];
+    /** The same while he's out riding */
+    ridingHints: string[];
+    startToast: string;
+    leaveToast: string;
+  };
+};
+
+const { copy } = Astro.props;
+---
+
+<!-- The cyclist easter egg: five clicks on the hero avatar send Dan out on his bike, along the
+     top of the marquee, up a hill and round the avatar's ring, until five more send him off.
+
+     This layer goes in a `relative` wrapper around the hero and the marquee, so it scrolls
+     with the page and its coordinates are the wrapper's. It clips sideways only: he rides in
+     from the left and leaves to the right without widening the page, but can stand above the
+     ring. It looks for [data-ride-trigger], [data-ride-hint], [data-ride-toast] (RideTrigger),
+     [data-ride-ring] and [data-ride-ground] on the page. -->
+<div
+  data-ride-layer
+  data-ride-copy={JSON.stringify(copy)}
+  aria-hidden="true"
+  hidden
+  class="pointer-events-none absolute inset-0 z-10 overflow-x-clip"
+>
+  <!-- no viewBox, so the hill's path is in the layer's own px -->
+  <svg class="absolute inset-0 size-full overflow-visible">
+    <path
+      data-ride-hill
+      fill="none"
+      stroke-width="1.5"
+      stroke-dasharray="6 6"
+      stroke-linecap="round"
+      class="stroke-muted"
+    ></path>
+  </svg>
+  <!-- the origin is where the wheels meet the ground: RIDER_ANCHOR in lib/ride -->
+  <div
+    data-ride-rider
+    class="absolute top-0 left-0 origin-[37.5%_94.3%] will-change-transform"
+  >
+    <Rider class="h-auto w-full" />
+  </div>
+</div>
+
+<script>
+  import {
+    RIDER_ANCHOR,
+    RIDER_VIEWBOX,
+    buildRoute,
+    countClick,
+    crankTurn,
+    hillOpacity,
+    hintFor,
+    isGone,
+    isLeaving,
+    pedalStroke,
+    poseFor,
+    riderWidthFor,
+    sendOff,
+    startRide,
+    stepRide,
+    wheelTurn,
+    type Ride,
+    type Route,
+  } from "../lib/ride";
+
+  const find = <T extends Element>(selector: string) =>
+    document.querySelector<T>(selector);
+  const trigger = find<HTMLButtonElement>("[data-ride-trigger]");
+  const hint = find<HTMLElement>("[data-ride-hint]");
+  const toast = find<HTMLElement>("[data-ride-toast]");
+  const ring = find<HTMLElement>("[data-ride-ring]");
+  const ground = find<HTMLElement>("[data-ride-ground]");
+  const layer = find<HTMLElement>("[data-ride-layer]");
+  const rider = layer?.querySelector<HTMLElement>("[data-ride-rider]");
+  const hill = layer?.querySelector<SVGPathElement>("[data-ride-hill]");
+
+  if (trigger && hint && toast && ring && layer && rider && hill) {
+    const copy: {
+      hints: string[];
+      ridingHints: string[];
+      startToast: string;
+      leaveToast: string;
+    } = JSON.parse(layer.dataset.rideCopy ?? "{}");
+    const reducedMotion = matchMedia("(prefers-reduced-motion: reduce)");
+    const wheels = [
+      ...rider.querySelectorAll<SVGGElement>("[data-ride-wheel]"),
+    ];
+    const part = (name: string) =>
+      rider.querySelector<SVGPathElement>(`[data-ride-part="${name}"]`);
+    const parts = {
+      crank: part("crank"),
+      nearThigh: part("near-thigh"),
+      nearShin: part("near-shin"),
+      nearShoe: part("near-shoe"),
+      farThigh: part("far-thigh"),
+      farShin: part("far-shin"),
+      farShoe: part("far-shoe"),
+    };
+
+    let count = 0;
+    let ride: Ride | null = null;
+    let route: Route | null = null;
+    let riderWidth = 0;
+    let bounds = { width: 0, bottom: 0 };
+    let frame = 0;
+    let last = 0;
+    let hideToast: ReturnType<typeof setTimeout> | undefined;
+
+    const say = (text: string) => {
+      toast.textContent = text;
+      toast.dataset.shown = "";
+      clearTimeout(hideToast);
+      hideToast = setTimeout(() => delete toast.dataset.shown, 3200);
+    };
+
+    // Works the route out from where things are on the page now. False when there's no ring
+    // to ride round: the avatar is hidden below the nav breakpoint.
+    const measure = () => {
+      // The ring spins, so its bounding box is bigger than it is: the box's centre is still
+      // the ring's, but the radius has to come from the layout width
+      const radius = ring.offsetWidth / 2;
+      if (radius === 0) return false;
+      const origin = layer.getBoundingClientRect();
+      const box = ring.getBoundingClientRect();
+      const circle = {
+        cx: box.left + box.width / 2 - origin.left,
+        cy: box.top + box.height / 2 - origin.top,
+        r: radius,
+      };
+      // Without a marquee he rides along the bottom of the hero
+      const groundY =
+        (ground?.getBoundingClientRect().top ?? origin.bottom) - origin.top;
+      riderWidth = riderWidthFor(radius, circle.cy - radius);
+      rider.style.width = `${riderWidth}px`;
+      route = buildRoute({
+        width: origin.width,
+        ground: groundY,
+        ring: circle,
+        riderWidth,
+      });
+      hill.setAttribute("d", route.hillPath);
+      bounds = {
+        width: origin.width,
+        bottom: document.documentElement.scrollHeight - (origin.top + scrollY),
+      };
+      return true;
+    };
+
+    const draw = (now: Ride, on: Route) => {
+      const pose = poseFor(now, on);
+      const scale = riderWidth / RIDER_VIEWBOX.width;
+      const x = pose.x - RIDER_ANCHOR.x * scale;
+      const y = pose.y - RIDER_ANCHOR.y * scale;
+      rider.style.transform = `translate(${x.toFixed(1)}px, ${y.toFixed(1)}px) rotate(${pose.rot.toFixed(4)}rad)`;
+      hill.style.opacity = hillOpacity(now, on).toFixed(2);
+
+      const wheel = wheelTurn(now.travelled, riderWidth);
+      const degrees = (((wheel * 180) / Math.PI) % 360).toFixed(1);
+      for (const w of wheels) {
+        w.setAttribute(
+          "transform",
+          `rotate(${degrees} ${w.dataset.rideWheel} 73)`,
+        );
+      }
+      const stroke = pedalStroke(crankTurn(wheel));
+      parts.crank?.setAttribute("d", stroke.crank);
+      parts.nearThigh?.setAttribute("d", stroke.near.thigh);
+      parts.nearShin?.setAttribute("d", stroke.near.shin);
+      parts.nearShoe?.setAttribute("d", stroke.near.shoe);
+      parts.farThigh?.setAttribute("d", stroke.far.thigh);
+      parts.farShin?.setAttribute("d", stroke.far.shin);
+      parts.farShoe?.setAttribute("d", stroke.far.shoe);
+      return pose;
+    };
+
+    const stop = () => {
+      cancelAnimationFrame(frame);
+      ride = null;
+      count = 0;
+      hint.textContent = "";
+      layer.hidden = true;
+      delete ring.dataset.ridden;
+    };
+
+    const tick = (time: number) => {
+      if (!ride || !route) return;
+      // a background tab pauses the frames; don't leap ahead when it comes back
+      const dt = Math.min(0.05, (time - last) / 1000);
+      last = time;
+      ride = stepRide(ride, route, dt);
+      // the ring's border darkens while he's on it
+      ring.toggleAttribute("data-ridden", ride.mode === "loop");
+      const pose = draw(ride, route);
+      if (ride.mode === "out" && isGone(pose, bounds, riderWidth)) {
+        stop();
+        return;
+      }
+      frame = requestAnimationFrame(tick);
+    };
+
+    const start = () => {
+      // shown first, so there's a layer to measure
+      layer.hidden = false;
+      if (!measure() || !route) {
+        layer.hidden = true;
+        return;
+      }
+      ride = startRide();
+      draw(ride, route);
+      last = performance.now();
+      frame = requestAnimationFrame(tick);
+    };
+
+    trigger.addEventListener("click", () => {
+      if (ride && isLeaving(ride)) return;
+      const next = countClick(count);
+      count = next.count;
+      hint.textContent = hintFor(count, ride ? copy.ridingHints : copy.hints);
+      if (!next.fire) return;
+
+      if (ride) {
+        ride = sendOff(ride);
+        say(copy.leaveToast);
+      } else {
+        say(copy.startToast);
+        // with reduced motion there's no ride, only the toast
+        if (!reducedMotion.matches) start();
+      }
+    });
+
+    // The route follows the layout; if the avatar goes (the window got narrower than the nav
+    // breakpoint), so does he
+    window.addEventListener("resize", () => {
+      if (ride && !measure()) stop();
+    });
+  }
+</script>
