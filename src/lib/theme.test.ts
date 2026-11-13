@@ -1,4 +1,4 @@
-import { describe, expect, test } from "vitest";
+import { afterEach, describe, expect, test, vi } from "vitest";
 import { readTheme, resolveTheme } from "./theme";
 
 describe("readTheme", () => {
@@ -24,5 +24,69 @@ describe("resolveTheme", () => {
   test("an unknown saved value is ignored", () => {
     expect(resolveTheme("dark", true)).toBe("night");
     expect(resolveTheme("dark", false)).toBe("day");
+  });
+});
+
+describe("savedTheme", () => {
+  // setTheme needs a page: stub the bits it touches, and a fresh module per test
+  // so a choice kept by one test doesn't leak into the next
+  const load = async (storage: Partial<Storage>) => {
+    vi.resetModules();
+    vi.stubGlobal("document", {
+      documentElement: { dataset: {} },
+      dispatchEvent: () => true,
+    });
+    vi.stubGlobal("localStorage", storage);
+    return import("./theme");
+  };
+  const blocked = {
+    getItem: () => {
+      throw new DOMException("blocked", "SecurityError");
+    },
+    setItem: () => {
+      throw new DOMException("blocked", "SecurityError");
+    },
+  };
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  test("with storage blocked, keeps the choice made on this page", async () => {
+    const theme = await load(blocked);
+    expect(theme.savedTheme()).toBeNull();
+    theme.setTheme("night");
+    expect(theme.savedTheme()).toBe("night");
+    // so the system-follow listener leaves it alone when the OS turns light
+    expect(theme.resolveTheme(theme.savedTheme(), false)).toBe("night");
+  });
+
+  test("a choice that wasn't saved doesn't count as one", async () => {
+    const theme = await load(blocked);
+    theme.setTheme("night", { save: false });
+    expect(theme.savedTheme()).toBeNull();
+  });
+
+  test("when storage refuses a write, the newer choice beats the old saved one", async () => {
+    const theme = await load({
+      getItem: () => "day",
+      setItem: () => {
+        throw new DOMException("full", "QuotaExceededError");
+      },
+    });
+    theme.setTheme("night");
+    expect(theme.savedTheme()).toBe("night");
+  });
+
+  test("with storage working, reads the saved choice", async () => {
+    const store = new Map<string, string>();
+    const theme = await load({
+      getItem: (k) => store.get(k) ?? null,
+      setItem: (k, v) => void store.set(k, v),
+    });
+    expect(theme.savedTheme()).toBeNull();
+    theme.setTheme("night");
+    expect(store.get(theme.THEME_KEY)).toBe("night");
+    expect(theme.savedTheme()).toBe("night");
   });
 });
