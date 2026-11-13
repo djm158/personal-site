@@ -44,11 +44,8 @@ const siteContent = defineCollection({
         topicLabel: z.string(),
         topics: z.array(z.string()).min(1),
         nameLabel: z.string(),
-        namePlaceholder: z.string(),
         emailLabel: z.string(),
-        emailPlaceholder: z.string(),
         messageLabel: z.string(),
-        messagePlaceholder: z.string(),
         submit: z.string(),
         errors: z.strictObject({
           name: z.string(),

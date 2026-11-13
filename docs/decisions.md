@@ -143,7 +143,9 @@ the `[data-theme="night"]` rule on top) and checks each text and background pair
 night with `colorjs.io`, so a token change that breaks AA fails `pnpm test`. Both are
 devDependencies, so the colour maths and CSS parsing aren't ours to maintain. axe sees only what's
 rendered at rest; this covers pressed chips and matched tags too. The tokens all passed. The
-one failure was the form placeholder at 70% muted (3.3:1 in day), which is now full muted.
+one failure was the form placeholder at 70% muted (3.3:1 in day). The placeholders were removed
+rather than darkened, because placeholder text that passes AA looks like a filled-in value; the
+fields already have visible labels. This departs from the design, which shows placeholders.
 
 **Accessible split-letter heading** · 2026-10-29 · #7 (agent)
 "Dan." is split into spans for the per-letter hover, which are `aria-hidden`, with an `sr-only`

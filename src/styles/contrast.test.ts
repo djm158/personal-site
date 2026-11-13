@@ -24,7 +24,7 @@ const themes = { day, night: { ...day, ...colours(nightRule) } };
 const pairs = [
   { fg: "ink", bg: "bg", min: 4.5 },
   { fg: "ink", bg: "surface", min: 4.5 },
-  { fg: "muted", bg: "bg", min: 4.5 }, // also the contact form placeholders
+  { fg: "muted", bg: "bg", min: 4.5 },
   { fg: "muted", bg: "surface", min: 4.5 },
   { fg: "accent", bg: "bg", min: 4.5 },
   { fg: "accent", bg: "surface", min: 4.5 },
