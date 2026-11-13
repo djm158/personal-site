@@ -74,3 +74,26 @@ test("a choice in one tab carries to another open tab", async ({ page }) => {
   await otherToggle.click();
   await expect(page.locator("html")).not.toHaveAttribute("data-theme", "night");
 });
+
+test("the switches say night is on before any module script runs", async ({
+  page,
+}) => {
+  // Drop the page's module scripts, so only the inline ones can set aria-checked
+  await page.route("/", async (route) => {
+    const response = await route.fetch();
+    const html = (await response.text()).replace(
+      /<script type="module"[\s\S]*?<\/script>/g,
+      "",
+    );
+    await route.fulfill({ response, body: html });
+  });
+  await page.emulateMedia({ colorScheme: "dark" });
+  await page.goto("/");
+
+  await expect(page.locator("html")).toHaveAttribute("data-theme", "night");
+  const switches = page.locator("[data-theme-switch]");
+  await expect(switches).toHaveCount(2);
+  for (const s of await switches.all()) {
+    await expect(s).toHaveAttribute("aria-checked", "true");
+  }
+});
