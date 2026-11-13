@@ -181,8 +181,7 @@ const RUN_PER_RISE = 0.8;
 /**
  * Where the climb starts: the middle of the viewport, as designed, or further left when the
  * ring is big or high enough that starting in the middle would make the hill steeper than the
- * design's. Never closer than `margin` to the left edge, which is what limits it when the
- * avatar is stacked above the text.
+ * design's. Never closer than `margin` to the left edge.
  */
 export function hillStartX(
   width: number,

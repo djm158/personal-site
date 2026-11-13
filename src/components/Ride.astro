@@ -123,7 +123,7 @@ const { copy } = Astro.props;
     };
 
     // Works the route out from where things are on the page now. False when there's no ring
-    // to ride round: the avatar is hidden below the nav breakpoint.
+    // to ride round: the avatar is hidden below the hero breakpoint.
     const measure = () => {
       // The ring spins, so its bounding box is bigger than it is: the box's centre is still
       // the ring's, but the radius has to come from the layout width
@@ -237,7 +237,7 @@ const { copy } = Astro.props;
       }
     });
 
-    // The route follows the layout; if the avatar goes (the window got narrower than the nav
+    // The route follows the layout; if the avatar goes (the window got narrower than the hero
     // breakpoint), so does he
     window.addEventListener("resize", () => {
       if (ride && !measure()) stop();

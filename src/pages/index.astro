@@ -46,8 +46,8 @@ const letterMotions = [
   <!-- the hero and the marquee share a wrapper so the cyclist's layer (Ride) can span both -->
   <div class="relative">
     <section class="relative overflow-hidden">
-      <Container class="relative flex flex-wrap-reverse items-center gap-[clamp(40px,5vw,72px)] pt-[clamp(56px,8vw,112px)] pb-[clamp(56px,7vw,96px)]">
-        <div class="flex-[1_1_400px] min-w-0">
+      <Container class="relative flex items-center gap-[clamp(40px,5vw,72px)] pt-[clamp(56px,8vw,112px)] pb-[clamp(56px,7vw,96px)]">
+        <div class="flex-1 min-w-0">
           <div class="inline-flex items-center gap-2.5 font-mono font-medium text-xs uppercase mb-8 text-muted rounded-full border tracking-wider border-line py-1.75 pl-2.75 pr-3.5">
             <span class="size-2 rounded-full bg-moss motion-safe:animate-pulse"></span>
             <Emphasis segments={hero.status} />
@@ -77,10 +77,11 @@ const letterMotions = [
             </Button>
           </div>
         </div>
-        <!-- hidden below the nav breakpoint so the heading, intro and buttons lead on phones (so the
-             five-click cyclist easter egg is desktop-only).
+        <!-- hidden below the hero breakpoint so the heading, intro and buttons lead on phones (so the
+             five-click cyclist easter egg starts at tablets). From there up the hero is one row
+             that never wraps, and the avatar's width follows the viewport's, not its height.
              the ring and the avatar share the first grid cell, so the hint line below sits outside the ring -->
-        <div class="max-nav:hidden mx-auto shrink-0 w-[min(100%,420px,40svh)] grid justify-items-center gap-3.5">
+        <div class="max-hero:hidden shrink-0 w-[clamp(180px,30vw,420px)] grid justify-items-center gap-3.5">
           <!-- outside the button so it stays still when the avatar is pressed.
                the border goes from line to muted while the cyclist is riding round it -->
           <div

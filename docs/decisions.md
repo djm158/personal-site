@@ -163,6 +163,15 @@ first and still took too much of the screen. Trade-off: the avatar is the night-
 egg, so phones don't get the five clicks; they switch themes with the switch in the mobile menu
 (see the night-mode switch entry under Site features). The nav avatar stays.
 
+**The hero is one row from 560px, avatar included** · 2026-11-12 · #43
+Reverses part of #34, which hid the avatar below 760px. Between 760px and about 900px the hero
+wrapped, with a 340px avatar stacked above the text, and the avatar's width also depended on
+the window's height (`40svh`). Now a `--breakpoint-hero` token at 560px shows the avatar, and
+from there the hero is a single row that never wraps: the text column takes the space left
+and the avatar is `clamp(180px, 30vw, 420px)` wide. 560px is where the 68px heading (about
+260px wide) still fits beside a 180px avatar. Phones still get no hero avatar. Tablets get
+the cyclist easter egg with it.
+
 **No cursor glow in the hero, a departure from the design** · 2026-11-12 · agent/remove-hero-glow
 The soft glow that trailed the cursor across the hero is gone. It's a stock "spotlight" effect
 common on templated and AI-generated sites, and it competed with the avatar's cursor-following
@@ -211,9 +220,10 @@ five more send him off. Dan specified the behaviour, the route, the speeds and t
 (a pure, tested `lib/ride.ts`; a `<script>` that writes `transform` each frame; no React
 island). The calls below were the agent's:
 
-- **Desktop only (agent).** The spec asked for a 390px check, but the hero avatar has been
-  hidden below 760px since #34, so there is nothing to click and no ring to ride. The ride
-  needs the avatar; if the window narrows past 760px mid-ride, he is removed.
+- **Wherever the avatar shows, so from 560px (agent).** The spec asked for a 390px check, but
+  phones have no hero avatar (#34), so there is nothing to tap and no ring to ride. The ride
+  needs the avatar; if the window narrows past the hero breakpoint mid-ride, he is removed.
+  The button has `touch-action: manipulation`, so five quick taps don't zoom the page.
 - **Reduced motion shows the start toast, "Out for a ride." (agent).** The spec said "only a
   toast" without saying which. Nothing else changes, so every fifth click shows it again.
 - **One layer over the hero and marquee, clipped sideways only (agent).** The hero clips its
@@ -229,10 +239,12 @@ island). The calls below were the agent's:
   prototype's, so a hill from the viewport's middle was about twice as steep as designed and
   pressed against the ring's left side. The start is now 0.8 × the rise before the join (the
   design's 275px run for a 345px rise), and the middle only when that is further left.
-- **In the stacked layout the hill is steep (agent).** From 760px to about 900px the avatar
-  sits above the text, so the join is near the left edge and high above the marquee. The
-  start stops 16px from the edge, and the curve's handles are capped at the run so it gets
-  steep but never leans back. The dashed line crosses the hero text at these widths.
+- **On tablets the hill crosses the hero text (agent).** With the hero in one row the join
+  is never far above the marquee, so the hill keeps the design's slope at every width. Below
+  about 900px that puts its start under the text column, and the dashed line passes over the
+  intro and the buttons. The start never goes closer than 16px to the left edge, and the
+  curve's handles are capped at the run, so a tall, narrow hill would get steep but never
+  lean back.
 - **The ring's radius comes from `offsetWidth`, not `getBoundingClientRect` (agent).** The
   ring spins, so its bounding box is larger than the ring. The box's centre is still right.
 - **Three new colour tokens (agent):** `shorts` and `shorts2`, because the design keeps the

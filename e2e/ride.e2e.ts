@@ -18,8 +18,8 @@ const noSidewaysScroll = (page: Page) =>
       document.documentElement.clientWidth,
   );
 
-// 760 is the narrowest the avatar shows at, and where it sits above the text
-for (const width of [1280, 760]) {
+// 560 is the hero breakpoint, the narrowest the avatar shows at
+for (const width of [1280, 560]) {
   test(`at ${width}px, five clicks start the ride and five more end it`, async ({
     page,
   }) => {
@@ -87,6 +87,6 @@ test("the ride ends if the window gets too narrow for the avatar", async ({
   const layer = page.locator("[data-ride-layer]");
   await expect(layer).toBeVisible();
 
-  await page.setViewportSize({ width: 600, height: 900 });
+  await page.setViewportSize({ width: 480, height: 900 });
   await expect(layer).toBeHidden();
 });

@@ -234,7 +234,7 @@ describe("hillStartX", () => {
     expect(hillStartX(1400, { x: 902, y: 148 }, 663)).toBeCloseTo(490);
   });
 
-  test("stops at the left edge when the avatar is stacked above the text", () => {
+  test("stops at the left edge when the join is close to it", () => {
     const join = { x: 243, y: 100 };
     expect(hillStartX(760, join, 900)).toBe(16);
   });
@@ -268,8 +268,8 @@ describe("hillCubic", () => {
   });
 
   test("a tall, narrow hill never doubles back", () => {
-    const stacked = { cx: 380, cy: 240, r: 194 };
-    const { samples } = sampleCubic(hillCubic(16, 900, stacked));
+    const highAndLeft = { cx: 380, cy: 240, r: 194 };
+    const { samples } = sampleCubic(hillCubic(16, 900, highAndLeft));
     for (let i = 1; i < samples.length; i++) {
       expect(samples[i].x).toBeGreaterThanOrEqual(samples[i - 1].x);
       expect(samples[i].y).toBeLessThanOrEqual(samples[i - 1].y);
