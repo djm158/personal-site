@@ -6,14 +6,18 @@ Netlify on every push to `main`.
 
 ## How to help
 
-Dan is building this site himself for practice. Default to explaining, reviewing and
-unblocking:
+Dan is using this site to practise agentic engineering: he specifies, reviews and decides, and
+agents write most of the code.
 
-- Don't write features or large blocks of code unless he asks for that specific piece.
-- When he does ask, stay within what was asked. Mention anything else you notice; don't fix it.
-- Short illustrative snippets are fine when they explain an approach.
+- Write the code for what he asks, and stay within it. Mention anything else you notice; don't
+  fix it.
+- Design, content and trade-offs are his calls. When a task needs one he hasn't made, give a
+  recommendation and ask, or make it and say so (see Documentation).
+- Explain what you changed and why, briefly, so he can review it: he reads every PR.
+- Don't push, merge or open a PR unless he asks.
 - `BACKLOG.md` is the task list. Tick items off when they are done and add items when scope
-  changes.
+  changes. Write follow-ups that are small and well specified as `(agent: <slug>)` items for
+  the backlog loop, not `(me)`; chain ones that edit the same files with `(after: <slug>)`.
 
 ## Development
 
