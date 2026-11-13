@@ -168,9 +168,11 @@ Reverses part of #34, which hid the avatar below 760px. Between 760px and about 
 wrapped, with a 340px avatar stacked above the text, and the avatar's width also depended on
 the window's height (`40svh`). Now a `--breakpoint-hero` token at 580px shows the avatar, and
 from there the hero is a single row that never wraps: the text column takes the space left
-and the avatar is `clamp(180px, 30vw, 420px)` wide, with a right margin of 18% of its width.
-The margin is close to the design's inset, and it is what keeps the cyclist on screen as he
-passes the right of the ring: without it he was cut off below about 1300px. 580px, not the
+and the avatar is `clamp(180px, 30vw, 420px)` wide. Where the viewport is tight it also has a
+right margin, which is what keeps the cyclist on screen as he passes the right of the ring:
+without it he was cut off below about 1300px. The margin is 18% of the avatar's width, less
+the space already outside the page container, so it shrinks from 1240px and is zero from
+about 1390px, where the avatar sits flush with the container's edge (Dan's call). 580px, not the
 backlog item's 560px, is where the 68px heading (263px wide) still fits beside a 180px avatar
 with that margin, with about 20px to spare. Phones still get no hero avatar. Tablets get
 the cyclist easter egg with it.

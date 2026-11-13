@@ -80,10 +80,11 @@ const letterMotions = [
         <!-- hidden below the hero breakpoint so the heading, intro and buttons lead on phones (so the
              five-click cyclist easter egg starts at tablets). From there up the hero is one row
              that never wraps, and the avatar's width follows the viewport's, not its height.
-             The right margin is 18% of that width, as the design insets it: it leaves the cyclist
-             (and his headlight) room to pass between the ring and the edge of the screen.
+             The right margin leaves the cyclist (and his headlight) room to pass between the ring and
+             the edge of the screen: 18% of the avatar's width, less whatever space there already is
+             outside the page container, so on wide screens it is zero and the avatar sits flush.
              the ring and the avatar share the first grid cell, so the hint line below sits outside the ring -->
-        <div class="max-hero:hidden shrink-0 w-[clamp(180px,30vw,420px)] mr-[min(5.4vw,76px)] grid justify-items-center gap-3.5">
+        <div class="max-hero:hidden shrink-0 w-[clamp(180px,30vw,420px)] mr-[max(0px,min(5.4vw,76px)_-_max(0px,(100vw_-_var(--container-page))/2))] grid justify-items-center gap-3.5">
           <!-- outside the button so it stays still when the avatar is pressed.
                the border goes from line to muted while the cyclist is riding round it -->
           <div
