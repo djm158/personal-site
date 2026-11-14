@@ -51,8 +51,12 @@ export const dragToDismiss = (
   handle: HTMLElement,
   onDismiss: () => void,
 ): DragToDismiss => {
-  let drag: { id: number; startY: number; height: number; samples: DragSample[] } | null =
-    null;
+  let drag: {
+    id: number;
+    startY: number;
+    height: number;
+    samples: DragSample[];
+  } | null = null;
   let dragMoved = false;
 
   const offsetOf = (e: PointerEvent) =>

@@ -194,8 +194,8 @@ const skillTotal = skills.reduce((n, group) => n + group.items.length, 0);
         return;
       }
       if (!(e.target instanceof Element)) return;
-      const skill = e.target.closest<HTMLElement>("button[data-skill]")?.dataset
-        .skill;
+      const skill =
+        e.target.closest<HTMLElement>("button[data-skill]")?.dataset.skill;
       if (skill) $selectedSkills.set(toggleSkill($selectedSkills.get(), skill));
     });
     sheet.addEventListener("cancel", (e) => {

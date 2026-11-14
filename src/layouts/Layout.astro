@@ -35,7 +35,9 @@ const ogTags = openGraphTags({
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="description" content={description} />
     <title>{fullTitle}</title>
-    {ogTags.map((tag) => <meta {...tag} />)}
+    {ogTags.map((tag) => (
+      <meta {...tag} />
+    ))}
     <!-- The theme before first paint, so the page doesn't flash day first: a saved choice wins,
          otherwise the system's colour scheme (the same rule as resolveTheme in lib/theme) -->
     <script is:inline define:vars={{ key: THEME_KEY }}>

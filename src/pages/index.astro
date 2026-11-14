@@ -24,7 +24,8 @@ const { description, hero, marquee, about, experience, contact } = home.data;
 // On load the letters hop in turn with the same lift and tilt, via the hop custom properties.
 const letterMotions = [
   {
-    hover: "motion-safe:hover:-translate-y-[0.14em] motion-safe:hover:-rotate-6",
+    hover:
+      "motion-safe:hover:-translate-y-[0.14em] motion-safe:hover:-rotate-6",
     intro: "[--hop-y:-0.14em] [--hop-rotate:-6deg] [--hop-delay:150ms]",
   },
   {
@@ -32,7 +33,8 @@ const letterMotions = [
     intro: "[--hop-y:-0.14em] [--hop-rotate:5deg] [--hop-delay:240ms]",
   },
   {
-    hover: "motion-safe:hover:-translate-y-[0.14em] motion-safe:hover:-rotate-4",
+    hover:
+      "motion-safe:hover:-translate-y-[0.14em] motion-safe:hover:-rotate-4",
     intro: "[--hop-y:-0.14em] [--hop-rotate:-4deg] [--hop-delay:330ms]",
   },
   {
@@ -55,10 +57,25 @@ const letterMotions = [
           <h1 class="font-serif text-[clamp(68px,10vw,136px)]/[0.88] tracking-[-0.03em]">
             {hero.heading.map((segment) =>
               segment.em ? (
-                <em class="text-accent"><span class="sr-only">{segment.text}</span><span aria-hidden="true" class="inline-flex">{[...segment.text].map((char, i) => (
-                  <span class:list={["inline-block motion-safe:animate-hop motion-safe:transition-[translate,rotate,scale] motion-safe:duration-350 motion-safe:ease-spring", letterMotions[i % letterMotions.length].hover, letterMotions[i % letterMotions.length].intro]}>{char}</span>
-                ))}</span></em>
-              ) : segment.text,
+                <em class="text-accent">
+                  <span class="sr-only">{segment.text}</span>
+                  <span aria-hidden="true" class="inline-flex">
+                    {[...segment.text].map((char, i) => (
+                      <span
+                        class:list={[
+                          "inline-block motion-safe:animate-hop motion-safe:transition-[translate,rotate,scale] motion-safe:duration-350 motion-safe:ease-spring",
+                          letterMotions[i % letterMotions.length].hover,
+                          letterMotions[i % letterMotions.length].intro,
+                        ]}
+                      >
+                        {char}
+                      </span>
+                    ))}
+                  </span>
+                </em>
+              ) : (
+                segment.text
+              ),
             )}
           </h1>
           <p class="mt-7 font-light text-[clamp(20px,2.1vw,27px)]/[1.35] tracking-[-0.01em] max-w-[30ch] text-pretty">
@@ -93,7 +110,10 @@ const letterMotions = [
             class="row-start-1 col-start-1 self-stretch justify-self-stretch -m-[4%] rounded-full border-[1.5px] border-dashed border-line data-ridden:border-muted transition-colors duration-800 pointer-events-none motion-safe:animate-spin-slow"
           ></div>
           <!-- the hint's top margin matches the ring's 4% overhang, so the gap is measured from the ring -->
-          <RideTrigger class="row-start-1 col-start-1 w-full" hintClass="mt-[4%]">
+          <RideTrigger
+            class="row-start-1 col-start-1 w-full"
+            hintClass="mt-[4%]"
+          >
             <Avatar class="w-full" />
           </RideTrigger>
         </div>

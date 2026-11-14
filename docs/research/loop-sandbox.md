@@ -11,18 +11,18 @@ The sandbox works for the loop, with three changes: Chromium needs different lau
 `gh` needs the weaker network isolation option, and the keychain folder has to be denied
 explicitly.
 
-| Check | Result |
-| --- | --- |
-| Read `~/.ssh`, `~/.config/gh` | Blocked by `denyRead` |
-| `git` over SSH (Dan's key) | Fails: the sandbox allows no traffic but its proxy, and SSH ignores the proxy |
-| `git` over HTTPS | Works through the proxy |
-| Hosts not on the allowlist | Blocked (proxy returns 403) |
-| `gh` (a Go program) | TLS fails (`x509: OSStatus -26276`) until `enableWeakerNetworkIsolation` is on |
-| Keychain (`security find-generic-password`) | **Leaks** by default; blocked once `~/Library/Keychains` is in `denyRead` |
-| Chromium, default launch | Crashes: `bootstrap_check_in org.chromium.Chromium.MachPortRendezvousServer: Permission denied` |
-| Chromium, `--single-process` | Works, but only one context per browser |
-| Chromium reaching production | Needs the proxy passed to Playwright; it ignores `HTTPS_PROXY` |
-| `pr-media.mjs` before/after shots and GIF recording | Work with the changes below |
+| Check                                               | Result                                                                                          |
+| --------------------------------------------------- | ----------------------------------------------------------------------------------------------- |
+| Read `~/.ssh`, `~/.config/gh`                       | Blocked by `denyRead`                                                                           |
+| `git` over SSH (Dan's key)                          | Fails: the sandbox allows no traffic but its proxy, and SSH ignores the proxy                   |
+| `git` over HTTPS                                    | Works through the proxy                                                                         |
+| Hosts not on the allowlist                          | Blocked (proxy returns 403)                                                                     |
+| `gh` (a Go program)                                 | TLS fails (`x509: OSStatus -26276`) until `enableWeakerNetworkIsolation` is on                  |
+| Keychain (`security find-generic-password`)         | **Leaks** by default; blocked once `~/Library/Keychains` is in `denyRead`                       |
+| Chromium, default launch                            | Crashes: `bootstrap_check_in org.chromium.Chromium.MachPortRendezvousServer: Permission denied` |
+| Chromium, `--single-process`                        | Works, but only one context per browser                                                         |
+| Chromium reaching production                        | Needs the proxy passed to Playwright; it ignores `HTTPS_PROXY`                                  |
+| `pr-media.mjs` before/after shots and GIF recording | Work with the changes below                                                                     |
 
 ## Sandbox settings
 

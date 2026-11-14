@@ -16,7 +16,9 @@ describe("firstInvalidField", () => {
   it("flags an email without an @ or a dot in the domain", () => {
     expect(firstInvalidField({ ...valid, email: "ada" })).toBe("email");
     expect(firstInvalidField({ ...valid, email: "ada@example" })).toBe("email");
-    expect(firstInvalidField({ ...valid, email: "ada @example.com" })).toBe("email");
+    expect(firstInvalidField({ ...valid, email: "ada @example.com" })).toBe(
+      "email",
+    );
   });
 
   it("flags a message under five characters once trimmed", () => {
@@ -25,16 +27,23 @@ describe("firstInvalidField", () => {
   });
 
   it("reports fields in form order", () => {
-    expect(firstInvalidField({ name: "", email: "", message: "" })).toBe("name");
-    expect(firstInvalidField({ ...valid, email: "", message: "" })).toBe("email");
+    expect(firstInvalidField({ name: "", email: "", message: "" })).toBe(
+      "name",
+    );
+    expect(firstInvalidField({ ...valid, email: "", message: "" })).toBe(
+      "email",
+    );
   });
 });
 
 describe("fillTemplate", () => {
   it("replaces each {key} with its value", () => {
-    expect(fillTemplate("Thanks, {name}! At {email}.", { name: "Ada", email: "a@b.co" })).toBe(
-      "Thanks, Ada! At a@b.co.",
-    );
+    expect(
+      fillTemplate("Thanks, {name}! At {email}.", {
+        name: "Ada",
+        email: "a@b.co",
+      }),
+    ).toBe("Thanks, Ada! At a@b.co.");
   });
 
   it("leaves unknown keys as they are", () => {

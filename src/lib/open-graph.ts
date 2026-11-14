@@ -1,8 +1,7 @@
 // Open Graph tags let link previews (Slack, LinkedIn, iMessage…) show the page's title and description.
 // Pages share `public/og.png`, shown as the large Twitter/X card, unless they pass their own image.
 export type MetaTag =
-  | { property: string; content: string }
-  | { name: string; content: string };
+  { property: string; content: string } | { name: string; content: string };
 
 export interface OgImage {
   /** Path under `public/`, made absolute against the site URL */

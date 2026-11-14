@@ -34,7 +34,9 @@ describe("matchingRoles", () => {
 
 describe("skillNote", () => {
   test("prompts to pick when no skill is picked", () => {
-    expect(skillNote(undefined, [])).toBe("Pick a skill to see where I used it.");
+    expect(skillNote(undefined, [])).toBe(
+      "Pick a skill to see where I used it.",
+    );
   });
 
   test("names the one place a skill was used", () => {
@@ -42,7 +44,9 @@ describe("skillNote", () => {
   });
 
   test("joins two places with an ampersand", () => {
-    expect(skillNote("React", ["Acme", "Globex"])).toBe("React at Acme & Globex.");
+    expect(skillNote("React", ["Acme", "Globex"])).toBe(
+      "React at Acme & Globex.",
+    );
   });
 
   test("joins three or more places with commas and a final ampersand", () => {

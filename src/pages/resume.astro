@@ -317,8 +317,8 @@ const nonPortfolioLinks = resume.links.filter(
       $selectedSkills.set([]);
       return;
     }
-    const skill = e.target.closest<HTMLElement>("button[data-skill]")?.dataset
-      .skill;
+    const skill =
+      e.target.closest<HTMLElement>("button[data-skill]")?.dataset.skill;
     if (skill) $selectedSkills.set(toggleSkill($selectedSkills.get(), skill));
   });
 </script>

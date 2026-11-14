@@ -9,7 +9,9 @@ export const matchingRoles = <R extends TaggedRole>(
   skills: readonly string[],
 ): R[] =>
   skills.length
-    ? roles.filter((role) => skills.every((skill) => role.tags?.includes(skill)))
+    ? roles.filter((role) =>
+        skills.every((skill) => role.tags?.includes(skill)),
+      )
     : [];
 
 // The line under the picker heading: where `skill` was used, given the places in role order
@@ -28,5 +30,7 @@ export const skillNote = (
 };
 
 // Single select for now: picking the selected skill clears it, any other replaces it
-export const toggleSkill = (selected: readonly string[], skill: string): string[] =>
-  selected.includes(skill) ? [] : [skill];
+export const toggleSkill = (
+  selected: readonly string[],
+  skill: string,
+): string[] => (selected.includes(skill) ? [] : [skill]);

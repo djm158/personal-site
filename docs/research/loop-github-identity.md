@@ -43,7 +43,7 @@ The factors that decide it:
    → [Local auth](#2-local-auth-for-gh-and-git-push)
 2. **The ruleset works either way.** Bypass is granted by role, team or App. Dan's
    `admin` role can be on the list while the machine user's `write` role, or the App, stays
-   off. Neither identity can approve its own PR. Both *could* merge once Dan approves. No
+   off. Neither identity can approve its own PR. Both _could_ merge once Dan approves. No
    source says whether "Restrict updates" stops that, so test it.
    → [Rulesets](#5-rulesets-on-a-personal-account-repo)
 3. **The App gives a server-side block on workflow edits.** Without the `Workflows`
@@ -53,7 +53,7 @@ The factors that decide it:
 4. **The review Action needs one line for the App.** Its actor is a `Bot`, so the review
    workflow needs `allowed_bots: <app-slug>`. A machine user passes as a `User` with write
    access. → [claude-code-action](#6-claude-code-action-and-bot-actors)
-5. **Neither option helps if the agent can reach Dan's own credentials.** *Repo check:* `gh` is
+5. **Neither option helps if the agent can reach Dan's own credentials.** _Repo check:_ `gh` is
    logged in as `djm158` from the keyring with `repo` and `workflow` scopes, and `origin` uses
    Dan's SSH key. Any agent that can run `gh auth token` or `git push git@github.com:…` can act
    as Dan, whatever `GH_TOKEN` says. → [Secrets](#9-storing-secrets-on-macos)
@@ -99,7 +99,7 @@ for it. An App raises no account question.
   repository collaborator". Also: "The token will only be able to access resources owned by the
   selected resource owner", which is the user or one of their orgs (docs)
   [Managing your personal access tokens](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens#fine-grained-personal-access-tokens-limitations).
-  So a machine user can't point a fine-grained PAT at `djm158/personal-site`. *Inference:* the
+  So a machine user can't point a fine-grained PAT at `djm158/personal-site`. _Inference:_ the
   repo is owned by `djm158`, who is not the machine user and not an org it belongs to.
 - That leaves a classic PAT. "Only personal access tokens (classic) have write access for public
   repositories that are not owned by you". A classic token "can access every repository that
@@ -191,6 +191,7 @@ long-lived credential for the whole run (inference).
   workflow files (docs)
   [Permissions required for GitHub Apps](https://docs.github.com/en/rest/authentication/permissions-required-for-github-apps),
   […for fine-grained PATs](https://docs.github.com/en/rest/authentication/permissions-required-for-fine-grained-personal-access-tokens).
+
 - Classic scope `workflow`: "Grants the ability to add and update GitHub Actions workflow
   files" (docs) [Scopes](https://docs.github.com/en/apps/oauth-apps/building-oauth-apps/scopes-for-oauth-apps).
 
@@ -224,11 +225,11 @@ long-lived credential for the whole run (inference).
 **For this setup:**
 
 - Both identities push from outside Actions with their own token, never `GITHUB_TOKEN`. So
-  `ci.yml`, which listens for `pull_request` and pushes to `main`, runs for both. *Inference:*
+  `ci.yml`, which listens for `pull_request` and pushes to `main`, runs for both. _Inference:_
   the docs name only `GITHUB_TOKEN` as the exception.
 - The approval gate is documented only for fork PRs, and the loop pushes branches to the base
   repo. The docs don't say outright that same-repo PRs by a new collaborator or App are exempt,
-  so watch the first agent PR. *Repo check:* `content-guard.yml` uses `pull_request_target`,
+  so watch the first agent PR. _Repo check:_ `content-guard.yml` uses `pull_request_target`,
   so it runs without approval either way.
 - The `GITHUB_TOKEN` exception matters only if the driver later moves into Actions.
 
@@ -255,21 +256,21 @@ long-lived credential for the whole run (inference).
 - The org-only "Restrict who can push" in classic branch protection keeps people "prevented
   from merging … when the required checks fail". It is not available for personal repos (docs)
   [About protected branches](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-protected-branches/about-protected-branches#restrict-who-can-push-to-matching-branches).
-- *Repo check:* `gh api …/collaborators/djm158/permission` returns `admin`, and the repo has no
+- _Repo check:_ `gh api …/collaborators/djm158/permission` returns `admin`, and the repo has no
   rulesets yet.
 
 **For this setup:**
 
-| Question | Machine user | GitHub App |
-| --- | --- | --- |
-| Left off the bypass list while Dan is on it? | Yes. Put only "Repository admin" on the list, never "Write". A personal-repo collaborator has `write` ([§3](#3-permission-granularity)) | Yes. Add no App to the list |
-| Does Dan's approval count on its PRs? | Yes. Dan isn't the author and has write | Yes, for the same reason |
-| Can it approve its own PR? | No: authors can't approve their own | No, by the same rule. *Inference:* the docs say "authors", not "users" |
-| Can it merge its own PR? | Not before Dan approves and the checks pass. After that, yes: collaborators can merge | Same, through `PUT …/merge` with `contents: write` |
-| Can it push straight to `main`? | No, if the ruleset requires a PR and the role has no bypass | Same |
+| Question                                     | Machine user                                                                                                                            | GitHub App                                                             |
+| -------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------- |
+| Left off the bypass list while Dan is on it? | Yes. Put only "Repository admin" on the list, never "Write". A personal-repo collaborator has `write` ([§3](#3-permission-granularity)) | Yes. Add no App to the list                                            |
+| Does Dan's approval count on its PRs?        | Yes. Dan isn't the author and has write                                                                                                 | Yes, for the same reason                                               |
+| Can it approve its own PR?                   | No: authors can't approve their own                                                                                                     | No, by the same rule. _Inference:_ the docs say "authors", not "users" |
+| Can it merge its own PR?                     | Not before Dan approves and the checks pass. After that, yes: collaborators can merge                                                   | Same, through `PUT …/merge` with `contents: write`                     |
+| Can it push straight to `main`?              | No, if the ruleset requires a PR and the role has no bypass                                                                             | Same                                                                   |
 
 **Gap the docs leave open:** the docs don't say whether "Restrict updates" (bypass: admin
-only) also blocks *merging a PR* by someone without bypass. If it does, it closes the "merge
+only) also blocks _merging a PR_ by someone without bypass. If it does, it closes the "merge
 after Dan approves" hole for both options. Test it once with the loop identity before relying
 on it. Otherwise the client-side `gh pr merge` deny rule is the only thing stopping that merge.
 If Dan ever pushes to an agent branch himself, "approval of the most recent push" means his own
@@ -291,6 +292,7 @@ approval can't count for that push.
   - `allowed_bots` "is only for bot actors and is not consulted" for Users.
 
   [`src/github/validation/actor.ts`](https://github.com/anthropics/claude-code-action/blob/main/src/github/validation/actor.ts).
+
 - `run.ts` calls `checkWritePermissions` for PR events
   ([`src/entrypoints/run.ts`](https://github.com/anthropics/claude-code-action/blob/main/src/entrypoints/run.ts)).
   An actor ending in `[bot]` passes at once. Any other actor needs `admin` or `write` from the
@@ -327,7 +329,7 @@ approval can't count for that push.
   automated services, or bots from outside your Netlify team" are always untrusted, and Git
   accounts "connected to a site member" deploy without restrictions. The default is **Require
   approval**, applied "when Netlify detects potentially sensitive environment variables". The
-  other options are *Deploy without sensitive variables* and *Deploy without restrictions*
+  other options are _Deploy without sensitive variables_ and _Deploy without restrictions_
   (docs)
   [Netlify, Sensitive variable policy](https://docs.netlify.com/build/environment-variables/get-started/#sensitive-variable-policy).
 - The docs don't say how Netlify decides who authored a PR deploy (PR opener, pusher or commit
@@ -337,10 +339,10 @@ approval can't count for that push.
 
 - The repo is public, so the private-repo Deploy Request Policy doesn't apply to either option.
 - Both identities are "outside your Netlify team", so both previews count as untrusted. They
-  need approval only if the site has variables Netlify flags as sensitive. *Repo check:*
+  need approval only if the site has variables Netlify flags as sensitive. _Repo check:_
   `netlify.toml` sets only `TYPST_VERSION`. Variables set in the Netlify UI weren't checked.
 - A machine user could be linked to a Netlify team member to become trusted. An App can't be
-  linked. If previews show "pending approval", choose *Deploy without sensitive variables*
+  linked. If previews show "pending approval", choose _Deploy without sensitive variables_
   rather than linking an account.
 
 ### 8. Commit attribution and verified signatures
@@ -353,7 +355,7 @@ approval can't count for that push.
   [Email addresses reference](https://docs.github.com/en/account-and-profile/reference/email-addresses-reference#your-noreply-email-address).
   GitHub's docs don't document the address for an App's bot user.
   `claude-code-action` uses `${botId}+${botName}@users.noreply.github.com`, with the bot
-  *user* ID, for example `41898282+claude[bot]` (source)
+  _user_ ID, for example `41898282+claude[bot]` (source)
   [`git-config.ts`](https://github.com/anthropics/claude-code-action/blob/main/src/github/operations/git-config.ts),
   [`constants.ts`](https://github.com/anthropics/claude-code-action/blob/main/src/github/constants.ts).
 - Bot signatures are verified "only … if the request is verified and authenticated as the
@@ -393,7 +395,7 @@ approval can't count for that push.
 - The same page says an app that "runs on a user device" should "not generate installation
   access tokens since doing so requires a private key" (docs)
   [Best practices](https://docs.github.com/en/apps/creating-github-apps/about-creating-github-apps/best-practices-for-creating-a-github-app).
-  *Inference:* that advice is about apps shipped to other people's devices. Here Dan owns the
+  _Inference:_ that advice is about apps shipped to other people's devices. Here Dan owns the
   App and the Mac, and is its only user. The underlying risk, a key on a machine the agent
   shares, still applies.
 - `security add-generic-password … -T appPath` limits which apps may read an item, and `-A`
@@ -431,7 +433,7 @@ approval can't count for that push.
 **What the sources say**
 
 - An installation token expires after 1 hour and can be revoked with `DELETE
-  /installation/token` ([REST: installations](https://docs.github.com/en/rest/apps/installations#revoke-an-installation-access-token)).
+/installation/token` ([REST: installations](https://docs.github.com/en/rest/apps/installations#revoke-an-installation-access-token)).
   Dan can suspend or uninstall the App to block it at once (docs)
   [Reviewing and modifying installed GitHub Apps](https://docs.github.com/en/apps/using-github-apps/reviewing-and-modifying-installed-github-apps).
   The App owner can also suspend it through
@@ -449,14 +451,14 @@ approval can't count for that push.
 
 **For this setup:**
 
-| Leak | Machine user (classic PAT `public_repo`) | App installation token | App private key |
-| --- | --- | --- | --- |
-| Lifetime | Until its expiry, or forever if none was set | ≤ 1 hour, less if the driver revokes it | Until Dan deletes the key |
-| Reach | Write to `personal-site`. Also acts publicly as the machine user anywhere on GitHub (comments, issues, forks) | Only `personal-site`, and only Contents, PRs and Issues | Mints tokens with every permission the installation has |
-| Kill switch | Remove the collaborator (Dan can do this alone), then revoke the token (needs the machine login) | Wait an hour, or revoke | Suspend or uninstall (Dan can do this alone), then rotate the key |
-| Can it get past `main`? | No, if the ruleset holds | No | No |
+| Leak                    | Machine user (classic PAT `public_repo`)                                                                      | App installation token                                  | App private key                                                   |
+| ----------------------- | ------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------- | ----------------------------------------------------------------- |
+| Lifetime                | Until its expiry, or forever if none was set                                                                  | ≤ 1 hour, less if the driver revokes it                 | Until Dan deletes the key                                         |
+| Reach                   | Write to `personal-site`. Also acts publicly as the machine user anywhere on GitHub (comments, issues, forks) | Only `personal-site`, and only Contents, PRs and Issues | Mints tokens with every permission the installation has           |
+| Kill switch             | Remove the collaborator (Dan can do this alone), then revoke the token (needs the machine login)              | Wait an hour, or revoke                                 | Suspend or uninstall (Dan can do this alone), then rotate the key |
+| Can it get past `main`? | No, if the ruleset holds                                                                                      | No                                                      | No                                                                |
 
-*Inference:* the App's worst case (the key) is about as bad as the machine user's normal case
+_Inference:_ the App's worst case (the key) is about as bad as the machine user's normal case
 (the PAT). The App's normal case is much smaller.
 
 ### 11. Setup, step by step
@@ -468,7 +470,7 @@ approval can't count for that push.
 2. From `djm158`, invite it as a collaborator, then accept the invite as the machine user.
 3. As the machine user, create a classic PAT with `public_repo` only (no `workflow`) and an
    expiry such as 90 days.
-4. Optionally add an SSH *signing* key to the machine account, and set `gpg.format=ssh`,
+4. Optionally add an SSH _signing_ key to the machine account, and set `gpg.format=ssh`,
    `user.signingkey` and `commit.gpgsign` in the loop's git config.
 5. Store the PAT in the keychain. The driver exports it as `GH_TOKEN` and sets the worktree's
    push URL to HTTPS, with an empty `credential.helper` and then `!gh auth git-credential`. Set
@@ -488,6 +490,7 @@ approval can't count for that push.
    - Installable "Only on this account".
 
    [Registering a GitHub App](https://docs.github.com/en/apps/creating-github-apps/registering-a-github-app/registering-a-github-app).
+
 2. Generate a private key. Store it base64-encoded in the keychain, then delete the PEM file.
 3. Install the App on `djm158` → "Only select repositories" → `personal-site`
    ([Installing your own GitHub App](https://docs.github.com/en/apps/using-github-apps/installing-your-own-github-app)).
@@ -516,24 +519,24 @@ rebase. [Creating rulesets](https://docs.github.com/en/repositories/configuring-
 
 ## 3. Comparison
 
-| | Machine user | GitHub App |
-| --- | --- | --- |
-| ToS | Allowed: one free machine account, created by a human | Not an account; the ToS doesn't mention Apps |
-| Token type for this repo | Classic PAT (`public_repo`) or SSH key. Fine-grained isn't possible | 1-hour installation token, limited to this repo and these permissions |
-| Expiry | Optional; can be never | 1 hour, fixed. The key never expires |
-| Per-run driver work | Export the PAT | Sign a JWT, mint, export, and revoke at the end |
-| Permissions | Every collaborator action. Can't be made read-only on a personal repo | Only what you choose. No Workflows unless granted |
-| Block on workflow-file edits | Only with a PAT lacking `workflow`; an SSH key goes around it | Yes, while Workflows isn't granted |
-| Triggers `pull_request` / `push` | Yes | Yes |
-| Left off ruleset bypass | Yes (`write` role not listed) | Yes (App not listed) |
-| Approve own PR | No | No |
-| Merge own PR after Dan approves | Yes, unless Restrict updates blocks it (untested) | Same |
-| claude-code-action | Works as is | Needs `allowed_bots: <slug>` |
-| Netlify preview | Untrusted unless linked to a Netlify member; gated only if there are sensitive variables | Untrusted and can't be linked; same gate |
-| Verified commits | Yes, with an SSH signing key, rebases included | Only through API commits, which can't rebase |
-| Blast radius of a leak | Long-lived write, plus a public account to misuse | ≤ 1 hour, one repo. Key leak: until rotated |
-| Kill switch Dan holds alone | Remove the collaborator | Suspend or uninstall |
-| Setup | Second account, email, 2FA, invite, PAT | Register, install, key, mint script |
+|                                  | Machine user                                                                             | GitHub App                                                            |
+| -------------------------------- | ---------------------------------------------------------------------------------------- | --------------------------------------------------------------------- |
+| ToS                              | Allowed: one free machine account, created by a human                                    | Not an account; the ToS doesn't mention Apps                          |
+| Token type for this repo         | Classic PAT (`public_repo`) or SSH key. Fine-grained isn't possible                      | 1-hour installation token, limited to this repo and these permissions |
+| Expiry                           | Optional; can be never                                                                   | 1 hour, fixed. The key never expires                                  |
+| Per-run driver work              | Export the PAT                                                                           | Sign a JWT, mint, export, and revoke at the end                       |
+| Permissions                      | Every collaborator action. Can't be made read-only on a personal repo                    | Only what you choose. No Workflows unless granted                     |
+| Block on workflow-file edits     | Only with a PAT lacking `workflow`; an SSH key goes around it                            | Yes, while Workflows isn't granted                                    |
+| Triggers `pull_request` / `push` | Yes                                                                                      | Yes                                                                   |
+| Left off ruleset bypass          | Yes (`write` role not listed)                                                            | Yes (App not listed)                                                  |
+| Approve own PR                   | No                                                                                       | No                                                                    |
+| Merge own PR after Dan approves  | Yes, unless Restrict updates blocks it (untested)                                        | Same                                                                  |
+| claude-code-action               | Works as is                                                                              | Needs `allowed_bots: <slug>`                                          |
+| Netlify preview                  | Untrusted unless linked to a Netlify member; gated only if there are sensitive variables | Untrusted and can't be linked; same gate                              |
+| Verified commits                 | Yes, with an SSH signing key, rebases included                                           | Only through API commits, which can't rebase                          |
+| Blast radius of a leak           | Long-lived write, plus a public account to misuse                                        | ≤ 1 hour, one repo. Key leak: until rotated                           |
+| Kill switch Dan holds alone      | Remove the collaborator                                                                  | Suspend or uninstall                                                  |
+| Setup                            | Second account, email, 2FA, invite, PAT                                                  | Register, install, key, mint script                                   |
 
 ## 4. Recommendation
 
@@ -568,47 +571,47 @@ pass rebases, so verified commits were never on offer for the App.
 
 ## 5. Sources
 
-| Source | Date | Type | What it contributed |
-| --- | --- | --- | --- |
-| [GitHub Terms of Service](https://docs.github.com/en/site-policy/github-terms/github-terms-of-service) | effective 2026-04-27 | ToS | Machine account definition and the one-free-machine-account limit |
-| [Types of GitHub accounts](https://docs.github.com/en/get-started/learning-about-github/types-of-github-accounts) | undated | Docs | "Machine user" term |
-| [Managing deploy keys](https://docs.github.com/en/authentication/connecting-to-github-with-ssh/managing-deploy-keys) | undated | Docs | Machine users get read/write on personal repos; ToS gloss; deploy key powers and risks |
-| [Managing your personal access tokens](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens) | undated | Docs | Fine-grained gaps for collaborators, resource owner, classic token reach, expiry, HTTPS only |
-| [Scopes for OAuth apps](https://docs.github.com/en/apps/oauth-apps/building-oauth-apps/scopes-for-oauth-apps) | undated | Docs | `public_repo` and `workflow` scopes |
-| [About mandatory 2FA](https://docs.github.com/en/authentication/securing-your-account-with-two-factor-authentication-2fa/about-mandatory-two-factor-authentication) | undated | Docs | Service accounts picked for 2FA must enroll |
-| [Generating a JWT](https://docs.github.com/en/apps/creating-github-apps/authenticating-with-a-github-app/generating-a-json-web-token-jwt-for-a-github-app) | undated | Docs | JWT claims, 10-minute maximum, Bash example |
-| [Generating an installation access token](https://docs.github.com/en/apps/creating-github-apps/authenticating-with-a-github-app/generating-an-installation-access-token-for-a-github-app) | undated | Docs | 1-hour expiry, narrowing by repo and permission, new token format |
-| [Authenticating as an installation](https://docs.github.com/en/apps/creating-github-apps/authenticating-with-a-github-app/authenticating-as-a-github-app-installation) | undated | Docs | `x-access-token` HTTPS git; actions attributed to the app |
-| [Managing private keys](https://docs.github.com/en/apps/creating-github-apps/authenticating-with-a-github-app/managing-private-keys-for-github-apps) | undated | Docs | Keys don't expire; 25 maximum; storage advice |
-| [Best practices for creating a GitHub App](https://docs.github.com/en/apps/creating-github-apps/about-creating-github-apps/best-practices-for-creating-a-github-app) | undated | Docs | Least permissions, key storage, user-device caveat, token lifetimes |
-| [Deciding when to build a GitHub App](https://docs.github.com/en/apps/creating-github-apps/about-creating-github-apps/deciding-when-to-build-a-github-app) | undated | Docs | Apps aren't tied to a user; App versus PAT advice |
-| [Choosing permissions for a GitHub App](https://docs.github.com/en/apps/creating-github-apps/registering-a-github-app/choosing-permissions-for-a-github-app) | undated | Docs | No default permissions; Workflows permission for `.github/workflows` |
-| [Registering a GitHub App](https://docs.github.com/en/apps/creating-github-apps/registering-a-github-app/registering-a-github-app) | undated | Docs | Webhook "Active" toggle; "Only on this account" |
-| [Installing your own GitHub App](https://docs.github.com/en/apps/using-github-apps/installing-your-own-github-app) | undated | Docs | "Only select repositories" |
-| [Reviewing and modifying installed GitHub Apps](https://docs.github.com/en/apps/using-github-apps/reviewing-and-modifying-installed-github-apps) | undated | Docs | Suspend and uninstall |
-| [REST: installations](https://docs.github.com/en/rest/apps/installations), [REST: apps](https://docs.github.com/en/rest/apps/apps) | undated | Docs | Revoke token, suspend installation, create token |
-| [Permissions required for GitHub Apps](https://docs.github.com/en/rest/authentication/permissions-required-for-github-apps), […for fine-grained PATs](https://docs.github.com/en/rest/authentication/permissions-required-for-fine-grained-personal-access-tokens) | undated | Docs | Permission for each endpoint the loop uses |
-| [Permission levels for a personal account repository](https://docs.github.com/en/account-and-profile/reference/permission-levels-for-a-personal-account-repository) | undated | Docs | What collaborators can do |
-| [REST: collaborators](https://docs.github.com/en/rest/collaborators/collaborators) | undated | Docs | Permission argument is org-only; legacy `admin`/`write` values |
-| [Triggering a workflow](https://docs.github.com/en/actions/writing-workflows/choosing-when-your-workflow-runs/triggering-a-workflow) | undated | Docs | `GITHUB_TOKEN` exception; App tokens and PATs trigger runs |
-| [Managing GitHub Actions settings](https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/enabling-features-for-your-repository/managing-github-actions-settings-for-a-repository#controlling-changes-from-forks-to-workflows-in-public-repositories), [Approving runs from forks](https://docs.github.com/en/actions/managing-workflow-runs-and-deployments/managing-workflow-runs/approving-workflow-runs-from-public-forks) | undated | Docs | First-time-contributor gates for fork PRs; `pull_request_target` always runs |
-| [About rulesets](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-rulesets/about-rulesets) | undated | Docs | Available on public repos on GitHub Free; rule layering |
-| [Creating rulesets](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-rulesets/creating-rulesets-for-a-repository) | undated | Docs | Who can be given bypass |
-| [Available rules for rulesets](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-rulesets/available-rules-for-rulesets) | undated | Docs | Restrict updates, required reviews, last-push approval, signed commits |
-| [About protected branches](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-protected-branches/about-protected-branches) | undated | Docs | "Restrict who can push" is org-only |
-| [Approving a PR with required reviews](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/reviewing-changes-in-pull-requests/approving-a-pull-request-with-required-reviews) | undated | Docs | Authors can't approve their own PRs; admins can merge without approval |
-| [About commit signature verification](https://docs.github.com/en/authentication/managing-commit-signature-verification/about-commit-signature-verification) | undated | Docs | Bot signature rules; SSH and GPG signing |
-| [Setting your commit email address](https://docs.github.com/en/account-and-profile/setting-up-and-managing-your-personal-account-on-github/managing-email-preferences/setting-your-commit-email-address), [Email addresses reference](https://docs.github.com/en/account-and-profile/reference/email-addresses-reference) | undated | Docs | Commits linked by email; user noreply format |
-| [Token expiration and revocation](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/token-expiration-and-revocation) | undated | Docs | Automatic revocation when pushed publicly; one-year unused rule |
-| cli/cli: `gh help environment`, `gh auth login/setup-git/token --help` | v2.103.2, 2026-10-23 | Source | `GH_TOKEN` precedence, headless use, credential helper, token printing |
-| [cli/cli `gitcredential/helper.go`](https://github.com/cli/cli/blob/trunk/pkg/cmd/auth/gitcredential/helper.go), [`internal/keyring/keyring.go`](https://github.com/cli/cli/blob/trunk/internal/keyring/keyring.go) | read 2026-10-29 | Source | `x-access-token` for env tokens; keyring storage |
-| [claude-code-action `actor.ts`](https://github.com/anthropics/claude-code-action/blob/main/src/github/validation/actor.ts), [`permissions.ts`](https://github.com/anthropics/claude-code-action/blob/main/src/github/validation/permissions.ts), [`run.ts`](https://github.com/anthropics/claude-code-action/blob/main/src/entrypoints/run.ts), [`agent/index.ts`](https://github.com/anthropics/claude-code-action/blob/main/src/modes/agent/index.ts), [`detector.ts`](https://github.com/anthropics/claude-code-action/blob/main/src/modes/detector.ts) | `d70510b`, 2026-10-27 | Source | Human-actor check, `allowed_bots`, write check, agent mode on PR events |
-| [claude-code-action `docs/security.md`](https://github.com/anthropics/claude-code-action/blob/main/docs/security.md), [`action.yml`](https://github.com/anthropics/claude-code-action/blob/main/action.yml), [`git-config.ts`](https://github.com/anthropics/claude-code-action/blob/main/src/github/operations/git-config.ts), [`constants.ts`](https://github.com/anthropics/claude-code-action/blob/main/src/github/constants.ts) | `d70510b`, 2026-10-27 | Source | Bot policy, signing options, bot noreply format, credential helper |
-| [claude-plugins-official `code-review.md`](https://github.com/anthropics/claude-plugins-official/blob/main/plugins/code-review/commands/code-review.md) | read 2026-10-29 | Source | Skip rule for "automated PR" |
-| [Netlify, Deploy overview: Deploy permissions](https://docs.netlify.com/deploy/deploy-overview/#deploy-permissions) | undated | Docs | Deploy Request Policy is for private repos only; recognized authors |
-| [Netlify, Sensitive variable policy](https://docs.netlify.com/build/environment-variables/get-started/#sensitive-variable-policy) | undated | Docs | Public-repo untrusted deploys; Require approval by default |
-| [Netlify, Roles and permissions](https://docs.netlify.com/manage/accounts-and-billing/team-management/roles-and-permissions/) | undated | Docs | What a Git Contributor is |
-| `man security`, `gitcredentials(7)` (git 2.39.5) | local | Source | Keychain `-T` and `-A` flags; empty helper resets the list |
+| Source                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     | Date                  | Type   | What it contributed                                                                          |
+| ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------- | ------ | -------------------------------------------------------------------------------------------- |
+| [GitHub Terms of Service](https://docs.github.com/en/site-policy/github-terms/github-terms-of-service)                                                                                                                                                                                                                                                                                                                                                                                                                                                     | effective 2026-04-27  | ToS    | Machine account definition and the one-free-machine-account limit                            |
+| [Types of GitHub accounts](https://docs.github.com/en/get-started/learning-about-github/types-of-github-accounts)                                                                                                                                                                                                                                                                                                                                                                                                                                          | undated               | Docs   | "Machine user" term                                                                          |
+| [Managing deploy keys](https://docs.github.com/en/authentication/connecting-to-github-with-ssh/managing-deploy-keys)                                                                                                                                                                                                                                                                                                                                                                                                                                       | undated               | Docs   | Machine users get read/write on personal repos; ToS gloss; deploy key powers and risks       |
+| [Managing your personal access tokens](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens)                                                                                                                                                                                                                                                                                                                                                                                                | undated               | Docs   | Fine-grained gaps for collaborators, resource owner, classic token reach, expiry, HTTPS only |
+| [Scopes for OAuth apps](https://docs.github.com/en/apps/oauth-apps/building-oauth-apps/scopes-for-oauth-apps)                                                                                                                                                                                                                                                                                                                                                                                                                                              | undated               | Docs   | `public_repo` and `workflow` scopes                                                          |
+| [About mandatory 2FA](https://docs.github.com/en/authentication/securing-your-account-with-two-factor-authentication-2fa/about-mandatory-two-factor-authentication)                                                                                                                                                                                                                                                                                                                                                                                        | undated               | Docs   | Service accounts picked for 2FA must enroll                                                  |
+| [Generating a JWT](https://docs.github.com/en/apps/creating-github-apps/authenticating-with-a-github-app/generating-a-json-web-token-jwt-for-a-github-app)                                                                                                                                                                                                                                                                                                                                                                                                 | undated               | Docs   | JWT claims, 10-minute maximum, Bash example                                                  |
+| [Generating an installation access token](https://docs.github.com/en/apps/creating-github-apps/authenticating-with-a-github-app/generating-an-installation-access-token-for-a-github-app)                                                                                                                                                                                                                                                                                                                                                                  | undated               | Docs   | 1-hour expiry, narrowing by repo and permission, new token format                            |
+| [Authenticating as an installation](https://docs.github.com/en/apps/creating-github-apps/authenticating-with-a-github-app/authenticating-as-a-github-app-installation)                                                                                                                                                                                                                                                                                                                                                                                     | undated               | Docs   | `x-access-token` HTTPS git; actions attributed to the app                                    |
+| [Managing private keys](https://docs.github.com/en/apps/creating-github-apps/authenticating-with-a-github-app/managing-private-keys-for-github-apps)                                                                                                                                                                                                                                                                                                                                                                                                       | undated               | Docs   | Keys don't expire; 25 maximum; storage advice                                                |
+| [Best practices for creating a GitHub App](https://docs.github.com/en/apps/creating-github-apps/about-creating-github-apps/best-practices-for-creating-a-github-app)                                                                                                                                                                                                                                                                                                                                                                                       | undated               | Docs   | Least permissions, key storage, user-device caveat, token lifetimes                          |
+| [Deciding when to build a GitHub App](https://docs.github.com/en/apps/creating-github-apps/about-creating-github-apps/deciding-when-to-build-a-github-app)                                                                                                                                                                                                                                                                                                                                                                                                 | undated               | Docs   | Apps aren't tied to a user; App versus PAT advice                                            |
+| [Choosing permissions for a GitHub App](https://docs.github.com/en/apps/creating-github-apps/registering-a-github-app/choosing-permissions-for-a-github-app)                                                                                                                                                                                                                                                                                                                                                                                               | undated               | Docs   | No default permissions; Workflows permission for `.github/workflows`                         |
+| [Registering a GitHub App](https://docs.github.com/en/apps/creating-github-apps/registering-a-github-app/registering-a-github-app)                                                                                                                                                                                                                                                                                                                                                                                                                         | undated               | Docs   | Webhook "Active" toggle; "Only on this account"                                              |
+| [Installing your own GitHub App](https://docs.github.com/en/apps/using-github-apps/installing-your-own-github-app)                                                                                                                                                                                                                                                                                                                                                                                                                                         | undated               | Docs   | "Only select repositories"                                                                   |
+| [Reviewing and modifying installed GitHub Apps](https://docs.github.com/en/apps/using-github-apps/reviewing-and-modifying-installed-github-apps)                                                                                                                                                                                                                                                                                                                                                                                                           | undated               | Docs   | Suspend and uninstall                                                                        |
+| [REST: installations](https://docs.github.com/en/rest/apps/installations), [REST: apps](https://docs.github.com/en/rest/apps/apps)                                                                                                                                                                                                                                                                                                                                                                                                                         | undated               | Docs   | Revoke token, suspend installation, create token                                             |
+| [Permissions required for GitHub Apps](https://docs.github.com/en/rest/authentication/permissions-required-for-github-apps), […for fine-grained PATs](https://docs.github.com/en/rest/authentication/permissions-required-for-fine-grained-personal-access-tokens)                                                                                                                                                                                                                                                                                         | undated               | Docs   | Permission for each endpoint the loop uses                                                   |
+| [Permission levels for a personal account repository](https://docs.github.com/en/account-and-profile/reference/permission-levels-for-a-personal-account-repository)                                                                                                                                                                                                                                                                                                                                                                                        | undated               | Docs   | What collaborators can do                                                                    |
+| [REST: collaborators](https://docs.github.com/en/rest/collaborators/collaborators)                                                                                                                                                                                                                                                                                                                                                                                                                                                                         | undated               | Docs   | Permission argument is org-only; legacy `admin`/`write` values                               |
+| [Triggering a workflow](https://docs.github.com/en/actions/writing-workflows/choosing-when-your-workflow-runs/triggering-a-workflow)                                                                                                                                                                                                                                                                                                                                                                                                                       | undated               | Docs   | `GITHUB_TOKEN` exception; App tokens and PATs trigger runs                                   |
+| [Managing GitHub Actions settings](https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/enabling-features-for-your-repository/managing-github-actions-settings-for-a-repository#controlling-changes-from-forks-to-workflows-in-public-repositories), [Approving runs from forks](https://docs.github.com/en/actions/managing-workflow-runs-and-deployments/managing-workflow-runs/approving-workflow-runs-from-public-forks)                                                                                            | undated               | Docs   | First-time-contributor gates for fork PRs; `pull_request_target` always runs                 |
+| [About rulesets](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-rulesets/about-rulesets)                                                                                                                                                                                                                                                                                                                                                                                                              | undated               | Docs   | Available on public repos on GitHub Free; rule layering                                      |
+| [Creating rulesets](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-rulesets/creating-rulesets-for-a-repository)                                                                                                                                                                                                                                                                                                                                                                                       | undated               | Docs   | Who can be given bypass                                                                      |
+| [Available rules for rulesets](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-rulesets/available-rules-for-rulesets)                                                                                                                                                                                                                                                                                                                                                                                  | undated               | Docs   | Restrict updates, required reviews, last-push approval, signed commits                       |
+| [About protected branches](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-protected-branches/about-protected-branches)                                                                                                                                                                                                                                                                                                                                                                                | undated               | Docs   | "Restrict who can push" is org-only                                                          |
+| [Approving a PR with required reviews](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/reviewing-changes-in-pull-requests/approving-a-pull-request-with-required-reviews)                                                                                                                                                                                                                                                                                                                                                        | undated               | Docs   | Authors can't approve their own PRs; admins can merge without approval                       |
+| [About commit signature verification](https://docs.github.com/en/authentication/managing-commit-signature-verification/about-commit-signature-verification)                                                                                                                                                                                                                                                                                                                                                                                                | undated               | Docs   | Bot signature rules; SSH and GPG signing                                                     |
+| [Setting your commit email address](https://docs.github.com/en/account-and-profile/setting-up-and-managing-your-personal-account-on-github/managing-email-preferences/setting-your-commit-email-address), [Email addresses reference](https://docs.github.com/en/account-and-profile/reference/email-addresses-reference)                                                                                                                                                                                                                                  | undated               | Docs   | Commits linked by email; user noreply format                                                 |
+| [Token expiration and revocation](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/token-expiration-and-revocation)                                                                                                                                                                                                                                                                                                                                                                                                          | undated               | Docs   | Automatic revocation when pushed publicly; one-year unused rule                              |
+| cli/cli: `gh help environment`, `gh auth login/setup-git/token --help`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     | v2.103.2, 2026-10-23  | Source | `GH_TOKEN` precedence, headless use, credential helper, token printing                       |
+| [cli/cli `gitcredential/helper.go`](https://github.com/cli/cli/blob/trunk/pkg/cmd/auth/gitcredential/helper.go), [`internal/keyring/keyring.go`](https://github.com/cli/cli/blob/trunk/internal/keyring/keyring.go)                                                                                                                                                                                                                                                                                                                                        | read 2026-10-29       | Source | `x-access-token` for env tokens; keyring storage                                             |
+| [claude-code-action `actor.ts`](https://github.com/anthropics/claude-code-action/blob/main/src/github/validation/actor.ts), [`permissions.ts`](https://github.com/anthropics/claude-code-action/blob/main/src/github/validation/permissions.ts), [`run.ts`](https://github.com/anthropics/claude-code-action/blob/main/src/entrypoints/run.ts), [`agent/index.ts`](https://github.com/anthropics/claude-code-action/blob/main/src/modes/agent/index.ts), [`detector.ts`](https://github.com/anthropics/claude-code-action/blob/main/src/modes/detector.ts) | `d70510b`, 2026-10-27 | Source | Human-actor check, `allowed_bots`, write check, agent mode on PR events                      |
+| [claude-code-action `docs/security.md`](https://github.com/anthropics/claude-code-action/blob/main/docs/security.md), [`action.yml`](https://github.com/anthropics/claude-code-action/blob/main/action.yml), [`git-config.ts`](https://github.com/anthropics/claude-code-action/blob/main/src/github/operations/git-config.ts), [`constants.ts`](https://github.com/anthropics/claude-code-action/blob/main/src/github/constants.ts)                                                                                                                       | `d70510b`, 2026-10-27 | Source | Bot policy, signing options, bot noreply format, credential helper                           |
+| [claude-plugins-official `code-review.md`](https://github.com/anthropics/claude-plugins-official/blob/main/plugins/code-review/commands/code-review.md)                                                                                                                                                                                                                                                                                                                                                                                                    | read 2026-10-29       | Source | Skip rule for "automated PR"                                                                 |
+| [Netlify, Deploy overview: Deploy permissions](https://docs.netlify.com/deploy/deploy-overview/#deploy-permissions)                                                                                                                                                                                                                                                                                                                                                                                                                                        | undated               | Docs   | Deploy Request Policy is for private repos only; recognized authors                          |
+| [Netlify, Sensitive variable policy](https://docs.netlify.com/build/environment-variables/get-started/#sensitive-variable-policy)                                                                                                                                                                                                                                                                                                                                                                                                                          | undated               | Docs   | Public-repo untrusted deploys; Require approval by default                                   |
+| [Netlify, Roles and permissions](https://docs.netlify.com/manage/accounts-and-billing/team-management/roles-and-permissions/)                                                                                                                                                                                                                                                                                                                                                                                                                              | undated               | Docs   | What a Git Contributor is                                                                    |
+| `man security`, `gitcredentials(7)` (git 2.39.5)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           | local                 | Source | Keychain `-T` and `-A` flags; empty helper resets the list                                   |
 
 ### Not reached or not verified
 
@@ -621,7 +624,7 @@ pass rebases, so verified commits were never on offer for the App.
 - **How Netlify decides who authored a PR deploy**, and how it treats a custom App on a public
   repo.
 - **Whether stateless `ghs_APPID_JWT` tokens revoke the same way** through `DELETE
-  /installation/token`.
+/installation/token`.
 - **The default keychain access list** when `security add-generic-password` is run without
   `-T`, and whether the Claude Code sandbox blocks keychain lookups.
 - **Classic PAT expiry options:** the docs say "select an expiration" and that infinite

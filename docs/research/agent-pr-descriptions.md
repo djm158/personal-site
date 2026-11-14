@@ -19,7 +19,7 @@ How to read the citations:
 The template causes most of the length, not the model. It has six required headings, and it
 asks for evidence on every check, test steps that repeat those checks, and captions under the
 media. The fix pass then adds review history on top. The sources agree on a short
-description that leads with *why*, describes the net change, leaves out anything the diff or
+description that leads with _why_, describes the net change, leaves out anything the diff or
 CI already shows, and leaves out sections that don't apply. Anthropic's docs add that Opus 5
 models write longer documents unless told otherwise. A length target, the reason for it, and
 a good example work better than a list of don'ts.
@@ -28,16 +28,16 @@ Top changes, ranked, are in [§4](#4-recommendations).
 
 ## 2. What our PRs show
 
-*Repo check.* Word counts are for the body, with image URLs left out of the per-section counts.
+_Repo check._ Word counts are for the body, with image URLs left out of the per-section counts.
 "Diff" is additions and deletions from `gh pr view`, including the one-line `BACKLOG.md` tick.
 
-| PR | Diff | Body words | Done when | What changed | How to test | Screenshots (prose) | Noticed |
-| --- | --- | --- | --- | --- | --- | --- | --- |
-| #9 PDF button lift | +7 −2 | 270 | 57 | 27 | 30 | 29 | 76 |
-| #12 avatar SVG | +2 −11 | 329 | 98 | 65 | 61 | 39 | 52 |
-| #8 timeline hover | +24 −6 | 567 | 111 | 118 | 100 | 81 | 81 |
-| #10 hero intro | +43 −8 | 583 | 180 | 145 | 73 | 52 | 59 |
-| #11 sheet drag | +173 −2 | 771 | 197 | 170 | 118 | 69 | 74 |
+| PR                 | Diff    | Body words | Done when | What changed | How to test | Screenshots (prose) | Noticed |
+| ------------------ | ------- | ---------- | --------- | ------------ | ----------- | ------------------- | ------- |
+| #9 PDF button lift | +7 −2   | 270        | 57        | 27           | 30          | 29                  | 76      |
+| #12 avatar SVG     | +2 −11  | 329        | 98        | 65           | 61          | 39                  | 52      |
+| #8 timeline hover  | +24 −6  | 567        | 111       | 118          | 100         | 81                  | 81      |
+| #10 hero intro     | +43 −8  | 583        | 180       | 145          | 73          | 52                  | 59      |
+| #11 sheet drag     | +173 −2 | 771        | 197       | 170          | 118         | 69                  | 74      |
 
 Patterns:
 
@@ -89,7 +89,7 @@ Patterns:
 ### Length and review outcomes
 
 - Description length was the largest factor in PR latency at submission (46.3% of explained
-  variance), and longer descriptions went with *higher* latency. The model also included churn,
+  variance), and longer descriptions went with _higher_ latency. The model also included churn,
   commits and files changed, so this isn't only "bigger PRs have longer descriptions". The
   authors advise "a clear and concise description" (study, preprint; venue not confirmed)
   [Zhang et al., Pull Request Latency Explained, arXiv 2108.09946, 2021](https://arxiv.org/abs/2108.09946).
@@ -119,7 +119,7 @@ Patterns:
   The Claude Code docs say to "Review Claude's generated PR before submitting" (docs)
   [Claude Code, Common workflows](https://code.claude.com/docs/en/common-workflows).
 - **OpenAI Codex**: the `codex-pr-body` skill that Codex's maintainers used on their own repo
-  says that explaining *why* is "critically important" and should come before *what*. It says
+  says that explaining _why_ is "critically important" and should come before _what_. It says
   to "Limit discussion to the _net change_", and to drop "changes that were attempted but later
   undone" when rewriting. It calls it "unnecessary to mention things that CI checks
   automatically", but naming new tests is fine. An optional docs section is used only when it
@@ -147,7 +147,7 @@ Patterns:
 
 ### Model tendencies and prompting levers
 
-The loop runs `--model opus`, and its commits are signed Claude Opus 5.5 (*repo check*).
+The loop runs `--model opus`, and its commits are signed Claude Opus 5.5 (_repo check_).
 
 - Opus 5 writes longer user-facing responses than earlier models, and "files that Claude Opus 5
   writes to disk ... are often longer". Effort doesn't reliably shorten visible output: "prompt
@@ -160,7 +160,7 @@ The loop runs `--model opus`, and its commits are signed Claude Opus 5.5 (*repo 
   [Prompting Claude Opus 5.5](https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/prompting-claude-opus-5-5).
 - The same Opus 5 page: explicit verification instructions "cause over-verification". This
   is about effort spent, but it's the same pressure that puts evidence on every check (docs,
-  same page). *Inference.*
+  same page). _Inference._
 - Explain why an instruction matters: "Claude can generalize from the explanation". Tell it
   what to do, not what not to do. Match the prompt's style to the output you want ("removing
   markdown from your prompt can reduce the volume of markdown in the output"). Examples are
@@ -175,12 +175,12 @@ The loop runs `--model opus`, and its commits are signed Claude Opus 5.5 (*repo 
 - `<details>` collapses content so readers expand it only if they want it (docs)
   [GitHub Docs, Collapsed sections](https://docs.github.com/en/get-started/writing-on-github/working-with-advanced-formatting/organizing-information-with-collapsed-sections).
   Collapsing hides text but doesn't stop it being written, so it's a fallback, not the fix.
-  *Inference.*
+  _Inference._
 
 ## 4. Recommendations
 
 Ranked by expected effect on length, highest first. Nothing in `scripts/` or `.github/` parses
-the body's headings (*repo check*: only the driver's prompt mentions "Backlog item"), so the
+the body's headings (_repo check_: only the driver's prompt mentions "Backlog item"), so the
 format can change freely.
 
 1. **Replace the six required sections with a lead plus optional parts, and name the ones to
@@ -221,7 +221,7 @@ format can change freely.
    It ranks last because it hides text rather than preventing it.
 
 If prompting alone doesn't hold, the driver could count the words with `gh pr view --json
-body` and print a `NOTE:` when a body is over budget. *Inference*: a deterministic check
+body` and print a `NOTE:` when a body is over budget. _Inference_: a deterministic check
 instead of one more instruction.
 
 ### Sketch of the revised template
@@ -261,30 +261,30 @@ Noticed, not changed: neither button turns the lift off under reduced motion
 
 ## 5. Sources
 
-| Source | Date | Type | What it contributed |
-| --- | --- | --- | --- |
-| [Google, Writing good CL descriptions](https://google.github.io/eng-practices/review/developer/cl-descriptions.html) | undated | Docs | Why over what; no length rule; re-read before submitting |
-| [GitHub, Helping others review your changes](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/getting-started/helping-others-review-your-changes) | undated | Docs | Purpose, what changed, where to look |
-| [GitHub, Creating a pull request template](https://docs.github.com/en/communities/using-templates-to-encourage-useful-issues-and-pull-requests/creating-a-pull-request-template-for-your-repository) | undated | Docs | Three suggested template contents |
-| [McMinn, How to write the perfect pull request](https://github.blog/developer-skills/github/how-to-write-the-perfect-pull-request/) | 2015, updated 2022 | Blog (first-party) | Purpose, why, what feedback you want |
-| [Bacchelli & Bird, ICSE 2013](https://www.microsoft.com/en-us/research/publication/expectations-outcomes-and-challenges-of-modern-code-review/) | 2013 | Study | Understanding the change is the key part of review |
-| [Zhang et al., arXiv 2108.09946](https://arxiv.org/abs/2108.09946) | 2021 | Study | Description length associated with higher latency |
-| [Xiao et al., arXiv 2402.08967](https://arxiv.org/abs/2402.08967) | FSE 2024 | Study | Generated descriptions associated with faster review and more merges |
-| [Watanabe et al., arXiv 2602.17084](https://arxiv.org/abs/2602.17084) | 2026-02-19 | Study | Agent description styles; structure associated with faster responses |
-| [Pham & Ghaleb, arXiv 2601.17627](https://arxiv.org/abs/2601.17627) | 2026-01-24 | Study | Agent summaries align slightly less with code |
-| [Claude Code commit-commands README](https://github.com/anthropics/claude-plugins-official/blob/main/plugins/commit-commands/README.md) | read at `main` | Source | Default: 1–3 summary bullets plus a test plan |
-| [Claude Code, Common workflows](https://code.claude.com/docs/en/common-workflows) | undated | Docs | Review the generated PR |
-| [openai/codex codex-pr-body skill](https://github.com/openai/codex/blob/14272b21e95ed9a54fae21c27d33d3771a9ee30f/.codex/skills/codex-pr-body/SKILL.md) | 2026-06-03 | Source | Why first, net change, skip what CI checks, optional sections |
-| [GitHub changelog, PR templates](https://github.blog/changelog/2025-11-05-copilot-coding-agent-now-supports-pull-request-templates/) | 2025-11-05 | Docs | Copilot agent follows the repo template |
-| [GitHub changelog, PR bodies kept up to date](https://github.blog/changelog/2025-07-30-copilot-coding-agent-keeps-pull-request-titles-and-bodies-up-to-date) | 2025-07-30 | Docs | Body updated as the agent responds to review |
-| [GitHub, Pull request assistant instructions](https://docs.github.com/en/copilot/tutorials/customization-library/custom-instructions/pull-request-assistant) | undated | Docs | Sample four-section instructions, "comprehensive" |
-| [Devin, PR templates](https://docs.devin.ai/integrations/pr-templates) | undated | Docs | Single Summary default; agent-only template |
-| [CodeRabbit, Configuration](https://docs.coderabbit.ai/reference/configuration) | undated | Docs | Summary in description, walkthrough collapsed in a comment |
-| [Anthropic, Prompting best practices](https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/claude-prompting-best-practices) | undated | Docs | Explain why, positive instructions, match prompt style, examples |
-| [Anthropic, Prompting Claude Opus 5](https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/prompting-claude-opus-5) | undated | Docs | Longer written deliverables; prompt length explicitly; over-verification |
-| [Anthropic, Prompting Claude Opus 5.5](https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/prompting-claude-opus-5-5) | undated | Docs | Opus 5 patterns still the starting point |
-| [Anthropic, Prompting Claude Opus 4.8](https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/prompting-claude-opus-4-8) | undated | Docs | Positive examples of concision beat don'ts |
-| [GitHub, Collapsed sections](https://docs.github.com/en/get-started/writing-on-github/working-with-advanced-formatting/organizing-information-with-collapsed-sections) | undated | Docs | `<details>` behaviour |
+| Source                                                                                                                                                                                               | Date               | Type               | What it contributed                                                      |
+| ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------ | ------------------ | ------------------------------------------------------------------------ |
+| [Google, Writing good CL descriptions](https://google.github.io/eng-practices/review/developer/cl-descriptions.html)                                                                                 | undated            | Docs               | Why over what; no length rule; re-read before submitting                 |
+| [GitHub, Helping others review your changes](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/getting-started/helping-others-review-your-changes)                           | undated            | Docs               | Purpose, what changed, where to look                                     |
+| [GitHub, Creating a pull request template](https://docs.github.com/en/communities/using-templates-to-encourage-useful-issues-and-pull-requests/creating-a-pull-request-template-for-your-repository) | undated            | Docs               | Three suggested template contents                                        |
+| [McMinn, How to write the perfect pull request](https://github.blog/developer-skills/github/how-to-write-the-perfect-pull-request/)                                                                  | 2015, updated 2022 | Blog (first-party) | Purpose, why, what feedback you want                                     |
+| [Bacchelli & Bird, ICSE 2013](https://www.microsoft.com/en-us/research/publication/expectations-outcomes-and-challenges-of-modern-code-review/)                                                      | 2013               | Study              | Understanding the change is the key part of review                       |
+| [Zhang et al., arXiv 2108.09946](https://arxiv.org/abs/2108.09946)                                                                                                                                   | 2021               | Study              | Description length associated with higher latency                        |
+| [Xiao et al., arXiv 2402.08967](https://arxiv.org/abs/2402.08967)                                                                                                                                    | FSE 2024           | Study              | Generated descriptions associated with faster review and more merges     |
+| [Watanabe et al., arXiv 2602.17084](https://arxiv.org/abs/2602.17084)                                                                                                                                | 2026-02-19         | Study              | Agent description styles; structure associated with faster responses     |
+| [Pham & Ghaleb, arXiv 2601.17627](https://arxiv.org/abs/2601.17627)                                                                                                                                  | 2026-01-24         | Study              | Agent summaries align slightly less with code                            |
+| [Claude Code commit-commands README](https://github.com/anthropics/claude-plugins-official/blob/main/plugins/commit-commands/README.md)                                                              | read at `main`     | Source             | Default: 1–3 summary bullets plus a test plan                            |
+| [Claude Code, Common workflows](https://code.claude.com/docs/en/common-workflows)                                                                                                                    | undated            | Docs               | Review the generated PR                                                  |
+| [openai/codex codex-pr-body skill](https://github.com/openai/codex/blob/14272b21e95ed9a54fae21c27d33d3771a9ee30f/.codex/skills/codex-pr-body/SKILL.md)                                               | 2026-06-03         | Source             | Why first, net change, skip what CI checks, optional sections            |
+| [GitHub changelog, PR templates](https://github.blog/changelog/2025-11-05-copilot-coding-agent-now-supports-pull-request-templates/)                                                                 | 2025-11-05         | Docs               | Copilot agent follows the repo template                                  |
+| [GitHub changelog, PR bodies kept up to date](https://github.blog/changelog/2025-07-30-copilot-coding-agent-keeps-pull-request-titles-and-bodies-up-to-date)                                         | 2025-07-30         | Docs               | Body updated as the agent responds to review                             |
+| [GitHub, Pull request assistant instructions](https://docs.github.com/en/copilot/tutorials/customization-library/custom-instructions/pull-request-assistant)                                         | undated            | Docs               | Sample four-section instructions, "comprehensive"                        |
+| [Devin, PR templates](https://docs.devin.ai/integrations/pr-templates)                                                                                                                               | undated            | Docs               | Single Summary default; agent-only template                              |
+| [CodeRabbit, Configuration](https://docs.coderabbit.ai/reference/configuration)                                                                                                                      | undated            | Docs               | Summary in description, walkthrough collapsed in a comment               |
+| [Anthropic, Prompting best practices](https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/claude-prompting-best-practices)                                                      | undated            | Docs               | Explain why, positive instructions, match prompt style, examples         |
+| [Anthropic, Prompting Claude Opus 5](https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/prompting-claude-opus-5)                                                               | undated            | Docs               | Longer written deliverables; prompt length explicitly; over-verification |
+| [Anthropic, Prompting Claude Opus 5.5](https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/prompting-claude-opus-5-5)                                                           | undated            | Docs               | Opus 5 patterns still the starting point                                 |
+| [Anthropic, Prompting Claude Opus 4.8](https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/prompting-claude-opus-4-8)                                                           | undated            | Docs               | Positive examples of concision beat don'ts                               |
+| [GitHub, Collapsed sections](https://docs.github.com/en/get-started/writing-on-github/working-with-advanced-formatting/organizing-information-with-collapsed-sections)                               | undated            | Docs               | `<details>` behaviour                                                    |
 
 ### Not reached or not verified
 
