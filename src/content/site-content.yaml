@@ -12,11 +12,21 @@ hero:
     Wizard AI.
   resumeLink: View résumé
   emailLink: Say hello
-  avatarHints:
-    - hey!
-    - that tickles
-    - okay, okay…
-    - one more and…
+  # The avatar's easter egg: five clicks send a cyclist out, five more send him off.
+  # A hint shows under the avatar after each of clicks 1–4, and a toast on the fifth.
+  ride:
+    hints:
+      - hey!
+      - that tickles
+      - okay, okay…
+      - one more and…
+    ridingHints:
+      - ding ding!
+      - nice wheels
+      - okay, last lap…
+      - one more and he's off…
+    startToast: Out for a ride.
+    leaveToast: Heading out — see ya.
 
 marquee:
   - TypeScript

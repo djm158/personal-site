@@ -46,13 +46,16 @@ with `astro dev stop`, `astro dev status` and `astro dev logs`.
   the browser, with the narrowest `client:*` directive that works.
 - **Real routes and plain links.** One file per route in `src/pages`, `<a href>` for
   navigation, no client-side router.
-- **Theme tokens, not raw values.** Colours, fonts and the breakpoint are defined in
+- **Theme tokens, not raw values.** Colours, fonts and the breakpoints are defined in
   `src/styles/global.css` under `@theme`. Components use the resulting utilities. Night mode
   works by overriding the same tokens under `[data-theme="night"]`.
 - **Fluid layout.** Follow the design: `clamp()` sizes, wrapping flex rows and auto-fit grids.
-  The only breakpoint is 760px, where the header collapses to a menu. The one exception is
-  `/resume` at 1000px, the width where the roles and picker columns stop wrapping: below it
-  the picker is a sticky bar and bottom sheet (`SkillSheet`), above it a sticky sidebar.
+  The only breakpoint is 760px, where the header collapses to a menu. There are two
+  exceptions. `/resume` at 1000px, the width where the roles and picker columns stop wrapping:
+  below it the picker is a sticky bar and bottom sheet (`SkillSheet`), above it a sticky
+  sidebar. And the home hero at 580px (`--breakpoint-hero`), the narrowest the text and the
+  avatar fit side by side: below it the avatar is hidden, above it the hero is one row that
+  never wraps.
 - **Native elements first.** For example `<dialog>` for the mobile menu. Respect
   `prefers-reduced-motion`.
 - **Tailwind v4 animation gotchas.** An `animate-*` utility sets the whole `animation`

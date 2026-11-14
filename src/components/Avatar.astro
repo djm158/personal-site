@@ -162,9 +162,10 @@ const { class: className, ...rest } = Astro.props;
 </svg>
 
 <script>
-  import { pupilOffset } from "../lib/avatar";
+  import { LOOK_EVENT, pupilOffset, type LookTarget } from "../lib/avatar";
 
-  // Eyes follow the cursor; a click blinks and opens the mouth for a moment
+  // Eyes follow the cursor, or a point another script asks them to watch (the cyclist easter
+  // egg); a click blinks and opens the mouth for a moment
   const avatar = document.querySelector<SVGSVGElement>("[data-avatar]");
   const eyes = avatar?.querySelector<SVGGElement>("[data-eyes]");
   const pupils = avatar?.querySelector<SVGGElement>("[data-pupils]");
@@ -172,16 +173,23 @@ const { class: className, ...rest } = Astro.props;
 
   if (avatar && eyes && pupils && mouth) {
     let frame = 0;
-    let x = 0;
-    let y = 0;
+    // Where the cursor was last seen, if it has been
+    let cursor: LookTarget = null;
+    // Set while something else has the eyes; the cursor is ignored until it's cleared
+    let watching: LookTarget = null;
 
     const look = () => {
       frame = 0;
+      const at = watching ?? cursor;
+      if (!at) {
+        pupils.removeAttribute("transform");
+        return;
+      }
       const box = avatar.getBoundingClientRect();
       // The eyes sit a little below the middle of the face
       const offset = pupilOffset(
-        x - (box.left + box.width / 2),
-        y - (box.top + box.height * 0.57),
+        at.x - (box.left + box.width / 2),
+        at.y - (box.top + box.height * 0.57),
       );
       pupils.setAttribute(
         "transform",
@@ -190,12 +198,18 @@ const { class: className, ...rest } = Astro.props;
     };
 
     const follow = (event: PointerEvent) => {
-      // Below the nav breakpoint the hero hides the avatar: skip the frame and layout read
+      // Below the hero breakpoint the hero hides the avatar: skip the frame and layout read
       if (!avatar.checkVisibility()) return;
-      x = event.clientX;
-      y = event.clientY;
-      frame ||= requestAnimationFrame(look);
+      // Remembered even while watching something else, so the eyes go back to it afterwards
+      cursor = { x: event.clientX, y: event.clientY };
+      if (!watching) frame ||= requestAnimationFrame(look);
     };
+
+    // The sender is already in a frame, so look straight away; on release, back to the cursor
+    document.addEventListener(LOOK_EVENT, (event) => {
+      watching = (event as CustomEvent<LookTarget>).detail;
+      look();
+    });
 
     // A touch tap sends pointerdown but no pointermove
     window.addEventListener("pointermove", follow);

@@ -27,8 +27,17 @@
   --color-skin: oklch(0.88 0.045 65);
   --color-skin2: oklch(0.8 0.06 55);
 
+  /* cyclist easter egg: the rider's shorts (near and far leg) and his headlight, which only
+     shows at night. Everything else on him uses the tokens above */
+  --color-shorts: oklch(0.25 0.025 50);
+  --color-shorts2: oklch(0.38 0.025 50);
+  --color-beam: oklch(0.97 0.07 95);
+
   /* layout */
   --breakpoint-nav: 760px;
+  /* the home hero shows its avatar beside the text from here: the narrowest the text column
+     and a 180px avatar, inset from the edge, fit in one row */
+  --breakpoint-hero: 580px;
   --spacing-gutter: clamp(20px, 4vw, 48px);
   --container-page: 1240px;
   --container-blog: 960px;
@@ -85,6 +94,9 @@
     --color-moss: oklch(0.68 0.08 130);
     --color-onink: oklch(0.2 0.015 55);
     --color-scrim: oklch(0.1 0.01 55 / 0.6);
+    /* the shorts stay dark at night, when ink turns light */
+    --color-shorts: oklch(0.36 0.02 55);
+    --color-shorts2: oklch(0.3 0.02 55);
   }
 
   a {
