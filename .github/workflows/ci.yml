@@ -42,6 +42,7 @@ jobs:
           echo "$PWD/.bin" >> "$GITHUB_PATH"
 
       - run: pnpm install --frozen-lockfile
+      - run: pnpm format:check
       - run: pnpm check
       - run: pnpm test --run
       - run: pnpm build

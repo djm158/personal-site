@@ -11,6 +11,7 @@
     "preview": "astro preview",
     "astro": "astro",
     "format": "prettier --write .",
+    "format:check": "prettier --check .",
     "test": "vitest",
     "check": "astro check",
     "loop": "node scripts/loop/run.mjs",

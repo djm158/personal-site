@@ -282,6 +282,13 @@ PRs only, CI and the content guard required, no force pushes, one approval. Appr
 from 0 to 1 once agent PRs came from a GitHub App instead of Dan's account, since Dan can't
 approve his own PRs.
 
+**CI fails on unformatted files** · 2026-11-14 · `.github/workflows/ci.yml` (agent)
+Agent sessions committed code without running Prettier, so `pnpm format` on `main` produced a
+diff across 19 files. CI now runs `pnpm format:check` (`prettier --check .`) and
+`AGENTS.md` and the loop prompt say to run `pnpm format` before committing. A CI check, not
+only an instruction, for the same reason as the other checks: CI is what proves it. A
+pre-commit hook was not added, since it needs a new dependency.
+
 **Monthly heartbeat rebuild** · 2026-10-31 · #23, `.github/workflows/heartbeat.yml`
 The site is static, so anything worked out from today's date (years of experience, "Present"
 durations) is frozen at the last build. A scheduled GitHub Action calls a Netlify build hook
