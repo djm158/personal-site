@@ -39,7 +39,7 @@ See proposal.md for why. The constraints that shape the approach:
 `netlify/functions/chat.ts` (Functions API v2, returning a web `Response`) on a fixed path such
 as `/api/chat`. Astro's config and output mode stay as they are.
 
-- *Alternative: `@astrojs/netlify` with an on-demand `src/pages/api/chat.ts` route.* It keeps
+- _Alternative: `@astrojs/netlify` with an on-demand `src/pages/api/chat.ts` route._ It keeps
   everything in `src/pages`, but changes the build pipeline for the whole site to serve one
   endpoint. Not worth it until a second server route exists.
 - The function bundles from the same repo, so it can import `src/lib` code directly.
@@ -68,7 +68,7 @@ The system prompt is fixed instructions plus the résumé (from `load.ts`) plus 
 personal-facts file Dan writes (for example `content/about-me.yaml`, validated with a Zod schema
 like the résumé). It's a few thousand tokens, so prompt caching makes repeats cheap.
 
-- *Alternative: retrieval.* More moving parts and worse answers at this size. Revisit only if
+- _Alternative: retrieval._ More moving parts and worse answers at this size. Revisit only if
   posts and projects grow the prompt past what caching keeps cheap.
 - Adding posts and projects later means more inputs to `buildSystemPrompt`, nothing else.
 - The bot knows only what's in these files. That is the privacy boundary for personal facts.
@@ -83,7 +83,7 @@ the tool call to the browser and **never sends anything itself**. The widget sho
 an editable card; when the visitor confirms, the browser submits it exactly as the contact form
 does (`form-name=contact`, same field names, reusing the `src/lib/contact/form` validation).
 
-- *Alternative: the function submits the form or calls an email API.* That gives a manipulated
+- _Alternative: the function submits the form or calls an email API._ That gives a manipulated
   model a way to send Dan mail, and needs a second spam defence. Rejected.
 - Netlify Forms keeps doing spam filtering and notifications. Dan's inbox setup is unchanged.
 - Submissions from the chat should be recognisable, for example a hidden `source=chat` field.
@@ -97,7 +97,7 @@ keeps it in `sessionStorage` so it survives the full page loads that plain links
 storage access is wrapped in try/catch, as the theme code learned to be: with storage blocked,
 the chat still works and only loses history on navigation.
 
-- *Alternative: server-side sessions.* Needs a store (Netlify Blobs) and IDs. Not needed for v0.
+- _Alternative: server-side sessions._ Needs a store (Netlify Blobs) and IDs. Not needed for v0.
 
 ### 6. Streaming responses (agent)
 
@@ -108,12 +108,12 @@ against it.
 
 ### 7. Limits on a public endpoint (agent)
 
-| Threat                        | Mitigation                                                     |
-| ----------------------------- | -------------------------------------------------------------- |
-| Scripted abuse, runaway cost  | Netlify per-IP rate limit on the function; spend limit on the API workspace |
-| Long or huge conversations    | Caps on messages per conversation, characters per message and output tokens |
-| Calls from other sites        | Reject requests whose `Origin` isn't the site (or a deploy preview) |
-| Missing key or API outage     | Function returns a clear error; the widget points to the contact form instead |
+| Threat                       | Mitigation                                                                    |
+| ---------------------------- | ----------------------------------------------------------------------------- |
+| Scripted abuse, runaway cost | Netlify per-IP rate limit on the function; spend limit on the API workspace   |
+| Long or huge conversations   | Caps on messages per conversation, characters per message and output tokens   |
+| Calls from other sites       | Reject requests whose `Origin` isn't the site (or a deploy preview)           |
+| Missing key or API outage    | Function returns a clear error; the widget points to the contact form instead |
 
 Model: a small, fast, cheap model is enough for questions and answers over a short prompt.
 
